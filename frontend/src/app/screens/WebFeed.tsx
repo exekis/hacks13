@@ -18,75 +18,17 @@ interface WebFeedProps {
   onRSVP: (userId: string) => void;
   friendRequests: Set<string>;
   onAddFriend: (userId: string) => void;
-  currentUserId?: string;
 }
 
-export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend, onRSVP, currentUserId = '482193' }: WebFeedProps) {
+export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend }: WebFeedProps) {
   const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
-  
-  const [peopleItems, setPeopleItems] = useState<User[]>([]);
-  const [postItems, setPostItems] = useState<(Post & { authorName?: string })[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [usingMockData, setUsingMockData] = useState(false);
-
-  useEffect(() => {
-    async function loadRecommendations() {
-      setLoading(true);
-      setError(null);
-      
-      try {
-        // check if api is available
-        const apiHealthy = await checkApiHealth();
-        
-        if (!apiHealthy) {
-          // fallback to mock data if api is not available
-          console.log('API not available, using mock data');
-          setUsingMockData(true);
-          setPeopleItems(mockUsers);
-          setPostItems(mockPosts);
-          setLoading(false);
-          return;
-        }
-
-        // fetch real recommendations from the backend
-        const [peopleRecs, postRecs] = await Promise.all([
-          fetchPeopleRecommendations(currentUserId, 20),
-          fetchPostRecommendations(currentUserId, 20)
-        ]);
-
-        // transform backend data to ui-compatible format
-        const transformedPeople = peopleRecs.map(backendPersonToMockUser);
-        const transformedPosts = postRecs.map(backendPostToMockPost);
-
-        setPeopleItems(transformedPeople as User[]);
-        setPostItems(transformedPosts as (Post & { authorName?: string })[]);
-        setUsingMockData(false);
-      } catch (err) {
-        console.error('Failed to load recommendations:', err);
-        // fallback to mock data on error
-        setUsingMockData(true);
-        setPeopleItems(mockUsers);
-        setPostItems(mockPosts);
-        setError('Using offline data - backend unavailable');
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    loadRecommendations();
-  }, [currentUserId]);
 
   // combine and shuffle people and posts for a mixed feed
+  const peopleItems = mockUsers.slice(0, 6);
+  const postItems = mockPosts.slice(0, 6);
   const allItems = [...peopleItems.map(u => ({type: 'user', data: u})), 
-                    ...postItems.map(p => ({type: 'post', data: p}))] as any[];
-  
-  // Only shuffle if not empty/loading
-  if (!loading && allItems.length > 0) {
-      // Deterministic shuffle or just rely on items order? 
-      // For now, simple sort to mix them
-      allItems.sort(() => Math.random() - 0.5);
-  }
+                    ...postItems.map(u => ({type: 'post', data: u}))];
+  allItems.sort(() => Math.random() - 0.5);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -107,17 +49,6 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend,
       transition: { type: 'spring', stiffness: 300, damping: 24 }
     },
   };
-
-  if (loading) {
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-[#FFEBDA] via-[#fff5ef] to-[#FFEBDA] py-8 relative overflow-hidden flex items-center justify-center">
-             <div className="flex flex-col items-center justify-center">
-                <Loader2 size={32} className="animate-spin text-[#f55c7a] mb-4" />
-                <p className="text-[#666666]">Loading recommendations...</p>
-             </div>
-        </div>
-    )
-  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFEBDA] via-[#fff5ef] to-[#FFEBDA] py-8 relative overflow-hidden">

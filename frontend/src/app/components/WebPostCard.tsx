@@ -1,38 +1,23 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
+import { motion, AnimatePresence } from 'motion/react';
 import { Post, mockUsers } from '@/app/data/mockData';
-import { User, Clock, MessageCircle, MapPin, Calendar, Heart } from 'lucide-react';
+import { User, Bell, MapPin, Calendar, Users, Heart } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 
 interface WebPostCardProps {
   post: Post;
-  onMessage?: (userId: string) => void;
+  onRSVP?: (userId: string) => void;
   onViewProfile?: (userId: string) => void;
 }
 
-export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  let user = mockUsers.find(u => u.id === post.userId);
-  
+  const user = mockUsers.find(u => u.id === post.userId);
+
   if (!user) {
-    user = {
-      id: post.userId,
-      name: (post as any).authorName || 'Unknown User',
-      avatar: '👤',
-      verified: { student: false },
-      age: 0,
-      pronouns: '',
-      role: 'Member',
-      bio: '',
-      interests: [],
-      location: '',
-      university: '',
-      hobbies: []
-    } as any;
+    return null;
   }
-  
-  // if (!user) return null; // Logic handled above
 
   return (
     <motion.div 
@@ -76,9 +61,16 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
-            <Clock size={12} className="text-[#f6ac69]" />
-            <span>{post.timestamp}</span>
+            
           </motion.div>
+        </div>
+
+        <div className="flex gap-2">
+            <span style={{ fontFamily: 'Castoro, serif' }}>{post.capacity}</span>
+            <Users 
+              size={20} 
+              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
+            />
         </div>
         
         {/* like button */}
@@ -94,7 +86,7 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
           >
             <Heart 
               size={20} 
-              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'} 
+              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
             />
           </motion.div>
         </motion.button>
@@ -126,20 +118,37 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
       )}
 
       {/* date range if present */}
-      {post.dateRange && (
-        <motion.div 
-          className="mb-4 px-4 py-2.5 bg-gradient-to-r from-[#f68c70] to-[#f6ac69] border border-black rounded-xl inline-flex items-center gap-2"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          whileHover={{ scale: 1.02 }}
-        >
-          <Calendar size={14} className="text-white" />
-          <p className="text-sm text-white" style={{ fontFamily: 'Castoro, serif' }}>
-            {post.dateRange.from} - {post.dateRange.to}
-          </p>
-        </motion.div>
-      )}
+      <div className="flex gap-2">
+        {post.dateRange && (
+          <motion.div 
+            className="mb-4 px-4 py-2.5 bg-gradient-to-r from-[#f68c70] to-[#f6ac69] border border-black rounded-xl inline-flex items-center gap-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Calendar size={14} className="text-white" />
+            <p className="text-sm text-white" style={{ fontFamily: 'Castoro, serif' }}>
+              {post.dateRange.from} - {post.dateRange.to}
+            </p>
+          </motion.div>
+        )}
+
+        {post.timeRange && (
+          <motion.div 
+            className="mb-4 px-4 py-2.5 bg-gradient-to-r from-[#f68c70] to-[#f6ac69] border border-black rounded-xl inline-flex items-center gap-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Calendar size={14} className="text-white" />
+            <p className="text-sm text-white" style={{ fontFamily: 'Castoro, serif' }}>
+              {post.timeRange.from} - {post.timeRange.to}
+            </p>
+          </motion.div>
+        )}
+      </div>
 
       {/* footer */}
       <div className="flex items-center justify-between pt-4 border-t border-black/10">
@@ -150,19 +159,19 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
           transition={{ delay: 0.25 }}
         >
           <MapPin size={12} className="text-[#f55c7a]" />
-          <span>Location revealed after connection</span>
+          <span>{post.location}</span>
         </motion.div>
-        {onMessage && (
-          <motion.button
-            onClick={() => onMessage(user.id)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
-            whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <MessageCircle size={16} />
-            <span className="text-sm font-medium">Message</span>
-          </motion.button>
-        )}
+        
+        <motion.button
+          onClick={() => onRSVP && onRSVP(user.id)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
+          whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Bell size={16} />
+          <span className="text-sm font-medium">RSVP</span>
+        </motion.button>
+        
       </div>
     </motion.div>
   );

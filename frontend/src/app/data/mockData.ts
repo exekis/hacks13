@@ -24,9 +24,11 @@ export interface Post {
   userId: string;
   content: string;
   image?: string;
-  dateRange?: { from: string; to: string };
+  dateRange: { from: string; to: string };
+  timeRange: { from: string; to: string };
   location: string;
   timestamp: string;
+  capacity: number;
 }
 
 export const mockUsers: User[] = [
@@ -225,7 +227,9 @@ export const mockPosts: Post[] = [
     userId: '1',
     content: 'Hey! Ill be in Toronto from Feb 2 to Feb 12. Looking for friends to explore the city—message me!',
     dateRange: { from: 'Feb 2', to: 'Feb 12' },
+    timeRange: { from: '10AM', to: '2PM' },
     location: 'Downtown Toronto',
+    capacity: 4,
     timestamp: '2h ago'
   },
   {
@@ -233,6 +237,9 @@ export const mockPosts: Post[] = [
     userId: '3',
     content: 'Anyone want to check out the new art exhibit at the museum this weekend? Would love some company!',
     location: 'Montreal arts district',
+    dateRange: { from: 'Feb 2', to: 'Feb 12' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
     timestamp: '5h ago'
   },
   {
@@ -240,6 +247,9 @@ export const mockPosts: Post[] = [
     userId: '4',
     content: 'Looking for a gym buddy in the downtown area. I usually go in the mornings around 7am. Lets motivate each other!',
     location: 'Downtown Toronto',
+    dateRange: { from: 'Feb 2', to: 'Feb 12' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
     timestamp: '1d ago'
   },
   {
@@ -247,6 +257,8 @@ export const mockPosts: Post[] = [
     userId: '8',
     content: 'Organizing a salsa night next Friday! If you love dancing or want to learn, come join us. All levels welcome!',
     dateRange: { from: 'Jan 24', to: 'Jan 24' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
     location: 'Montreal downtown',
     timestamp: '1d ago'
   },
@@ -255,19 +267,28 @@ export const mockPosts: Post[] = [
     userId: '6',
     content: 'Found the best ramen spot near campus! Anyone want to grab lunch tomorrow? DM me!',
     location: 'Near UBC campus',
-    timestamp: '2d ago'
+    timestamp: '2d ago',
+    dateRange: { from: 'Feb 2', to: 'Feb 12' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
   },
   {
     id: 'p6',
     userId: '2',
     content: 'Study group forming for CPSC 320. Looking for 2-3 more people. We meet Tuesdays and Thursdays at the library.',
     location: 'UBC Library',
+    dateRange: { from: 'Feb 2', to: 'Feb 12' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
     timestamp: '2d ago'
   },
   {
     id: 'p7',
     userId: '7',
     content: 'Apartment hunting in North York. Anyone else looking for a place? Maybe we can be roommates! Budget: $800-1000/month',
+    dateRange: { from: 'Feb 2', to: 'Feb 12' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
     location: 'North York area',
     timestamp: '3d ago'
   },
@@ -276,6 +297,8 @@ export const mockPosts: Post[] = [
     userId: '9',
     content: 'Cricket match this Sunday at the park! We need 2 more players. All skill levels welcome, just come have fun!',
     dateRange: { from: 'Jan 19', to: 'Jan 19' },
+    timeRange: { from: '10AM', to: '2PM' },
+    capacity: 8,
     location: 'Calgary East',
     timestamp: '3d ago'
   }
