@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { mockUsers, mockPosts, User, Post } from '@/app/data/mockData';
 import { WebPersonCard } from '@/app/components/WebPersonCard';
 import { WebPostCard } from '@/app/components/WebPostCard';
-import { Users, FileText, Sparkles, TrendingUp, Globe, Loader2, AlertCircle } from 'lucide-react';
+import { Users, FileText, Sparkles, TrendingUp, Globe, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
 import { 
   fetchPeopleRecommendations, 
   fetchPostRecommendations,
@@ -18,17 +18,85 @@ interface WebFeedProps {
   onRSVP: (userId: string) => void;
   friendRequests: Set<string>;
   onAddFriend: (userId: string) => void;
+  currentUserId?: string;
 }
 
-export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend }: WebFeedProps) {
+export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAddFriend, currentUserId = '482193' }: WebFeedProps) {
   const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
+  
+  // state for api-powered recommendations
+  const [peopleItems, setPeopleItems] = useState<User[]>([]);
+  const [postItems, setPostItems] = useState<(Post & { authorName?: string })[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [usingMockData, setUsingMockData] = useState(false);
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const lastRefreshTime = useRef<Date | null>(null);
 
-  // combine and shuffle people and posts for a mixed feed
-  const peopleItems = mockUsers.slice(0, 6);
-  const postItems = mockPosts.slice(0, 6);
-  const allItems = [...peopleItems.map(u => ({type: 'user', data: u})), 
-                    ...postItems.map(u => ({type: 'post', data: u}))];
-  allItems.sort(() => Math.random() - 0.5);
+  // manual refresh function - only called when user clicks refresh button
+  const handleRefreshFeed = useCallback(async () => {
+    // prevent multiple simultaneous refreshes
+    if (isRefreshing) return;
+    
+    setIsRefreshing(true);
+    setLoading(true);
+    setError(null);
+    
+    try {
+      // check if api is available
+      const apiHealthy = await checkApiHealth();
+      
+      if (!apiHealthy) {
+        // fallback to mock data if api is not available
+        console.log('API not available, using mock data');
+        setUsingMockData(true);
+        setPeopleItems(mockUsers);
+        setPostItems(mockPosts);
+        setHasLoadedOnce(true);
+        setError('Backend unavailable - showing demo data');
+        return;
+      }
+
+      // fetch real recommendations from the backend
+      const [peopleRecs, postRecs] = await Promise.all([
+        fetchPeopleRecommendations(currentUserId, 20),
+        fetchPostRecommendations(currentUserId, 20)
+      ]);
+
+      // transform backend data to ui-compatible format
+      const transformedPeople = peopleRecs.map(backendPersonToMockUser);
+      const transformedPosts = postRecs.map(backendPostToMockPost);
+
+      setPeopleItems(transformedPeople as User[]);
+      setPostItems(transformedPosts as (Post & { authorName?: string })[]);
+      setUsingMockData(false);
+      setHasLoadedOnce(true);
+      lastRefreshTime.current = new Date();
+    } catch (err) {
+      console.error('Failed to load recommendations:', err);
+      // only fallback to mock data if we have no existing data
+      if (peopleItems.length === 0 && postItems.length === 0) {
+        setUsingMockData(true);
+        setPeopleItems(mockUsers);
+        setPostItems(mockPosts);
+      }
+      setError('Failed to refresh - keeping previous feed');
+    } finally {
+      setLoading(false);
+      setIsRefreshing(false);
+    }
+  }, [currentUserId, isRefreshing, peopleItems.length, postItems.length]);
+
+  // combine people and posts for all tab
+  const allItems = hasLoadedOnce 
+    ? [...peopleItems.map(u => ({type: 'user' as const, data: u})), 
+       ...postItems.map(p => ({type: 'post' as const, data: p}))]
+    : [];
+  // shuffle for variety
+  if (allItems.length > 0) {
+    allItems.sort(() => Math.random() - 0.5);
+  }
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -100,13 +168,63 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend 
         >
           <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f55c7a]/10 rounded-full">
             <TrendingUp className="w-4 h-4 text-[#f55c7a]" />
-            <span className="text-sm font-medium text-[#f55c7a]">6 new matches today</span>
+            <span className="text-sm font-medium text-[#f55c7a]">
+              {hasLoadedOnce ? `${peopleItems.length} matches` : '6 new matches today'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-sm text-[#666666]">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
             <span>12 people online nearby</span>
           </div>
+          {usingMockData && (
+            <span className="text-xs text-[#f55c7a] bg-[#f55c7a]/10 px-2 py-1 rounded-full">Demo data</span>
+          )}
+          {hasLoadedOnce && !usingMockData && lastRefreshTime.current && (
+            <span className="text-xs text-[#666666]">
+              Updated: {lastRefreshTime.current.toLocaleTimeString()}
+            </span>
+          )}
         </motion.div>
+
+        {/* refresh feed button */}
+        <motion.div 
+          className="mb-6"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.25 }}
+        >
+          <motion.button
+            onClick={handleRefreshFeed}
+            disabled={isRefreshing}
+            className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all border-2 ${
+              isRefreshing
+                ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
+                : 'bg-white text-[#f55c7a] border-[#f55c7a] hover:bg-[#f55c7a] hover:text-white'
+            }`}
+            whileHover={!isRefreshing ? { scale: 1.01 } : {}}
+            whileTap={!isRefreshing ? { scale: 0.99 } : {}}
+          >
+            <RefreshCw 
+              size={20} 
+              className={isRefreshing ? 'animate-spin' : ''} 
+            />
+            <span style={{ fontFamily: 'Castoro, serif' }}>
+              {isRefreshing ? 'Refreshing Recommendations...' : 'Refresh Feed'}
+            </span>
+          </motion.button>
+        </motion.div>
+
+        {/* error banner */}
+        {error && (
+          <motion.div 
+            className="mb-4 p-3 bg-[#f6bc66]/20 border border-[#f6bc66] rounded-xl flex items-center gap-2"
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <AlertCircle size={16} className="text-[#f55c7a]" />
+            <span className="text-sm text-[#3d3028]">{error}</span>
+          </motion.div>
+        )}
 
         {/* tabs with smooth animation */}
         <motion.div 
@@ -179,69 +297,131 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend 
 
         {/* content with staggered animation */}
         <AnimatePresence mode="wait">
-          <motion.div 
-            key={activeTab}
-            className="space-y-4"
-            variants={containerVariants}
-            initial="hidden"
-            animate="visible"
-            exit={{ opacity: 0, y: -10 }}
-          >
-            {activeTab === 'people' && (
-              <>
-                {peopleItems.map((user, index) => (
-                  <motion.div key={user.id} variants={itemVariants}>
-                    <WebPersonCard
-                      user={user}
-                      onViewProfile={onViewProfile}
-                      onAddFriend={onAddFriend}
-                      isFriendRequested={friendRequests.has(user.id)}
-                    />
-                  </motion.div>
-                ))}
-              </>
-            )}
+          {/* loading state */}
+          {loading && (
+            <motion.div 
+              className="flex flex-col items-center justify-center py-16"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+            >
+              <Loader2 size={32} className="animate-spin text-[#f55c7a] mb-3" />
+              <p className="text-[#666666]">Loading recommendations...</p>
+            </motion.div>
+          )}
 
-            {activeTab === 'posts' && (
-              <>
-                {postItems.map((post, index) => (
-                  <motion.div key={post.id} variants={itemVariants}>
-                    <WebPostCard
-                      post={post}
-                      onMessage={onMessage}
-                      onViewProfile={onViewProfile}
-                    />
-                  </motion.div>
-                ))}
-              </>
-            )}
+          {/* initial state - prompt user to refresh */}
+          {!loading && !hasLoadedOnce && (
+            <motion.div 
+              className="flex flex-col items-center justify-center py-16"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0 }}
+            >
+              <motion.div 
+                className="w-24 h-24 rounded-full bg-gradient-to-r from-[#f55c7a]/20 to-[#f6ac69]/20 flex items-center justify-center mb-4"
+                animate={{ scale: [1, 1.05, 1] }}
+                transition={{ duration: 2, repeat: Infinity }}
+              >
+                <RefreshCw size={40} className="text-[#f55c7a]" />
+              </motion.div>
+              <h3 className="text-xl font-semibold text-[#3d3028] mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Ready to Discover
+              </h3>
+              <p className="text-[#666666] text-center max-w-sm mb-4">
+                Tap the Refresh Feed button above to load personalized recommendations for travelers and events
+              </p>
+            </motion.div>
+          )}
 
-            {activeTab === 'all' &&
-            allItems.map((item) => {
-              if (item.type === 'user') {
-                return (
-                  <motion.div key={item.data.id} variants={itemVariants}><WebPersonCard
-                    key={item.data.id}
-                    user={item.data}
-                    onViewProfile={onViewProfile}
-                    onAddFriend={onAddFriend}
-                    isFriendRequested={friendRequests.has(item.data.id)}
-                  /></motion.div>
-                );
-              } else {
-                return (
-                  <motion.div key={item.data.id} variants={itemVariants}>
-                    <WebPostCard
-                      key={item.data.id}
-                      post={item.data}
-                      onRSVP={onRSVP}
-                      onMessage={onMessage}
-                      onViewProfile={onViewProfile}
-                  /></motion.div>
-                );
-              }
-            })}
-          </motion.div>
+          {/* content - only show after first load */}
+          {!loading && hasLoadedOnce && (
+            <motion.div 
+              key={activeTab}
+              className="space-y-4"
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              exit={{ opacity: 0, y: -10 }}
+            >
+              {activeTab === 'people' && (
+                <>
+                  {peopleItems.length === 0 ? (
+                    <div className="text-center py-8 text-[#666666]">
+                      <p>No recommendations found. Try refreshing!</p>
+                    </div>
+                  ) : (
+                    peopleItems.map((user) => (
+                      <motion.div key={user.id} variants={itemVariants}>
+                        <WebPersonCard
+                          user={user}
+                          onViewProfile={onViewProfile}
+                          onAddFriend={onAddFriend}
+                          isFriendRequested={friendRequests.has(user.id)}
+                        />
+                      </motion.div>
+                    ))
+                  )}
+                </>
+              )}
+
+              {activeTab === 'posts' && (
+                <>
+                  {postItems.length === 0 ? (
+                    <div className="text-center py-8 text-[#666666]">
+                      <p>No events found. Try refreshing!</p>
+                    </div>
+                  ) : (
+                    postItems.map((post) => (
+                      <motion.div key={post.id} variants={itemVariants}>
+                        <WebPostCard
+                          post={post}
+                          onMessage={onMessage}
+                          onViewProfile={onViewProfile}
+                        />
+                      </motion.div>
+                    ))
+                  )}
+                </>
+              )}
+
+              {activeTab === 'all' && (
+                <>
+                  {allItems.length === 0 ? (
+                    <div className="text-center py-8 text-[#666666]">
+                      <p>No content found. Try refreshing!</p>
+                    </div>
+                  ) : (
+                    allItems.map((item) => {
+                      if (item.type === 'user') {
+                        return (
+                          <motion.div key={`user-${item.data.id}`} variants={itemVariants}>
+                            <WebPersonCard
+                              user={item.data as User}
+                              onViewProfile={onViewProfile}
+                              onAddFriend={onAddFriend}
+                              isFriendRequested={friendRequests.has(item.data.id)}
+                            />
+                          </motion.div>
+                        );
+                      } else {
+                        return (
+                          <motion.div key={`post-${item.data.id}`} variants={itemVariants}>
+                            <WebPostCard
+                              post={item.data as Post}
+                              onRSVP={onRSVP}
+                              onMessage={onMessage}
+                              onViewProfile={onViewProfile}
+                            />
+                          </motion.div>
+                        );
+                      }
+                    })
+                  )}
+                </>
+              )}
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
     </div>
