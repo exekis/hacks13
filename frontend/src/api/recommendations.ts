@@ -8,6 +8,32 @@
 // api base url - change this when deploying to production
 const API_BASE_URL = 'http://localhost:8000';
 
+// backend response types (matches what the backend actually returns)
+export interface BackendPersonRecommendation {
+  userid: number;
+  name: string;
+  pronouns: string | null;
+  currentCity: string | null;
+  travelingTo: string | null;
+  age: number | null;
+  bio: string | null;
+  languages: string[];
+  lookingFor: string[];
+  culturalIdentity: string[];
+  isStudent: boolean | null;
+  university: string | null;
+}
+
+export interface BackendPostRecommendation {
+  postid: number;
+  time_posted: string | null;
+  post_content: string;
+  author_id: number | null;
+  author_name: string | null;
+  author_location: string | null;
+}
+
+// frontend-compatible types (for ui components)
 export interface PersonRecommendation {
   id: string;
   display_name: string;
@@ -36,12 +62,13 @@ export interface PostRecommendation {
 
 /**
  * fetch people recommendations from the api
+ * returns raw backend data that can be transformed for ui use
  */
 export async function fetchPeopleRecommendations(
   userId: string,
   limit: number = 20,
   debug: boolean = false
-): Promise<PersonRecommendation[]> {
+): Promise<BackendPersonRecommendation[]> {
   const params = new URLSearchParams({
     user_id: userId,
     limit: limit.toString(),
@@ -64,12 +91,13 @@ export async function fetchPeopleRecommendations(
 
 /**
  * fetch post recommendations from the api
+ * returns raw backend data that can be transformed for ui use
  */
 export async function fetchPostRecommendations(
   userId: string,
   limit: number = 30,
   debug: boolean = false
-): Promise<PostRecommendation[]> {
+): Promise<BackendPostRecommendation[]> {
   const params = new URLSearchParams({
     user_id: userId,
     limit: limit.toString(),
@@ -104,72 +132,86 @@ export async function checkApiHealth(): Promise<boolean> {
 }
 
 /**
- * convert api person recommendation to mock user format
+ * convert backend person recommendation to mock user format
  * for compatibility with existing ui components
  */
-export function personRecommendationToMockUser(rec: PersonRecommendation) {
-  // extract goals, languages, and cultural backgrounds from tags
-  // this is a rough heuristic since the api combines them
-  const goals: string[] = [];
-  const languages: string[] = [];
-  const culturalBackground: string[] = [];
+export function backendPersonToMockUser(rec: BackendPersonRecommendation) {
+  // use the actual name from the backend
+  const displayName = rec.name || `User ${rec.userid}`;
   
-  // known goal keywords
-  const goalKeywords = ['Friends', 'Food buddies', 'Exploring the city', 'Study pals', 'Gym', 'Events', 'Roommates'];
+  // extract location info
+  const location = rec.currentCity || 'Location hidden';
   
-  for (const tag of rec.tags) {
-    if (goalKeywords.includes(tag)) {
-      goals.push(tag);
-    } else if (tag.includes('Asian') || tag.includes('African') || tag.includes('Latin') || tag.includes('European') || tag.includes('Middle') || tag.includes('Indian') || tag.includes('British') || tag.includes('Brazilian') || tag.includes('Mexican') || tag.includes('Nigerian') || tag.includes('Korean') || tag.includes('Japanese') || tag.includes('Vietnamese') || tag.includes('Pakistani') || tag.includes('Arab') || tag.includes('Taiwanese') || tag.includes('Senegalese')) {
-      culturalBackground.push(tag);
-    } else {
-      languages.push(tag);
-    }
-  }
+  // build goals from lookingFor array
+  const goals = rec.lookingFor.length > 0 
+    ? rec.lookingFor 
+    : (rec.travelingTo ? [`Traveling to ${rec.travelingTo}`] : ['Exploring']);
+  
+  // build badges
+  const badges: string[] = [];
+  if (rec.isStudent) badges.push('Verified Student');
+  if (rec.university) badges.push(rec.university);
   
   return {
-    id: rec.id,
-    name: rec.display_name,
+    id: rec.userid.toString(),
+    name: displayName,
     avatar: 'user',
-    bio: rec.bio,
-    culturalBackground,
-    languages,
+    bio: rec.bio || 'No bio available',
+    culturalBackground: rec.culturalIdentity || [],
+    languages: rec.languages || [],
     goals,
+    pronouns: rec.pronouns || undefined,
     verified: {
-      student: rec.verified_student,
-      age: rec.age_verified,
+      student: rec.isStudent ?? false,
+      age: true,
     },
-    location: rec.location_hidden ? 'Location hidden' : '',
-    mutualFriends: rec.mutual_friends_count,
-    badges: [],
-    photos: [],
+    location,
+    mutualFriends: 0,
+    badges,
+    photos: [] as string[],
+    age: rec.age || undefined,
+    travelingTo: rec.travelingTo || undefined,
+    university: rec.university || undefined,
   };
 }
 
 /**
- * convert api post recommendation to mock post format
+ * convert backend post recommendation to mock post format
  * for compatibility with existing ui components
  */
-export function postRecommendationToMockPost(rec: PostRecommendation) {
-  let dateRange: { from: string; to: string } | undefined;
-  
-  if (rec.date_range?.start_date) {
-    const startDate = new Date(rec.date_range.start_date);
-    const endDate = rec.date_range.end_date ? new Date(rec.date_range.end_date) : startDate;
+export function backendPostToMockPost(rec: BackendPostRecommendation) {
+  // format timestamp
+  let timestamp = 'Recently';
+  if (rec.time_posted) {
+    const postedDate = new Date(rec.time_posted);
+    const now = new Date();
+    const diffMs = now.getTime() - postedDate.getTime();
+    const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+    const diffDays = Math.floor(diffHours / 24);
     
-    dateRange = {
-      from: startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-      to: endDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
-    };
+    if (diffHours < 1) {
+      timestamp = 'Just now';
+    } else if (diffHours < 24) {
+      timestamp = `${diffHours}h ago`;
+    } else if (diffDays < 7) {
+      timestamp = `${diffDays}d ago`;
+    } else {
+      timestamp = postedDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+    }
   }
   
   return {
-    id: rec.id,
-    userId: rec.author_id,
-    content: rec.text,
-    image: rec.image_url || undefined,
-    dateRange,
-    location: rec.coarse_location,
-    timestamp: 'Recently',
+    id: rec.postid.toString(),
+    
+    // author information from backend
+    userId: rec.author_id?.toString() || '0',
+    authorName: rec.author_name || `User ${rec.author_id}`,
+    authorLocation: rec.author_location || undefined,
+    
+    content: rec.post_content,
+    image: undefined,
+    dateRange: undefined,
+    location: 'Location revealed after connection',
+    timestamp,
   };
 }

@@ -1,8 +1,9 @@
 -- Commented out the drops cuz we're prob not changing the data anymore
---DROP TABLE IF EXISTS Messages;
---DROP TABLE IF EXISTS Posts;
---DROP TABLE IF EXISTS Conversations;
---DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Messages;
+DROP TABLE IF EXISTS Posts;
+DROP TABLE IF EXISTS Conversations;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Auth;
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -49,10 +50,11 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
-    location_str VARCHAR(255),
-    location_coords POINT,
-    time_posted TIMESTAMPTZ DEFAULT NOW(),
+    location_str TEXT,
     post_content TEXT,
+    is_event BOOLEAN DEFAULT FALSE,
+    time_posted TIMESTAMPTZ DEFAULT NOW(),
+    rsvps INT[],
     post_embedding vector(384)
 );
 
@@ -73,4 +75,10 @@ CREATE TABLE Messages (
   senderID INT NOT NULL,
   message_content TEXT NOT NULL,
   timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create the Auth table
+CREATE TABLE Auth (
+    userID INT PRIMARY KEY REFERENCES Users(userID),
+    password_hash VARCHAR(255) NOT NULL
 );

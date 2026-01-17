@@ -35,7 +35,6 @@ export interface UserProfile {
   availability: string[];
 
   // Safety + Comfort
-  whoCanMessage: 'friends' | 'friends-of-friends' | 'anyone-verified';
   whoCanSeePosts: 'friends' | 'friends-of-friends' | 'everyone-verified';
   hideLocationUntilFriends: boolean;
   meetupPreference: 'public-only' | 'public-first' | 'comfortable-either';
@@ -63,7 +62,7 @@ export const defaultProfile: Partial<UserProfile> = {
   culturalComfortLevel: 'open',
   languageMatchImportant: false,
   hideLocationUntilFriends: true,
-  whoCanMessage: 'anyone-verified',
+
   whoCanSeePosts: 'everyone-verified',
   meetupPreference: 'public-first',
   matchFilters: {

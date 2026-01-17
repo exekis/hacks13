@@ -48,30 +48,26 @@ class Post(BaseModel):
 
 
 class PersonRecommendation(BaseModel):
-    """api response shape for person recommendations"""
-    
-    id: str
-    display_name: str
-    avatar_url: Optional[str] = None
-    bio: str = ""
-    verified_student: bool = False
-    age_verified: bool = False
-    tags: list[str] = Field(default_factory=list)  # up to 6 combined chips
-    mutual_friends_count: int = 0
-    location_hidden: bool = True
-    debug_score: Optional[float] = None
+    """API response shape for person recommendations"""
+    userid: int
+    name: str
+    pronouns: Optional[str] = None
+    currentCity: Optional[str] = None
+    travelingTo: Optional[str] = None
+    age: Optional[int] = None
+    bio: Optional[str] = None
+    languages: list[str] = Field(default_factory=list)
+    lookingFor: list[str] = Field(default_factory=list)
+    culturalIdentity: list[str] = Field(default_factory=list)
+    isStudent: Optional[bool] = None
+    university: Optional[str] = None
 
 
 class PostRecommendation(BaseModel):
-    """api response shape for post recommendations"""
-    
-    id: str
-    author_id: str
-    author_name: str
-    author_verified_student: bool = False
-    text: str
-    image_url: Optional[str] = None
-    coarse_location: str
-    date_range: Optional[dict] = None  # {start_date, end_date}
-    liked_by_friends_count: int = 0
-    debug_score: Optional[float] = None
+    """API response shape for post recommendations"""
+    postid: int
+    time_posted: Optional[str] = None
+    post_content: str
+    author_id: Optional[int] = None
+    author_name: Optional[str] = None
+    author_location: Optional[str] = None

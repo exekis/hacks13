@@ -1,6 +1,7 @@
 """
 Persist deterministic PEOPLE recommendations into users.people_recs (JSONB[])
 
+cd backend
 python -m app.services.helpers.store_people_recs_in_db
 """
 
@@ -8,7 +9,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime
-from typing import List, Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional
 
 import psycopg2
 from psycopg2.extras import RealDictCursor, Json
@@ -20,9 +21,6 @@ from app.services.helpers.similarity_helpers import (
     mutual_friends_score,  # we will provide friends sets from DB
     culture_score,
 )
-
-from app.state import get_people_impression_store, ImpressionStore
-
 
 # diversity constraints (same as your algorithm)
 MAX_SAME_PRIMARY_CULTURE = 6
@@ -247,7 +245,6 @@ def _score_person_from_rows(viewer: Dict[str, Any], cand: Dict[str, Any], friend
 def _rerank_people(
     viewer_id: str,
     scored: List[ScoredCandidate],
-    impression_store: ImpressionStore,
     candidate_rows_by_id: Dict[str, Dict[str, Any]],
     limit: int,
 ) -> List[ScoredCandidate]:
@@ -260,9 +257,6 @@ def _rerank_people(
 
         scored: List[ScoredCandidate]
             List of candidates with base scores (before reranking).
-
-        impression_store: ImpressionStore
-            Tracks which candidates were recently shown to apply penalties.
 
         candidate_rows_by_id: Dict[str, Dict[str, Any]]
             Mapping from candidate user_id (string) to DB row dict.
@@ -283,13 +277,6 @@ def _rerank_people(
             continue
 
         score = sc.score
-
-        # impression penalties
-        if impression_store.is_recently_shown(viewer_id, sc.id, within_last_n=50):
-            score -= 0.05
-        elif impression_store.was_shown_within_days(viewer_id, sc.id, days=7):
-            score -= 0.02
-
         # primary culture/language from DB arrays
         cultures = cand.get("culturalidentity") or []
         langs = cand.get("languages") or []
@@ -341,7 +328,6 @@ def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50) -> 
       - score + rerank using the same deterministic rules
       - store users.people_recs = JSONB[] (userid + score + tags + mutual friends)
     """
-    impression_store = get_people_impression_store()
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("SELECT userid FROM users;")
@@ -398,7 +384,6 @@ def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50) -> 
         reranked = _rerank_people(
             viewer_id=viewer_id_str,
             scored=scored,
-            impression_store=impression_store,
             candidate_rows_by_id=candidate_rows_by_id,
             limit=limit,
         )
@@ -427,8 +412,6 @@ def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50) -> 
                 "tags": tags,
                 "score": sc.score,
             })
-
-            impression_store.record_impression(viewer_id_str, sc.id)
 
         with conn.cursor() as cur:
             cur.execute(SQL_UPDATE_PEOPLE_RECS, (Json(payload), int(uid)))

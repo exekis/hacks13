@@ -79,17 +79,17 @@ post_keys_in_order = []
 
 for uid in user_ids:
     for _ in range(3):
-        content = generate_post_text(post_templates)
+        post_content = generate_post_text(post_templates)
         key = str(post_id)
 
         data[key] = {
             "user_id": uid,
             "time_posted": (start_time + timedelta(minutes=random.randint(0, 200000))).isoformat() + "Z",
-            "post_content": content,
+            "post_content": post_content,
             "embedding": []
         }
 
-        all_contents.append(content)
+        all_contents.append(post_content)
         post_keys_in_order.append(key)
         post_id += 1
 

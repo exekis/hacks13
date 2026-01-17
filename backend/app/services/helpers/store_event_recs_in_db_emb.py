@@ -2,6 +2,9 @@
 Docstring for app.services.recommendations_helpers.cg_events
 
 Candidate generation for events recommendation
+
+cd backend
+python -m app.services.helpers.store_event_recs_in_db_emb
 """
 
 from __future__ import annotations

@@ -8,17 +8,22 @@ GET /api/recommendations/posts?user_id=<id>&limit=30
 from fastapi import APIRouter, Query, HTTPException
 
 from app.models.recommendation import PersonRecommendation, PostRecommendation
-from backend.app.services.recommender_service import recommend_people, recommend_posts
+from app.services.recommender_service import recommend_people, recommend_posts
 
 
-router = APIRouter(prefix="/api/recommendations", tags=["recommendations"])
+router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
+@router.get("/all-recs")
+def get_all_recommendations(user_id, limit):
+    """
+    Get reranked list of recs from user
+    """
+    pass
 
 @router.get("/people", response_model=list[PersonRecommendation])
 async def get_people_recommendations(
     user_id: str = Query(..., description="user id to get recommendations for"),
-    limit: int = Query(default=20, ge=1, le=100, description="max number of results"),
-    debug: bool = Query(default=False, description="include debug scores in response"),
+    limit: int = Query(default=20, ge=1, le=100, description="max number of results")
 ):
     """
     get people recommendations for a user
@@ -31,7 +36,8 @@ async def get_people_recommendations(
     results are ranked by a deterministic scoring algorithm
     and diversified to avoid monoculture clumping
     """
-    results = recommend_people(user_id, limit=limit, debug=debug)
+    print(user_id)
+    results = recommend_people(int(user_id), limit=limit)
     print(results)
     return results
 
@@ -39,8 +45,7 @@ async def get_people_recommendations(
 @router.get("/posts", response_model=list[PostRecommendation])
 async def get_post_recommendations(
     user_id: str = Query(..., description="user id to get recommendations for"),
-    limit: int = Query(default=30, ge=1, le=100, description="max number of results"),
-    debug: bool = Query(default=False, description="include debug scores in response"),
+    limit: int = Query(default=30, ge=1, le=100, description="max number of results")
 ):
     """
     get post recommendations for a user
@@ -53,5 +58,5 @@ async def get_post_recommendations(
     results are ranked by a deterministic scoring algorithm
     and diversified to avoid too many posts from the same author
     """
-    results = recommend_posts(user_id, limit=limit, debug=debug)
+    results = recommend_posts(user_id, limit=limit)
     return results
