@@ -1,0 +1,901 @@
+import React, { useState } from 'react';
+import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
+import { UserProfile, defaultProfile } from '@/app/types/profile';
+
+interface ProfileSetupProps {
+  onComplete: (profile: UserProfile) => void;
+}
+
+const culturalIdentities = [
+  'Iranian', 'Arab', 'Turkish', 'Chinese', 'Indian', 'Nigerian', 'Latino', 
+  'Korean', 'Japanese', 'Vietnamese', 'Filipino', 'Pakistani', 'Mexican',
+  'Brazilian', 'Egyptian', 'Indonesian', 'Thai', 'Moroccan', 'Kenyan',
+  'South African', 'Ethiopian', 'Ghanaian', 'Colombian', 'Peruvian'
+];
+
+const languages = [
+  'English', 'Spanish', 'Mandarin', 'French', 'Arabic', 'Portuguese',
+  'Hindi', 'Russian', 'Japanese', 'Korean', 'Vietnamese', 'Turkish',
+  'Italian', 'German', 'Urdu', 'Punjabi', 'Farsi', 'Tagalog', 'Thai'
+];
+
+const goals = [
+  'Friends', 'Exploring the city', 'Food buddies', 'Coffee chats',
+  'Study pals', 'Events / nightlife', 'Gym / sports', 
+  'Roommates / housing advice', 'Language exchange'
+];
+
+const interests = [
+  'Music', 'Food', 'Photography', 'Gaming', 'Hiking', 'Museums',
+  'Cafes', 'Art', 'Sports', 'Reading', 'Cooking', 'Dancing',
+  'Travel', 'Movies', 'Theater', 'Technology', 'Fitness'
+];
+
+const badges = [
+  'New in town', 'Studying abroad', 'Language buddy', 'Food explorer',
+  'Gym buddy', 'Coffee enthusiast', 'Culture vulture', 'Night owl'
+];
+
+export function ProfileSetup({ onComplete }: ProfileSetupProps) {
+  const [step, setStep] = useState(1);
+  const [profile, setProfile] = useState<Partial<UserProfile>>({
+    ...defaultProfile,
+    fullName: '',
+    age: 18,
+    currentCity: '',
+    languages: [],
+    culturalIdentity: [],
+    lookingFor: [],
+    socialVibe: [],
+    availability: [],
+    bio: '',
+    interests: [],
+    badges: [],
+  });
+
+  const updateProfile = (updates: Partial<UserProfile>) => {
+    setProfile({ ...profile, ...updates });
+  };
+
+  const toggleInArray = (array: string[], item: string): string[] => {
+    return array.includes(item) 
+      ? array.filter(i => i !== item)
+      : [...array, item];
+  };
+
+  // Step 1: Basic Information
+  if (step === 1) {
+    return (
+      <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
+          <h2 className="text-3xl mb-2">Basic Information</h2>
+          <p className="text-[#666666] mb-8">Let's start with the basics</p>
+
+          <div className="space-y-6">
+            {/* Full Name */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Full name or display name
+              </label>
+              <input
+                type="text"
+                value={profile.fullName || ''}
+                onChange={(e) => updateProfile({ fullName: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                placeholder="Enter your name"
+              />
+            </div>
+
+            {/* Age */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Age (must be 18+)
+              </label>
+              <input
+                type="number"
+                value={profile.age || 18}
+                onChange={(e) => updateProfile({ age: parseInt(e.target.value) || 18 })}
+                min="18"
+                max="100"
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+              />
+            </div>
+
+            {/* Pronouns */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Pronouns (optional)
+              </label>
+              <select
+                value={profile.pronouns || ''}
+                onChange={(e) => updateProfile({ pronouns: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+              >
+                <option value="">Prefer not to say</option>
+                <option value="he/him">he/him</option>
+                <option value="she/her">she/her</option>
+                <option value="they/them">they/them</option>
+                <option value="other">other</option>
+              </select>
+            </div>
+
+            {/* Student Status */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Student status
+              </label>
+              <div className="flex gap-3">
+                <button
+                  onClick={() => updateProfile({ isStudent: true })}
+                  className={`flex-1 px-4 py-3 border border-black rounded-lg transition-colors ${
+                    profile.isStudent
+                      ? 'bg-[#f55c7a] text-white'
+                      : 'bg-white hover:bg-[#f6bc66]/20'
+                  }`}
+                >
+                  Verified Student
+                </button>
+                <button
+                  onClick={() => updateProfile({ isStudent: false })}
+                  className={`flex-1 px-4 py-3 border border-black rounded-lg transition-colors ${
+                    profile.isStudent === false
+                      ? 'bg-[#f55c7a] text-white'
+                      : 'bg-white hover:bg-[#f6bc66]/20'
+                  }`}
+                >
+                  Not a student
+                </button>
+              </div>
+            </div>
+
+            {/* University (if student) */}
+            {profile.isStudent && (
+              <div>
+                <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                  University / School
+                </label>
+                <input
+                  type="text"
+                  value={profile.university || ''}
+                  onChange={(e) => updateProfile({ university: e.target.value })}
+                  className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                  placeholder="Enter your university"
+                />
+              </div>
+            )}
+
+            {/* Current City */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Current city / where you are now
+              </label>
+              <input
+                type="text"
+                value={profile.currentCity || ''}
+                onChange={(e) => updateProfile({ currentCity: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                placeholder="e.g., Toronto, ON"
+              />
+            </div>
+
+            {/* Traveling To */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Where are you travelling to? (optional)
+              </label>
+              <input
+                type="text"
+                value={profile.travelingTo || ''}
+                onChange={(e) => updateProfile({ travelingTo: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                placeholder="Same as current city or different"
+              />
+            </div>
+
+            {/* Languages */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Languages spoken
+              </label>
+              <div className="flex flex-wrap gap-2 mb-3">
+                {languages.map((lang) => (
+                  <button
+                    key={lang}
+                    onClick={() => updateProfile({ 
+                      languages: toggleInArray(profile.languages || [], lang) 
+                    })}
+                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
+                      profile.languages?.includes(lang)
+                        ? 'bg-[#f6ac69] text-black'
+                        : 'bg-white hover:bg-[#f6bc66]/20'
+                    }`}
+                  >
+                    {lang}
+                    {profile.languages?.includes(lang) && <Check size={14} className="inline ml-1" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Hometown */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Hometown / where you grew up (optional)
+              </label>
+              <input
+                type="text"
+                value={profile.hometown || ''}
+                onChange={(e) => updateProfile({ hometown: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                placeholder="Enter your hometown"
+              />
+            </div>
+          </div>
+
+          <button
+            onClick={() => setStep(2)}
+            disabled={!profile.fullName || !profile.currentCity || (profile.languages?.length || 0) === 0}
+            className={`w-full mt-8 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
+              profile.fullName && profile.currentCity && (profile.languages?.length || 0) > 0
+                ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                : 'bg-[#666666] text-white cursor-not-allowed'
+            }`}
+          >
+            Continue
+            <ArrowRight size={20} />
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 2: Cultural Information
+  if (step === 2) {
+    return (
+      <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
+          <h2 className="text-3xl mb-2">Cultural Information</h2>
+          <p className="text-[#666666] mb-8">Help us understand your background</p>
+
+          <div className="space-y-6">
+            {/* Cultural Identity */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Cultural identity / background
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {culturalIdentities.map((identity) => (
+                  <button
+                    key={identity}
+                    onClick={() => updateProfile({ 
+                      culturalIdentity: toggleInArray(profile.culturalIdentity || [], identity) 
+                    })}
+                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
+                      profile.culturalIdentity?.includes(identity)
+                        ? 'bg-[#f68c70] text-black'
+                        : 'bg-white hover:bg-[#f57c73]/20'
+                    }`}
+                  >
+                    {identity}
+                    {profile.culturalIdentity?.includes(identity) && <Check size={14} className="inline ml-1" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Religion */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Religion / spiritual identity (optional)
+              </label>
+              <input
+                type="text"
+                value={profile.religion || ''}
+                onChange={(e) => updateProfile({ religion: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                placeholder="Prefer not to say"
+              />
+            </div>
+
+            {/* Cultural Similarity Importance */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                How important is cultural similarity to you?
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={profile.culturalSimilarityImportance || 50}
+                onChange={(e) => updateProfile({ culturalSimilarityImportance: parseInt(e.target.value) })}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-[#666666] mt-1">
+                <span>Not important</span>
+                <span>Somewhat</span>
+                <span>Very important</span>
+              </div>
+            </div>
+
+            {/* Comfort Level */}
+            <div>
+              <label className="block mb-3" style={{ fontFamily: 'Castoro, serif' }}>
+                Comfort level with culture mixing
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'open', label: "I'm open to anyone" },
+                  { value: 'prefer-similar', label: 'Prefer similar background' },
+                  { value: 'strong-preference', label: 'Strong preference for similar background' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateProfile({ culturalComfortLevel: option.value as any })}
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
+                      profile.culturalComfortLevel === option.value
+                        ? 'bg-[#f6bc66] text-black'
+                        : 'bg-white hover:bg-[#f6ac69]/20'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Language Match */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer p-4 bg-white border border-black rounded-lg">
+                <input
+                  type="checkbox"
+                  checked={profile.languageMatchImportant || false}
+                  onChange={(e) => updateProfile({ languageMatchImportant: e.target.checked })}
+                  className="w-5 h-5"
+                />
+                <span>I want to meet people who speak my language</span>
+              </label>
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-8">
+            <button
+              onClick={() => setStep(1)}
+              className="px-6 py-3 bg-white border border-black rounded-lg hover:bg-[#FFEBDA] transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={20} />
+              Back
+            </button>
+            <button
+              onClick={() => setStep(3)}
+              disabled={(profile.culturalIdentity?.length || 0) === 0}
+              className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                (profile.culturalIdentity?.length || 0) > 0
+                  ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                  : 'bg-[#666666] text-white cursor-not-allowed'
+              }`}
+            >
+              Continue
+              <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 3: Travel + Intent
+  if (step === 3) {
+    return (
+      <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
+          <h2 className="text-3xl mb-2">Travel + Intent</h2>
+          <p className="text-[#666666] mb-8">Tell us about your plans</p>
+
+          <div className="space-y-6">
+            {/* Purpose of Stay */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                What are you here for?
+              </label>
+              <select
+                value={profile.purposeOfStay || ''}
+                onChange={(e) => updateProfile({ purposeOfStay: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+              >
+                <option value="">Select one</option>
+                <option value="studying">Studying abroad / Exchange</option>
+                <option value="internship">Internship / Work</option>
+                <option value="travelling">Travelling</option>
+                <option value="moved">Just moved here</option>
+                <option value="visiting">Visiting family</option>
+              </select>
+            </div>
+
+            {/* Looking For (Goals) */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                What are you looking for right now?
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {goals.map((goal) => (
+                  <button
+                    key={goal}
+                    onClick={() => updateProfile({ 
+                      lookingFor: toggleInArray(profile.lookingFor || [], goal) 
+                    })}
+                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
+                      profile.lookingFor?.includes(goal)
+                        ? 'bg-[#f6ac69] text-black'
+                        : 'bg-white hover:bg-[#f6bc66]/20'
+                    }`}
+                  >
+                    {goal}
+                    {profile.lookingFor?.includes(goal) && <Check size={14} className="inline ml-1" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Social Vibe */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Your social vibe (pick 1-2)
+              </label>
+              <div className="space-y-2">
+                {['Chill / lowkey', 'Extroverted / outgoing', 'Down to explore', 'More introverted', 'Depends on the day'].map((vibe) => (
+                  <button
+                    key={vibe}
+                    onClick={() => {
+                      const current = profile.socialVibe || [];
+                      if (current.includes(vibe)) {
+                        updateProfile({ socialVibe: current.filter(v => v !== vibe) });
+                      } else if (current.length < 2) {
+                        updateProfile({ socialVibe: [...current, vibe] });
+                      }
+                    }}
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
+                      profile.socialVibe?.includes(vibe)
+                        ? 'bg-[#f68c70] text-black'
+                        : 'bg-white hover:bg-[#f57c73]/20'
+                    }`}
+                  >
+                    {vibe}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Availability */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Availability
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {['Weekdays', 'Weekends', 'Evenings'].map((time) => (
+                  <button
+                    key={time}
+                    onClick={() => updateProfile({ 
+                      availability: toggleInArray(profile.availability || [], time) 
+                    })}
+                    className={`px-4 py-2 border border-black rounded-lg transition-colors ${
+                      profile.availability?.includes(time)
+                        ? 'bg-[#f6bc66] text-black'
+                        : 'bg-white hover:bg-[#f6ac69]/20'
+                    }`}
+                  >
+                    {time}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-8">
+            <button
+              onClick={() => setStep(2)}
+              className="px-6 py-3 bg-white border border-black rounded-lg hover:bg-[#FFEBDA] transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={20} />
+              Back
+            </button>
+            <button
+              onClick={() => setStep(4)}
+              disabled={!profile.purposeOfStay || (profile.lookingFor?.length || 0) === 0}
+              className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                profile.purposeOfStay && (profile.lookingFor?.length || 0) > 0
+                  ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                  : 'bg-[#666666] text-white cursor-not-allowed'
+              }`}
+            >
+              Continue
+              <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 4: Safety + Comfort
+  if (step === 4) {
+    return (
+      <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
+          <h2 className="text-3xl mb-2">Safety + Comfort</h2>
+          <p className="text-[#666666] mb-8">Your safety is our priority</p>
+
+          <div className="space-y-6">
+            {/* Who Can Message */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Who can message you?
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'friends', label: 'Friends only' },
+                  { value: 'friends-of-friends', label: 'Friends-of-friends' },
+                  { value: 'anyone-verified', label: 'Anyone verified' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateProfile({ whoCanMessage: option.value as any })}
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
+                      profile.whoCanMessage === option.value
+                        ? 'bg-[#f55c7a] text-white'
+                        : 'bg-white hover:bg-[#f6bc66]/20'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Who Can See Posts */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Who can see your posts?
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'friends', label: 'Friends' },
+                  { value: 'friends-of-friends', label: 'Friends-of-friends' },
+                  { value: 'everyone-verified', label: 'Everyone verified' },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateProfile({ whoCanSeePosts: option.value as any })}
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
+                      profile.whoCanSeePosts === option.value
+                        ? 'bg-[#f55c7a] text-white'
+                        : 'bg-white hover:bg-[#f6bc66]/20'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Hide Location */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer p-4 bg-white border border-black rounded-lg">
+                <input
+                  type="checkbox"
+                  checked={profile.hideLocationUntilFriends ?? true}
+                  onChange={(e) => updateProfile({ hideLocationUntilFriends: e.target.checked })}
+                  className="w-5 h-5"
+                />
+                <span>Hide exact location until we're friends (recommended)</span>
+              </label>
+            </div>
+
+            {/* Meetup Preference */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Preferred meetup type
+              </label>
+              <div className="space-y-2">
+                {[
+                  { value: 'public-only', label: 'Public places only' },
+                  { value: 'public-first', label: 'Public first, open later' },
+                  { value: 'comfortable-either', label: "I'm comfortable either way" },
+                ].map((option) => (
+                  <button
+                    key={option.value}
+                    onClick={() => updateProfile({ meetupPreference: option.value as any })}
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
+                      profile.meetupPreference === option.value
+                        ? 'bg-[#f6ac69] text-black'
+                        : 'bg-white hover:bg-[#f6bc66]/20'
+                    }`}
+                  >
+                    {option.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Boundaries */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Any boundaries you want respected? (optional)
+              </label>
+              <textarea
+                value={profile.boundaries || ''}
+                onChange={(e) => updateProfile({ boundaries: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white resize-none"
+                rows={3}
+                placeholder='e.g., "No bars", "No late-night meets", "Group hangouts only"'
+              />
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-8">
+            <button
+              onClick={() => setStep(3)}
+              className="px-6 py-3 bg-white border border-black rounded-lg hover:bg-[#FFEBDA] transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={20} />
+              Back
+            </button>
+            <button
+              onClick={() => setStep(5)}
+              className="flex-1 px-6 py-3 bg-[#f55c7a] text-white border border-black rounded-lg hover:bg-[#f57c73] transition-colors flex items-center justify-center gap-2"
+            >
+              Continue
+              <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 5: Profile Customization
+  if (step === 5) {
+    return (
+      <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
+          <h2 className="text-3xl mb-2">Profile Customization</h2>
+          <p className="text-[#666666] mb-8">Show your personality</p>
+
+          <div className="space-y-6">
+            {/* Bio */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Bio - What's your story?
+              </label>
+              <textarea
+                value={profile.bio || ''}
+                onChange={(e) => updateProfile({ bio: e.target.value })}
+                className="w-full px-4 py-3 border border-black rounded-lg bg-white resize-none"
+                rows={4}
+                placeholder="Tell people about yourself..."
+              />
+            </div>
+
+            {/* Interests */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Interests
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {interests.map((interest) => (
+                  <button
+                    key={interest}
+                    onClick={() => updateProfile({ 
+                      interests: toggleInArray(profile.interests || [], interest) 
+                    })}
+                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
+                      profile.interests?.includes(interest)
+                        ? 'bg-[#f6ac69] text-black'
+                        : 'bg-white hover:bg-[#f6bc66]/20'
+                    }`}
+                  >
+                    {interest}
+                    {profile.interests?.includes(interest) && <Check size={14} className="inline ml-1" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Badges */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Badges you want to show
+              </label>
+              <div className="flex flex-wrap gap-2">
+                {badges.map((badge) => (
+                  <button
+                    key={badge}
+                    onClick={() => updateProfile({ 
+                      badges: toggleInArray(profile.badges || [], badge) 
+                    })}
+                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
+                      profile.badges?.includes(badge)
+                        ? 'bg-[#f68c70] text-black'
+                        : 'bg-white hover:bg-[#f57c73]/20'
+                    }`}
+                  >
+                    {badge}
+                    {profile.badges?.includes(badge) && <Check size={14} className="inline ml-1" />}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-8">
+            <button
+              onClick={() => setStep(4)}
+              className="px-6 py-3 bg-white border border-black rounded-lg hover:bg-[#FFEBDA] transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={20} />
+              Back
+            </button>
+            <button
+              onClick={() => setStep(6)}
+              disabled={!profile.bio || (profile.interests?.length || 0) === 0}
+              className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
+                profile.bio && (profile.interests?.length || 0) > 0
+                  ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                  : 'bg-[#666666] text-white cursor-not-allowed'
+              }`}
+            >
+              Continue
+              <ArrowRight size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Step 6: Match Filters
+  if (step === 6) {
+    const ageRange = profile.matchFilters?.ageRange || [18, 30];
+    
+    return (
+      <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
+        <div className="max-w-2xl w-full">
+          <h2 className="text-3xl mb-2">Match Filters</h2>
+          <p className="text-[#666666] mb-8">Customize who you want to see</p>
+
+          <div className="space-y-6">
+            {/* Age Range */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Age range you want to see
+              </label>
+              <div className="flex items-center gap-4">
+                <input
+                  type="number"
+                  value={ageRange[0]}
+                  onChange={(e) => updateProfile({ 
+                    matchFilters: { 
+                      ...profile.matchFilters!, 
+                      ageRange: [parseInt(e.target.value) || 18, ageRange[1]] 
+                    } 
+                  })}
+                  min="18"
+                  max="100"
+                  className="w-24 px-3 py-2 border border-black rounded-lg bg-white"
+                />
+                <span>to</span>
+                <input
+                  type="number"
+                  value={ageRange[1]}
+                  onChange={(e) => updateProfile({ 
+                    matchFilters: { 
+                      ...profile.matchFilters!, 
+                      ageRange: [ageRange[0], parseInt(e.target.value) || 30] 
+                    } 
+                  })}
+                  min="18"
+                  max="100"
+                  className="w-24 px-3 py-2 border border-black rounded-lg bg-white"
+                />
+              </div>
+            </div>
+
+            {/* Age Preference Toggle */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer p-4 bg-white border border-black rounded-lg mb-3">
+                <input
+                  type="checkbox"
+                  checked={profile.agePreference?.enabled ?? true}
+                  onChange={(e) => updateProfile({ 
+                    agePreference: { ...profile.agePreference!, enabled: e.target.checked } 
+                  })}
+                  className="w-5 h-5"
+                />
+                <span>I prefer meeting people near my age</span>
+              </label>
+              
+              {profile.agePreference?.enabled && (
+                <div>
+                  <label className="block mb-2 text-sm text-[#666666]">Range: ±{profile.agePreference?.range || 5} years</label>
+                  <div className="flex gap-2">
+                    {[2, 5, 8].map((range) => (
+                      <button
+                        key={range}
+                        onClick={() => updateProfile({ 
+                          agePreference: { ...profile.agePreference!, range } 
+                        })}
+                        className={`px-4 py-2 border border-black rounded-lg transition-colors ${
+                          profile.agePreference?.range === range
+                            ? 'bg-[#f6bc66] text-black'
+                            : 'bg-white hover:bg-[#f6ac69]/20'
+                        }`}
+                      >
+                        ±{range}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* Verified Only */}
+            <div>
+              <label className="flex items-center gap-3 cursor-pointer p-4 bg-white border border-black rounded-lg">
+                <input
+                  type="checkbox"
+                  checked={profile.verifiedStudentsOnly ?? false}
+                  onChange={(e) => updateProfile({ verifiedStudentsOnly: e.target.checked })}
+                  className="w-5 h-5"
+                />
+                <span>I prefer meeting other verified students only</span>
+              </label>
+            </div>
+
+            {/* Cultural Similarity Slider */}
+            <div>
+              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
+                Cultural similarity influence on recommendations
+              </label>
+              <input
+                type="range"
+                min="0"
+                max="100"
+                value={profile.matchFilters?.culturalSimilarity || 50}
+                onChange={(e) => updateProfile({ 
+                  matchFilters: { 
+                    ...profile.matchFilters!, 
+                    culturalSimilarity: parseInt(e.target.value) 
+                  } 
+                })}
+                className="w-full"
+              />
+              <div className="flex justify-between text-sm text-[#666666] mt-1">
+                <span>Not important</span>
+                <span>Somewhat</span>
+                <span>Very important</span>
+              </div>
+            </div>
+          </div>
+
+          <div className="flex gap-4 mt-8">
+            <button
+              onClick={() => setStep(5)}
+              className="px-6 py-3 bg-white border border-black rounded-lg hover:bg-[#FFEBDA] transition-colors flex items-center gap-2"
+            >
+              <ArrowLeft size={20} />
+              Back
+            </button>
+            <button
+              onClick={() => onComplete(profile as UserProfile)}
+              className="flex-1 px-6 py-3 bg-[#f55c7a] text-white border border-black rounded-lg hover:bg-[#f57c73] transition-colors flex items-center justify-center gap-2"
+            >
+              Complete Setup
+              <Check size={20} />
+            </button>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return null;
+}
