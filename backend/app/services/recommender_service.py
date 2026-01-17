@@ -6,6 +6,9 @@ python -m app.services.recommender_service
 from __future__ import annotations
 from typing import Any, Dict, List
 from app.services.helpers.db_helpers import get_conn
+from app.services.helpers.store_event_recs_in_db_dis import store_post_recs_dis
+from app.services.helpers.store_event_recs_in_db_emb import store_user_avg_embedding, store_post_recs_emb
+from app.services.helpers.store_people_recs_in_db import store_people_recs
 
 
 def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
@@ -241,6 +244,14 @@ def recommend_mixed_feed(user_id: int, limit: int = 50, seed: int | None = None)
 
     return mixed[:limit]
 
+
+def refresh_feed():
+    conn = get_conn()
+    store_post_recs_dis(conn)
+    store_user_avg_embedding(conn)
+    store_post_recs_emb(conn)
+    store_people_recs(conn)
+    return "Stored all"
 
 if __name__=="__main__":
     test_user_id = 482193

@@ -8,10 +8,18 @@ GET /api/recommendations/posts?user_id=<id>&limit=30
 from fastapi import APIRouter, Query, HTTPException
 
 from app.models.recommendation import PersonRecommendation, PostRecommendation
-from app.services.recommender_service import recommend_people, recommend_posts, recommend_mixed_feed
+from app.services.recommender_service import recommend_people, recommend_posts, recommend_mixed_feed, refresh_feed
 
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
+
+
+@router.get("/refresh")
+def refresh_recommendations():
+    """
+    Refresh user recommendations. This refreshes everyone for now LOL
+    """
+    return refresh_feed()
 
 @router.get("/all-recs")
 def get_all_recommendations(
@@ -20,7 +28,7 @@ def get_all_recommendations(
     """
     Get reranked list of recs from user
     """
-    return recommend_mixed_feed(user_id, limit)
+    return recommend_mixed_feed(int(user_id), limit)
 
 @router.get("/people", response_model=list[PersonRecommendation])
 async def get_people_recommendations(
@@ -38,9 +46,7 @@ async def get_people_recommendations(
     results are ranked by a deterministic scoring algorithm
     and diversified to avoid monoculture clumping
     """
-    print(user_id)
     results = recommend_people(int(user_id), limit=limit)
-    print(results)
     return results
 
 
@@ -60,5 +66,5 @@ async def get_post_recommendations(
     results are ranked by a deterministic scoring algorithm
     and diversified to avoid too many posts from the same author
     """
-    results = recommend_posts(user_id, limit=limit)
+    results = recommend_posts(int(user_id), limit=limit)
     return results

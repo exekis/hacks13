@@ -16,7 +16,7 @@ from dataclasses import dataclass
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 import psycopg2
-from psycopg2.extras import RealDictCursor
+from psycopg2.extras import RealDictCursor, Json
 
 from app.services.helpers.similarity_helpers import (
     jaccard,
@@ -370,9 +370,8 @@ def rerank_posts(
 
     return result
 
-
 # ---------------------------------------------------------------------------
-# main recommendation function (DB-backed)
+# main recommendation function
 # ---------------------------------------------------------------------------
 
 def recommend_posts(
@@ -505,6 +504,40 @@ def recommend_posts(
         conn.close()
 
 
+
+def store_post_recs_dis(conn, limit: int = 30) -> int:
+    """
+    Compute + STORE event_recs_dis for ALL users.
+    Stores as JSONB[] like: [{"postid": 123}, {"postid": 456}, ...]
+    Returns the number of users updated.
+    """
+    updated = 0
+    try:
+        # fetch all user ids
+        with conn.cursor() as cur:
+            cur.execute("SELECT userid FROM users;")
+            all_user_ids = [int(r[0]) for r in cur.fetchall()]
+
+        # compute + store for each user
+        for uid in all_user_ids:
+            post_ids = recommend_posts(uid, limit)  # List[int]
+
+            with conn.cursor() as cur:
+                cur.execute(
+                    """
+                    UPDATE users
+                    SET event_recs_dis = %s
+                    WHERE userid = %s;
+                    """,
+                    (Json(post_ids), uid),
+                )
+            updated += 1
+
+        conn.commit()
+        return updated
+    finally:
+        conn.close()
+
 if __name__ == "__main__":
     limit_env = os.getenv("EVENT_RECS_LIMIT", "30")
     try:
@@ -513,5 +546,5 @@ if __name__ == "__main__":
         limit = 30
 
     test_user_id = 482193
-    print(recommend_posts(user_id=test_user_id,limit=limit))
+    print(store_post_recs_dis(limit=20))
     print("Stored event recommendations into users.event_recs_dis")
