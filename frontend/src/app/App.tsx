@@ -70,7 +70,7 @@ export default function App() {
               bio: "I am a debug user.",
               interests: ["Coding"],
               badges: [],
-              matchFilters: { ageRange: [18, 99], culturalSimilarity: 0 },
+              matchFilters: { ageRange: [18, 99], culturalSimilarity: 0, sharedGoals: [], languages: [], verifiedOnly: false },
               agePreference: { enabled: false, range: 10 },
               verifiedStudentsOnly: false
             };
@@ -131,8 +131,6 @@ export default function App() {
             onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
-            currentUserId="482193"
-            onRSVP={(postId) => console.log('RSVP', postId)}
           />
         )}
 

@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { Post, mockUsers } from '@/app/data/mockData';
-import { User, Clock, Bell, MapPin, Calendar, Users } from 'lucide-react';
-import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { motion, AnimatePresence } from 'motion/react';
+import { Post, mockUsers } from '@/app/data/mockData';
+import { User, Bell, MapPin, Calendar, Users, Heart } from 'lucide-react';
+import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 
 interface WebPostCardProps {
   post: Post;
@@ -15,25 +14,10 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const user = mockUsers.find(u => u.id === post.userId);
-  
+
   if (!user) {
-    user = {
-      id: post.userId,
-      name: (post as any).authorName || 'Unknown User',
-      avatar: '👤',
-      verified: { student: false },
-      age: 0,
-      pronouns: '',
-      role: 'Member',
-      bio: '',
-      interests: [],
-      location: '',
-      university: '',
-      hobbies: []
-    } as any;
+    return null;
   }
-  
-  // if (!user) return null; // Logic handled above
 
   return (
     <motion.div 
@@ -79,13 +63,13 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
           >
             
           </motion.div>
-        </motion.button>
+        </div>
 
         <div className="flex gap-2">
             <span style={{ fontFamily: 'Castoro, serif' }}>{post.capacity}</span>
             <Users 
               size={20} 
-              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'} 
+              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
             />
         </div>
         
@@ -102,7 +86,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
           >
             <Heart 
               size={20} 
-              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'} 
+              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
             />
           </motion.div>
         </motion.button>
@@ -179,7 +163,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
         </motion.div>
         
         <motion.button
-          onClick={() => onRSVP(user.id)}
+          onClick={() => onRSVP && onRSVP(user.id)}
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
           whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
           whileTap={{ scale: 0.98 }}
@@ -189,6 +173,6 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
         </motion.button>
         
       </div>
-    </div>
+    </motion.div>
   );
 }
