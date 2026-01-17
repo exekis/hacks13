@@ -37,6 +37,7 @@ CREATE TABLE Users (
     AboutMe TEXT,
     Friends INT[],
     recs JSONB[],
+    event_recs JSONB[],
     user_embedding vector(384)
 );
 
