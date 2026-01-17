@@ -13,6 +13,12 @@ from app.services.recommender_service import recommend_people, recommend_posts
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
+@router.get("/all-recs")
+def get_all_recommendations(user_id, limit):
+    """
+    Get reranked list of recs from user
+    """
+    pass
 
 @router.get("/people", response_model=list[PersonRecommendation])
 async def get_people_recommendations(

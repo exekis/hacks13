@@ -60,7 +60,6 @@ class PersonRecommendation(BaseModel):
 
 class PostRecommendation(BaseModel):
     """API response shape for post recommendations"""
-
     postid: int
     name: str
     time_posted: Optional[str] = None

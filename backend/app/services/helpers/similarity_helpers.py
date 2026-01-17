@@ -5,7 +5,7 @@ all functions are pure and unit-testable
 designed to be deterministic with no randomness
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 
 # configurable set of high-signal languages
@@ -139,19 +139,26 @@ def recency_score(dt: datetime, window_days: int = 14) -> float:
     1.0 if dt is within 1 day of now
     decays linearly to 0.0 at window_days
     """
-    now = datetime.now()
+    if dt is None:
+        return 0.0
+
+    # Ensure both are timezone-aware
+    now = datetime.now(timezone.utc)
+
+    # If dt somehow came in naive, assume UTC
+    if dt.tzinfo is None:
+        dt = dt.replace(tzinfo=timezone.utc)
+
     delta = now - dt
     days_ago = delta.total_seconds() / (24 * 3600)
-    
+
     if days_ago <= 1:
         return 1.0
-    
+
     if days_ago >= window_days:
         return 0.0
-    
-    # linear decay from 1.0 at day 1 to 0.0 at window_days
-    return 1.0 - (days_ago - 1) / (window_days - 1)
 
+    return 1.0 - (days_ago - 1) / (window_days - 1)
 
 def culture_score(a_cultures: list[str], b_cultures: list[str]) -> float:
     """

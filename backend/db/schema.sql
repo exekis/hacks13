@@ -51,7 +51,8 @@ CREATE TABLE IF NOT EXISTS Posts (
     user_id INT REFERENCES Users(userID),
     content TEXT,
     is_event BOOLEAN DEFAULT FALSE,
-    time_posted TIMESTAMPTZ DEFAULT NOW()
+    time_posted TIMESTAMPTZ DEFAULT NOW(),
+    rsvps INT[]
 );
 
 -- Create the Conversations table
