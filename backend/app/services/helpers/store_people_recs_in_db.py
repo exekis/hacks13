@@ -1,6 +1,7 @@
 """
 Persist deterministic PEOPLE recommendations into users.people_recs (JSONB[])
 
+cd backend
 python -m app.services.helpers.store_people_recs_in_db
 """
 

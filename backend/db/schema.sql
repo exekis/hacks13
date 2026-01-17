@@ -1,9 +1,11 @@
 -- Commented out the drops cuz we're prob not changing the data anymore
---DROP TABLE IF EXISTS Messages;
---DROP TABLE IF EXISTS Posts;
---DROP TABLE IF EXISTS Conversations;
---DROP TABLE IF EXISTS Users;
---DROP TABLE IF EXISTS Auth;
+DROP TABLE IF EXISTS Messages;
+DROP TABLE IF EXISTS Posts;
+DROP TABLE IF EXISTS Conversations;
+DROP TABLE IF EXISTS Users;
+DROP TABLE IF EXISTS Auth;
+
+CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Create the Users table
 CREATE TABLE IF NOT EXISTS Users (
@@ -40,17 +42,20 @@ CREATE TABLE IF NOT EXISTS Users (
     recs JSONB[],
     event_recs_emb JSONB[],
     event_recs_dis JSONB[],
-    people_recs JSONB
+    people_recs JSONB,
+    user_embedding vector(384)
 );
 
 -- Create the Posts table
 CREATE TABLE IF NOT EXISTS Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
-    content TEXT,
+    location_str TEXT,
+    post_content TEXT,
     is_event BOOLEAN DEFAULT FALSE,
     time_posted TIMESTAMPTZ DEFAULT NOW(),
-    rsvps INT[]
+    rsvps INT[],
+    post_embedding vector(384)
 );
 
 -- Create the Conversations table

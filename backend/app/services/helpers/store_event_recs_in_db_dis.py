@@ -4,6 +4,7 @@ recommendation service for travelmate
 implements deterministic, fair recommendation algorithm
 no external apis, no embeddings, no heavy ml
 
+cd backend
 python -m app.services.helpers.store_event_recs_in_db_dis
 """
 
@@ -157,13 +158,13 @@ WHERE userid = ANY(%s);
 
 _WORD_RE = re.compile(r"[a-zA-Z']{2,}")
 
-def _derive_post_tags_from_content(post_content: str, max_tags: int = 12) -> List[str]:
+def _derive_post_tags_from_content(content: str, max_tags: int = 12) -> List[str]:
     """
     Your demo algorithm had post.tags; your DB schema doesn't.
     To preserve the 'goals_match = jaccard(user.goals, post.tags)' logic,
-    we derive simple tags from the post_content text.
+    we derive simple tags from the content text.
     """
-    text = (post_content or "").lower()
+    text = (content or "").lower()
     tokens = _WORD_RE.findall(text)
     # keep unique, stable order
     seen = set()
@@ -310,7 +311,7 @@ def score_post(
 
     # goals match: jaccard(user.goals, post.tags)
     viewer_goals = viewer.get("goals") or []
-    post_tags = _derive_post_tags_from_content(post_row.get("post_content") or "")
+    post_tags = _derive_post_tags_from_content(post_row.get("content") or "")
     goals_match = jaccard(viewer_goals, post_tags)
 
     # recency

@@ -115,7 +115,7 @@ def load_posts(cur, conn, posts_file: str) -> None:
                             PostID,
                             user_id,
                             time_posted,
-                            content
+                            post_content
                         )
                         VALUES (%s, %s, %s, %s)
                         """,
