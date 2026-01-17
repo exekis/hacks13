@@ -8,7 +8,7 @@ GET /api/recommendations/posts?user_id=<id>&limit=30
 from fastapi import APIRouter, Query, HTTPException
 
 from app.models.recommendation import PersonRecommendation, PostRecommendation
-from backend.app.services.recommender import recommend_people, recommend_posts
+from app.services.recommender import recommend_people, recommend_posts
 from app.data.demo import get_demo_state
 
 

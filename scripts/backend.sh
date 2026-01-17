@@ -21,4 +21,4 @@ pip install -q fastapi uvicorn pydantic 2>/dev/null || true
 
 # start the server
 echo "[backend] starting uvicorn on http://localhost:8000"
-uvicorn app.recommendations_main:app --reload --port 8000 --host 0.0.0.0
+uvicorn app.main:app --reload --port 8000 --host 0.0.0.0
