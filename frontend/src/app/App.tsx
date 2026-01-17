@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '@/app/components/Sidebar';
 import { LandingPage } from '@/app/screens/LandingPage';
 import { ProfileSetup } from '@/app/screens/ProfileSetup';
@@ -73,10 +73,10 @@ export default function App() {
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeScreen}
-        onTabChange={(tab: MainScreen) => {
+        onTabChange={(tab: string) => {
           setSelectedProfileId(undefined);
           setSelectedMessageUserId(undefined);
-          setActiveScreen(tab);
+          setActiveScreen(tab as MainScreen);
         }}
       />
 
@@ -89,6 +89,7 @@ export default function App() {
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
             currentUserId="482193"
+            onRSVP={(postId) => console.log('RSVP', postId)}
           />
         )}
 
