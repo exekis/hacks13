@@ -49,7 +49,7 @@ class Post(BaseModel):
 
 class PersonRecommendation(BaseModel):
     """API response shape for person recommendations"""
-
+    name: str
     userid: int
     pronouns: Optional[str] = None
     currentCity: Optional[str] = None
@@ -62,5 +62,6 @@ class PostRecommendation(BaseModel):
     """API response shape for post recommendations"""
 
     postid: int
+    name: str
     time_posted: Optional[str] = None
     post_content: str

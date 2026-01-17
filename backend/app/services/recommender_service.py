@@ -29,11 +29,13 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             FROM unnest(%s::int[]) WITH ORDINALITY AS t(rec_postid, ord)
         )
         SELECT
+            u.name,
             p.postid,
             p.time_posted,
             p.post_content
         FROM rec_ids r
         JOIN posts p ON p.postid = r.rec_postid
+        JOIN users u ON u.userid = p.user_id
         ORDER BY r.ord
         LIMIT %s;
     """
@@ -70,9 +72,10 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
 
             return [
                 {
-                    "postid": r[0],
-                    "time_posted": r[1].isoformat() if r[1] else None,
-                    "post_content": r[2],
+                    "name": r[0],               # u.name
+                    "postid": r[1],                    # p.postid
+                    "time_posted": r[2].isoformat() if r[2] else None,
+                    "post_content": r[3],              # p.post_content
                 }
                 for r in rows
             ]
@@ -102,6 +105,7 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             FROM unnest(%s::int[]) WITH ORDINALITY AS t(rec_userid, ord)
         )
         SELECT
+            u.Name,
             u.userid,
             u.pronouns,
             u.currentCity,
@@ -141,12 +145,13 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
 
             return [
                 {
-                    "userid": r[0],
-                    "pronouns": r[1],
-                    "currentCity": r[2],
-                    "travelingTo": r[3],
-                    "age": r[4],
-                    "bio": r[5],
+                    "name":r[0],
+                    "userid": r[1],
+                    "pronouns": r[2],
+                    "currentCity": r[3],
+                    "travelingTo": r[4],
+                    "age": r[5],
+                    "bio": r[6],
                 }
                 for r in rows
             ]
