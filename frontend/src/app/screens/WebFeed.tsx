@@ -1,9 +1,16 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { mockUsers, mockPosts } from '@/app/data/mockData';
+import { mockUsers, mockPosts, User, Post } from '@/app/data/mockData';
 import { WebPersonCard } from '@/app/components/WebPersonCard';
 import { WebPostCard } from '@/app/components/WebPostCard';
-import { Users, FileText, Sparkles, TrendingUp, Globe } from 'lucide-react';
+import { Users, FileText, Sparkles, TrendingUp, Globe, Loader2, AlertCircle } from 'lucide-react';
+import { 
+  fetchPeopleRecommendations, 
+  fetchPostRecommendations,
+  backendPersonToMockUser,
+  backendPostToMockPost,
+  checkApiHealth
+} from '@/api/recommendations';
 
 interface WebFeedProps {
   onViewProfile: (userId: string) => void;

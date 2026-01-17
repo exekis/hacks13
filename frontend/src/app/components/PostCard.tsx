@@ -3,14 +3,8 @@ import { Post, mockUsers } from '@/app/data/mockData';
 import { Button, VerificationBadge, Avatar } from '@/app/components/DesignSystem';
 import { MapPin, Calendar } from 'lucide-react';
 
-// extended post type that can include author info from api
-interface ExtendedPost extends Post {
-  authorName?: string;
-  authorLocation?: string;
-}
-
 interface PostCardProps {
-  post: ExtendedPost;
+  post: Post;
   onAddFriend?: (userId: string) => void;
   onMessage?: (userId: string) => void;
   friendRequested?: boolean;
@@ -22,21 +16,37 @@ export const PostCard: React.FC<PostCardProps> = ({
   onMessage,
   friendRequested = false
 }) => {
-  // try to find user in mock data first, fallback to embedded author info
-  const mockUser = mockUsers.find(u => u.id === post.userId);
+  let user = mockUsers.find(u => u.id === post.userId);
   
-  // use author name from api if available, otherwise from mock data
-  const authorName = post.authorName || mockUser?.name || `User ${post.userId}`;
-  const isVerifiedStudent = mockUser?.verified?.student ?? true;
+  // Fallback for real backend data that might not be in mockUsers
+  if (!user) {
+    user = {
+      id: post.userId,
+      name: (post as any).authorName || 'Unknown User',
+      avatar: '👤',
+      verified: { student: false },
+      // Add minimum required fields to satisfy the UI
+      age: 0,
+      pronouns: '',
+      role: 'Member',
+      bio: '',
+      interests: [],
+      location: '',
+      university: '',
+      hobbies: []
+    } as any;
+  }
+
+  // if (!user) return null; // Logic handled above
   
   return (
     <div className="bg-white rounded-3xl p-5 shadow-md">
       <div className="flex items-start gap-3 mb-3">
-        <Avatar emoji="user" size="md" />
+        <Avatar emoji={user.avatar} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
-            <h4 className="font-semibold text-[#3d3430]">{authorName}</h4>
-            {isVerifiedStudent && <VerificationBadge type="student" />}
+            <h4 className="font-semibold text-[#3d3430]">{user.name}</h4>
+            {user.verified.student && <VerificationBadge type="student" />}
           </div>
           <p className="text-xs text-[#8c7a6f]">{post.timestamp}</p>
         </div>
@@ -63,7 +73,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           onClick={() => onAddFriend?.(post.userId)}
           className="flex-1"
         >
-          {friendRequested ? 'Requested' : '+ Add friend'}
+          {friendRequested ? '✓ Requested' : '+ Add friend'}
         </Button>
         <Button
           variant="secondary"
@@ -71,7 +81,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           onClick={() => onMessage?.(post.userId)}
           className="flex-1"
         >
-          Message
+          💬 Message
         </Button>
       </div>
     </div>

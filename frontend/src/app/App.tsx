@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Sidebar } from '@/app/components/Sidebar';
 import { LandingPage } from '@/app/screens/LandingPage';
 import { ProfileSetup } from '@/app/screens/ProfileSetup';
@@ -43,7 +43,46 @@ export default function App() {
   // Render the landing page for new visitors
   if (appScreen === 'landing') {
     // onGetStarted will transition the user to the authentication screen
-    return <LandingPage onGetStarted={() => setAppScreen('auth')} />;
+    return (
+      <>
+        <LandingPage onGetStarted={() => setAppScreen('auth')} />
+        <button
+          onClick={() => {
+            const debugProfile: UserProfile = {
+              fullName: "Speedrunner",
+              age: 25,
+              isStudent: true,
+              university: "Debug University",
+              currentCity: "Toronto",
+              languages: ["English"],
+              culturalIdentity: ["Debugger"],
+              ethnicity: ["Mixed"],
+              culturalSimilarityImportance: 1,
+              culturalComfortLevel: 'open',
+              languageMatchImportant: false,
+              purposeOfStay: "Speedrunning",
+              lookingFor: ["Bugs"],
+              socialVibe: ["Fast"],
+              availability: ["Always"],
+              whoCanSeePosts: "everyone-verified",
+              hideLocationUntilFriends: false,
+              meetupPreference: "public-first",
+              bio: "I am a debug user.",
+              interests: ["Coding"],
+              badges: [],
+              matchFilters: { ageRange: [18, 99], culturalSimilarity: 0 },
+              agePreference: { enabled: false, range: 10 },
+              verifiedStudentsOnly: false
+            };
+            setUserProfile(debugProfile);
+            setAppScreen('main');
+          }}
+          className="fixed bottom-4 right-4 bg-red-600/80 text-white px-4 py-2 rounded-full z-50 hover:bg-red-500 text-sm font-bold shadow-lg"
+        >
+          ⚡ Dev: Skip to Feed
+        </button>
+      </>
+    );
   }
 
   // Render the authentication page for users who need to sign in or sign up
@@ -76,10 +115,10 @@ export default function App() {
       {/* Sidebar Navigation */}
       <Sidebar
         activeTab={activeScreen}
-        onTabChange={(tab: MainScreen) => {
+        onTabChange={(tab: string) => {
           setSelectedProfileId(undefined);
           setSelectedMessageUserId(undefined);
-          setActiveScreen(tab);
+          setActiveScreen(tab as MainScreen);
         }}
       />
 
@@ -93,6 +132,7 @@ export default function App() {
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
             currentUserId="482193"
+            onRSVP={(postId) => console.log('RSVP', postId)}
           />
         )}
 

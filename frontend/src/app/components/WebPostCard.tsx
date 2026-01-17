@@ -1,14 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
+import { motion } from 'motion/react';
 import { Post, mockUsers } from '@/app/data/mockData';
 import { User, Clock, Bell, MapPin, Calendar, Users } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { motion, AnimatePresence } from 'motion/react';
-
-// extended post type that can include author info from api
-interface ExtendedPost extends Post {
-  authorName?: string;
-  authorLocation?: string;
-}
 
 interface WebPostCardProps {
   post: Post;
@@ -21,26 +16,66 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   const [isLiked, setIsLiked] = useState(false);
   const user = mockUsers.find(u => u.id === post.userId);
   
-  // use author name from api if available, otherwise from mock data
-  const authorName = post.authorName || mockUser?.name || `User ${post.userId}`;
+  if (!user) {
+    user = {
+      id: post.userId,
+      name: (post as any).authorName || 'Unknown User',
+      avatar: '👤',
+      verified: { student: false },
+      age: 0,
+      pronouns: '',
+      role: 'Member',
+      bio: '',
+      interests: [],
+      location: '',
+      university: '',
+      hobbies: []
+    } as any;
+  }
   
-  // only render if we have valid author info
-  const hasValidAuthor = post.authorName || mockUser;
+  // if (!user) return null; // Logic handled above
 
   return (
-    <div className="bg-white border border-black rounded-lg p-5 hover:shadow-md transition-shadow">
-      {/* Header */}
+    <motion.div 
+      className="relative bg-white border border-black rounded-2xl p-5 overflow-hidden"
+      onHoverStart={() => setIsHovered(true)}
+      onHoverEnd={() => setIsHovered(false)}
+      whileHover={{ 
+        y: -4,
+        boxShadow: '0 12px 24px -8px rgba(245, 92, 122, 0.2)',
+      }}
+      transition={{ type: 'spring', stiffness: 300, damping: 25 }}
+    >
+      {/* animated gradient border on hover */}
+      <motion.div 
+        className="absolute inset-0 rounded-2xl bg-gradient-to-r from-[#f55c7a] via-[#f68c70] to-[#f6ac69] opacity-0 -z-10"
+        animate={{ opacity: isHovered ? 0.1 : 0 }}
+        transition={{ duration: 0.3 }}
+      />
+
+      {/* header */}
       <div className="flex items-start gap-3 mb-4">
-        <div 
-          className="w-12 h-12 bg-[#f6bc66] border border-black rounded-full flex items-center justify-center flex-shrink-0 cursor-pointer"
-          onClick={() => onViewProfile?.(post.userId)}
+        <motion.div 
+          className="w-12 h-12 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center flex-shrink-0 cursor-pointer"
+          onClick={() => onViewProfile?.(user.id)}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
         >
           <User size={24} className="text-black" />
-        </div>
+        </motion.div>
         <div className="flex-1 min-w-0">
-          <h4 
-            className="text-base mb-0.5 cursor-pointer hover:underline"
-            onClick={() => onViewProfile?.(post.userId)}
+          <motion.h4 
+            className="text-base mb-0.5 cursor-pointer hover:text-[#f55c7a] transition-colors"
+            onClick={() => onViewProfile?.(user.id)}
+            style={{ fontFamily: 'Castoro, serif' }}
+          >
+            {user.name}
+          </motion.h4>
+          <motion.div 
+            className="flex items-center gap-1 text-xs text-[#666666]"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.1 }}
           >
             
           </motion.div>
@@ -53,20 +88,49 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
               className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'} 
             />
         </div>
+        
+        {/* like button */}
+        <motion.button
+          onClick={() => setIsLiked(!isLiked)}
+          className={`p-2 rounded-full transition-colors ${isLiked ? 'bg-[#f55c7a]/10' : 'hover:bg-[#FFEBDA]'}`}
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+        >
+          <motion.div
+            animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
+            transition={{ duration: 0.3 }}
+          >
+            <Heart 
+              size={20} 
+              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'} 
+            />
+          </motion.div>
+        </motion.button>
       </div>
 
-      {/* Content */}
-      <p className="text-sm mb-4 whitespace-pre-wrap">{post.content}</p>
+      {/* content */}
+      <motion.p 
+        className="text-sm mb-4 whitespace-pre-wrap text-[#3d3430] leading-relaxed"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        transition={{ delay: 0.15 }}
+      >
+        {post.content}
+      </motion.p>
 
-      {/* Image if present */}
+      {/* image if present */}
       {post.image && (
-        <div className="mb-4 border border-black rounded-lg overflow-hidden">
+        <motion.div 
+          className="mb-4 border border-black rounded-xl overflow-hidden"
+          whileHover={{ scale: 1.01 }}
+          transition={{ type: 'spring', stiffness: 300 }}
+        >
           <ImageWithFallback 
             src={post.image} 
             alt="Post image"
             className="w-full h-48 object-cover"
           />
-        </div>
+        </motion.div>
       )}
 
       {/* date range if present */}
