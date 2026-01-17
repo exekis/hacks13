@@ -1,7 +1,6 @@
 """services package"""
 
-from .recommender import recommend_people, recommend_posts
-from .similarity import (
+from .helpers.similarity_helpers import (
     jaccard,
     overlap_coefficient,
     language_score,

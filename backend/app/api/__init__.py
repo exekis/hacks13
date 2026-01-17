@@ -1,5 +1,5 @@
 """api package"""
 
-from .recommendations import router as recommendations_router
+from .recommendations_router import router as recommendations_router
 
 __all__ = ["recommendations_router"]
