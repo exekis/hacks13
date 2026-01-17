@@ -15,7 +15,6 @@ CREATE TABLE Users (
     isStudent BOOLEAN,
     university VARCHAR(255),
     currentCity VARCHAR(255),
-    travelingTo VARCHAR(255),
     languages TEXT[],
     hometown VARCHAR(255),
     agePreference INT,
@@ -29,6 +28,7 @@ CREATE TABLE Users (
     purposeOfStay VARCHAR(255),
     lookingFor TEXT[],
     socialVibe TEXT[],
+    whoCanMessage VARCHAR(255),
     whoCanSeePosts VARCHAR(255),
     hideLocationUntilFriends BOOLEAN,
     meetupPreference VARCHAR(255),
@@ -65,4 +65,17 @@ CREATE TABLE Messages (
     SenderID INT REFERENCES Users(userID),
     Content TEXT,
     Timestamp TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Create the Auth table
+CREATE TABLE Auth (
+    userID INT PRIMARY KEY REFERENCES Users(userID),
+    password_hash VARCHAR(255) NOT NULL
+);
+
+-- Create the Sessions table
+CREATE TABLE Sessions (
+    session_id VARCHAR(255) PRIMARY KEY,
+    user_id INT REFERENCES Users(userID),
+    expires_at TIMESTAMPTZ NOT NULL
 );

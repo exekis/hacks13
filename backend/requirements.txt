@@ -8,3 +8,10 @@ psycopg2>=2.9.11
 sentence-transformers>=5.2.0
 huggingface-hub>=0.36.0
 dotenv
+sqlalchemy
+python-multipart
+
+# auth dependencies
+passlib>=1.7.4
+argon2-cffi>=21.2.0
+python-jose>=3.3.0

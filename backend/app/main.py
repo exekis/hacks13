@@ -1,21 +1,44 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy import text
+from dotenv import load_dotenv
 
-from app.core.config import settings
-from app.core.db import engine, Base
-from app.api.routers import feed_router, profile_router, conversations_router, settings_router
+load_dotenv()
+
+# from app.core.config import settings
+# from app.core.db import engine, Base
+from app.api import profile
+from app.api import profile_setup
+from app.api import conversations
+from app.api import settings
+from app.api import recommendations
+from app.api import auth
 
 
 app = FastAPI(title="NAME PLACEHOLDER")
 
+# CORS
+origins = [
+    "http://localhost:5173",
+    "http://localhost:3000",
+]
 
-@app.on_event("startup")
-async def on_startup():
-    # Create tables
-    async with engine.begin() as conn:
-        await conn.run_sync(Base.metadata.create_all)
-        # quick sanity ping
-        await conn.execute(text("SELECT 1"))
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+
+# @app.on_event("startup")
+# async def on_startup():
+#     # Create tables
+#     async with engine.begin() as conn:
+#         await conn.run_sync(Base.metadata.create_all)
+#         # quick sanity ping
+#         await conn.execute(text("SELECT 1"))
 
 
 @app.get("/")
@@ -37,7 +60,9 @@ async def start_page():
 
 
 # Routers
-app.include_router(feed_router)
-app.include_router(profile_router)
-app.include_router(conversations_router)
-app.include_router(settings_router)
+app.include_router(profile.router)
+app.include_router(profile_setup.router)
+# app.include_router(conversations.router)
+# app.include_router(settings.router)
+# app.include_router(recommendations.router)
+app.include_router(auth.router)
