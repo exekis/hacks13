@@ -100,18 +100,27 @@ def load_posts(cur, conn, posts_file: str) -> None:
         try:
             cur.execute(
                 """
-                INSERT INTO Posts (user_id, location_str, location_coords, time_posted, post_content, post_embedding)
-                VALUES (%s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    post["user_id"],
-                    None,  # location_str
-                    None,  # location_coords (POINT)
-                    post.get("time_posted"),
-                    post.get("post_content"),
-                    post.get("embedding"),
-                ),
-            )
+                    INSERT INTO Posts (
+                        PostID,
+                        user_id,
+                        location_str,
+                        location_coords,
+                        time_posted,
+                        post_content,
+                        post_embedding
+                    )
+                    VALUES (%s, %s, %s, %s, %s, %s, %s)
+                    """,
+                    (
+                        int(post_key),          # <-- this is the JSON key, converted to int
+                        post["user_id"],
+                        None,                   # location_str
+                        None,                   # location_coords
+                        post.get("time_posted"),
+                        post.get("post_content"),
+                        post.get("embedding"),
+                    ),
+                )
         except psycopg2.Error as e:
             print(f"Error inserting post {post_key} (user_id={post.get('user_id')}): {e}")
             conn.rollback()

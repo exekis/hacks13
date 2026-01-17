@@ -93,7 +93,7 @@ def get_event_recs(
         return []
 
     # row[0] is JSONB[] like:
-    # [{'postid': 123, 'distance': 0.12}, ...]
+    print(f"TESTING RECS: {row[0][:10]}")
     post_ids = [rec["postid"] for rec in row[0]]
     return post_ids[:num_recs]
 
