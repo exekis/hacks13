@@ -6,7 +6,7 @@ DROP TABLE IF EXISTS Users;
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Create the Users table
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS Users (
     userID INT PRIMARY KEY,
     Name VARCHAR(255),
     Age INT,
@@ -45,7 +45,7 @@ CREATE TABLE Users (
 );
 
 -- Create the Posts table
-CREATE TABLE Posts (
+CREATE TABLE IF NOT EXISTS Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
     location_str VARCHAR(255),
@@ -57,15 +57,18 @@ CREATE TABLE Posts (
 
 -- Create the Conversations table
 CREATE TABLE Conversations (
-    conversationID SERIAL PRIMARY KEY,
-    participants INT[]
+  conversationID SERIAL PRIMARY KEY,
+  user_a INT NOT NULL REFERENCES Users(userID),
+  user_b INT NOT NULL REFERENCES Users(userID),
+  last_messaged TIMESTAMPTZ DEFAULT NOW(),
+  UNIQUE (LEAST(user_a, user_b), GREATEST(user_a, user_b))
 );
 
 -- Create the Messages table
 CREATE TABLE Messages (
-    MessageID SERIAL PRIMARY KEY,
-    conversationID INT REFERENCES Conversations(conversationID),
-    SenderID INT REFERENCES Users(userID),
-    Content TEXT,
-    Timestamp TIMESTAMPTZ DEFAULT NOW()
+  messageID SERIAL PRIMARY KEY,
+  conversationID INT NOT NULL REFERENCES Conversations(conversationID) ON DELETE CASCADE,
+  senderID INT NOT NULL REFERENCES Users(userID),
+  message_content TEXT NOT NULL,
+  timestamp TIMESTAMPTZ DEFAULT NOW()
 );

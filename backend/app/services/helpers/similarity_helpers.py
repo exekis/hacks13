@@ -5,7 +5,7 @@ all functions are pure and unit-testable
 designed to be deterministic with no randomness
 """
 
-from datetime import datetime, timedelta
+from datetime import datetime
 
 
 # configurable set of high-signal languages

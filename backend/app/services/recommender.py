@@ -3,20 +3,7 @@ Gets post and people recommendations from database
 """
 from __future__ import annotations
 from typing import List
-import psycopg2
-import os
-
-
-def _get_conn() -> psycopg2.extensions.connection:
-    """Create and return a new database connection."""
-    return psycopg2.connect(
-        dbname=os.getenv("DB_NAME", "hacks13"),
-        user=os.getenv("DB_USER", "jennifer"),
-        password=os.getenv("DB_PASSWORD", ""),
-        host=os.getenv("DB_HOST", "localhost"),
-        port=os.getenv("DB_PORT", "5432"),
-    )
-
+from app.services.helpers.db_helpers import get_conn
 
 def recommend_posts(user_id: int, limit: int = 50) -> List[int]:
     """
@@ -28,7 +15,7 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[int]:
         WHERE userid = %s;
     """
 
-    conn = _get_conn()
+    conn = get_conn()
     try:
         with conn.cursor() as cur:
             cur.execute(sql_get_recs, (user_id,))
@@ -47,7 +34,7 @@ def recommend_people(user_id: int, limit: int = 50) -> List[int]:
     """
     Return list of recommended user IDs from users.people_recs (ignore scores).
     """
-    conn = _get_conn()
+    conn = get_conn()
     try:
         with conn.cursor() as cur:
             cur.execute("SELECT people_recs FROM users WHERE userid = %s;", (user_id,))

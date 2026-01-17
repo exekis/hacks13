@@ -10,7 +10,7 @@ from dataclasses import dataclass
 
 from app.models.recommendation import UserProfile, Post, PersonRecommendation, PostRecommendation
 from app.data.demo import get_demo_state, DemoState
-from app.services.candidate_generation.similarity_helpers import (
+from app.services.helpers.similarity_helpers import (
     jaccard,
     language_score,
     location_score,

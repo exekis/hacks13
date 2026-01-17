@@ -1,6 +1,6 @@
 """services package"""
 
-from .candidate_generation.similarity_helpers import (
+from .helpers.similarity_helpers import (
     jaccard,
     overlap_coefficient,
     language_score,

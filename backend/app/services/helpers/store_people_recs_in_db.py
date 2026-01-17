@@ -1,7 +1,7 @@
 """
 Persist deterministic PEOPLE recommendations into users.people_recs (JSONB[])
 
-python -m app.services.candidate_generation.store_people_recs_in_db
+python -m app.services.helpers.store_people_recs_in_db
 """
 
 from __future__ import annotations
@@ -13,12 +13,11 @@ from typing import List, Dict, Any, Optional, Tuple
 import psycopg2
 from psycopg2.extras import RealDictCursor, Json
 
-from app.services.candidate_generation.similarity_helpers import (
+from app.services.helpers.similarity_helpers import (
     jaccard,
     language_score,
     location_score,
     mutual_friends_score,  # we will provide friends sets from DB
-    recency_score,
     culture_score,
 )
 
