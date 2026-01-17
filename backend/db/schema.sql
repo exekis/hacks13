@@ -1,6 +1,11 @@
--- Users table
+DROP TABLE IF EXISTS Messages;
+DROP TABLE IF EXISTS Posts;
+DROP TABLE IF EXISTS Conversations;
+DROP TABLE IF EXISTS Users;
+
+-- Create the Users table
 CREATE TABLE Users (
-    userID PRIMARY KEY,
+    userID INT PRIMARY KEY,
     Name VARCHAR(255),
     Age INT,
     Email VARCHAR(255) UNIQUE,
@@ -32,7 +37,7 @@ CREATE TABLE Users (
     recs JSONB[]
 );
 
--- Posts table
+-- Create the Posts table
 CREATE TABLE Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
@@ -43,13 +48,13 @@ CREATE TABLE Posts (
     embedding INT[]
 );
 
--- Conversations table
+-- Create the Conversations table
 CREATE TABLE Conversations (
     conversationID SERIAL PRIMARY KEY,
     participants INT[]
 );
 
--- Messages table
+-- Create the Messages table
 CREATE TABLE Messages (
     MessageID SERIAL PRIMARY KEY,
     conversationID INT REFERENCES Conversations(conversationID),
