@@ -20,6 +20,8 @@ backend/
 │   ├── models/
 │   │   └── recommendation.py     # Pydantic models
 │   ├── services/
+        ├── recommendations_helpers # helper functions for recommendations
+            └── cg_events.py      # SQL logic for generating + storing post recommendations
 │   │   ├── recommender.py        # Main recommendation logic
 │   │   └── similarity.py         # Scoring helper functions
 │   ├── state.py                  # Impression tracking store
@@ -44,25 +46,6 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 
 ```bash
 pip install -r requirements.txt
-```
-
-Set up pgvector: https://github.com/pgvector/pgvector
-
-```bash
-# Mac
-cd /tmp
-git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git
-cd pgvector
-make
-make install # may need sudo
-
-# Windows
-set "PGROOT=C:\Program Files\PostgreSQL\18"
-cd %TEMP%
-git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git
-cd pgvector
-nmake /F Makefile.win
-nmake /F Makefile.win install
 ```
 
 ### 3. Run the server

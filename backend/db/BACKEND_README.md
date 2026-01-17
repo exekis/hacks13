@@ -30,6 +30,26 @@ This document describes how to set up the PostgreSQL database for this project.
 
     *(Note: A `requirements.txt` file will be created in a subsequent step)*
 
+
+    Set up pgvector: https://github.com/pgvector/pgvector
+
+    ```bash
+    # Mac
+    cd /tmp
+    git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git
+    cd pgvector
+    make
+    make install # may need sudo
+
+    # Windows
+    set "PGROOT=C:\Program Files\PostgreSQL\18"
+    cd %TEMP%
+    git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git
+    cd pgvector
+    nmake /F Makefile.win
+    nmake /F Makefile.win install
+    ```
+
 4.  **Seed the database:**
 
     Before running the seed script, you need to set the following environment variables:
