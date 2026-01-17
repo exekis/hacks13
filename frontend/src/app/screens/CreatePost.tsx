@@ -18,14 +18,14 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onBack }) =>
   
   return (
     <div className="min-h-screen bg-[#fef9f6] pb-20">
-      <TopAppBar title="Create a post" showBack onBackClick={onBack} />
+      <TopAppBar title="Create an event" showBack onBackClick={onBack} />
       
       <div className="px-4 pt-6 max-w-md mx-auto">
         <div className="bg-white rounded-3xl p-5 shadow-md mb-4">
           <textarea
             value={content}
             onChange={(e) => setContent(e.target.value)}
-            placeholder="What's on your mind? Share your plans, ask for recommendations, or find activity buddies..."
+            placeholder="Share your plans, ask for recommendations and find activity buddies..."
             rows={6}
             className="w-full px-4 py-3 rounded-2xl border-2 border-[#f5ede8] focus:border-[#f55c7a] outline-none transition-colors resize-none"
           />
@@ -41,7 +41,7 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onBack }) =>
         <div className="bg-white rounded-3xl p-5 shadow-md mb-4 space-y-4">
           <div>
             <label className="block text-sm font-semibold text-[#3d3430] mb-2">
-              Date range (optional)
+              Time
             </label>
             <div className="grid grid-cols-2 gap-3">
               <input
@@ -57,7 +57,7 @@ export const CreatePostScreen: React.FC<CreatePostScreenProps> = ({ onBack }) =>
           
           <div>
             <label className="block text-sm font-semibold text-[#3d3430] mb-2">
-              General location
+              Address
             </label>
             <input
               type="text"

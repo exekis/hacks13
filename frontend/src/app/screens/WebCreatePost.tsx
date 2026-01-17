@@ -11,6 +11,9 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
   const [hasDateRange, setHasDateRange] = useState(false);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
+  const [timeFrom, setTimeFrom] = useState('');
+  const [timeTo, setTimeTo] = useState('');
+  const [capacity, setCapacity] = useState<number | ''>('');
 
   const handleSubmit = () => {
     // in a real app, this would create the post
@@ -65,7 +68,7 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
               <Send className="w-7 h-7 text-[#f55c7a]" />
             </motion.div>
             <h2 className="text-3xl bg-gradient-to-r from-[#f55c7a] via-[#f68c70] to-[#f6ac69] bg-clip-text text-transparent" style={{ fontFamily: 'Castoro, serif' }}>
-              Create Post
+              Create New Event
             </h2>
           </div>
           <motion.button
@@ -86,13 +89,12 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
         >
           <motion.div className="mb-6" variants={itemVariants}>
             <label className="block mb-2 text-lg flex items-center gap-2" style={{ fontFamily: 'Castoro, serif' }}>
-              <Sparkles size={18} className="text-[#f6ac69]" />
-              What's on your mind?
+              What do you have in mind?
             </label>
             <textarea
               value={content}
               onChange={(e) => setContent(e.target.value)}
-              placeholder="Share your travel plans, find activity partners, or just say hello..."
+              placeholder="Share your travel plans and find activity partners..."
               className="w-full px-4 py-3 border border-black rounded-xl resize-none focus:outline-none focus:ring-2 focus:ring-[#f55c7a]/30 transition-all"
               rows={6}
             />
@@ -103,60 +105,69 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
             </div>
           </motion.div>
 
-          {/* date range toggle */}
-          <motion.label 
-            className="flex items-center gap-3 cursor-pointer mb-6 p-3 bg-gradient-to-r from-[#FFEBDA] to-[#fff5ef] border border-black rounded-xl"
-            whileHover={{ scale: 1.01 }}
-            whileTap={{ scale: 0.99 }}
-          >
-            <input
-              type="checkbox"
-              checked={hasDateRange}
-              onChange={(e) => setHasDateRange(e.target.checked)}
-              className="w-5 h-5 rounded accent-[#f55c7a]"
-            />
-            <Calendar size={18} className="text-[#f68c70]" />
-            <span>Add travel dates</span>
-          </motion.label>
-
           {/* date range inputs */}
-          <AnimatePresence>
-            {hasDateRange && (
-              <motion.div 
-                className="mb-6 p-4 bg-gradient-to-r from-[#f68c70]/20 to-[#f6ac69]/10 border border-black rounded-xl"
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ type: 'spring', stiffness: 300, damping: 25 }}
-              >
-                <div className="flex items-center gap-2 mb-3">
-                  <Calendar size={16} className="text-[#f68c70]" />
-                  <label className="font-medium">Travel Dates</label>
-                </div>
-                <div className="flex gap-4">
-                  <div className="flex-1">
-                    <label className="block text-sm mb-1 text-[#666666]">From</label>
-                    <input
-                      type="date"
-                      value={dateFrom}
-                      onChange={(e) => setDateFrom(e.target.value)}
-                      className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <label className="block text-sm mb-1 text-[#666666]">To</label>
-                    <input
-                      type="date"
-                      value={dateTo}
-                      onChange={(e) => setDateTo(e.target.value)}
-                      className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
-                    />
-                  </div>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
+          <motion.div 
+            className="mb-6 p-4 bg-gradient-to-r from-[#f68c70]/20 to-[#f6ac69]/10 border border-black rounded-xl"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar size={16} className="text-[#f68c70]" />
+              <label className="font-medium">Event Dates</label>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="block text-sm mb-1 text-[#666666]">From</label>
+                <input
+                  type="date"
+                  value={dateFrom}
+                  onChange={(e) => setDateFrom(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
+                />
+                <input 
+                  type="time" 
+                  value={timeFrom}
+                  onChange={(e) => setTimeFrom(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="block text-sm mb-1 text-[#666666]">To</label>
+                <input
+                  type="date"
+                  value={dateTo}
+                  onChange={(e) => setDateTo(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
+                />
+                <input 
+                  type="time" 
+                  value={timeTo}
+                  onChange={(e) => setTimeTo(e.target.value)}
+                  className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
+                />
+              </div>
+            </div>
+          </motion.div>
 
+          <motion.div 
+            className="mb-6 p-4 bg-gradient-to-r from-[#f68c70]/20 to-[#f6ac69]/10 border border-black rounded-xl"
+          >
+            <div className="flex items-center gap-2 mb-3">
+              <Calendar size={16} className="text-[#f68c70]" />
+              <label className="font-medium">Capacity</label>
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <input
+                  type="number"
+                  value={capacity}
+                  min={1}
+                  onChange={(e) => setCapacity(Number(e.target.value))}
+                  className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
+                />
+              </div>
+              
+            </div>
+          </motion.div>
+          
           {/* add image button */}
           <motion.button 
             className="w-full p-4 border border-black border-dashed rounded-xl hover:border-solid transition-all flex items-center justify-center gap-2 mb-6 bg-gradient-to-r from-white to-[#fff5ef]"
@@ -167,20 +178,20 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
             <span>Add Image (optional)</span>
           </motion.button>
 
-          {/* info box */}
+          {/* info box
           <motion.div 
             className="p-4 bg-gradient-to-r from-[#f6bc66]/20 to-[#f6ac69]/10 border border-black rounded-xl mb-6"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3 }}
           >
-            <div className="flex items-start gap-2">
+            {/* <div className="flex items-start gap-2">
               <MapPin size={16} className="text-[#f55c7a] mt-0.5 flex-shrink-0" />
               <p className="text-sm text-[#666666]">
                 <strong className="text-[#3d3430]">Privacy Note:</strong> Your exact location will only be shared with people you connect with.
               </p>
-            </div>
-          </motion.div>
+            </div> 
+          </motion.div> */}
 
           {/* action buttons */}
           <div className="flex gap-3">

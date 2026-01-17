@@ -1,16 +1,16 @@
 import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Post, mockUsers } from '@/app/data/mockData';
-import { User, Clock, MessageCircle, MapPin, Calendar, Heart } from 'lucide-react';
+import { User, Clock, Bell, MapPin, Calendar, Users } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 
 interface WebPostCardProps {
   post: Post;
-  onMessage?: (userId: string) => void;
+  onRSVP?: (userId: string) => void;
   onViewProfile?: (userId: string) => void;
 }
 
-export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const user = mockUsers.find(u => u.id === post.userId);
@@ -75,12 +75,17 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
             animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
             transition={{ duration: 0.3 }}
           >
-            <Heart 
+            
+          </motion.div>
+        </motion.button>
+
+        <div className="flex gap-2">
+            <span style={{ fontFamily: 'Castoro, serif' }}>{post.capacity}</span>
+            <Users 
               size={20} 
               className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'} 
             />
-          </motion.div>
-        </motion.button>
+        </div>
       </div>
 
       {/* content */}
@@ -109,20 +114,37 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
       )}
 
       {/* date range if present */}
-      {post.dateRange && (
-        <motion.div 
-          className="mb-4 px-4 py-2.5 bg-gradient-to-r from-[#f68c70] to-[#f6ac69] border border-black rounded-xl inline-flex items-center gap-2"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2 }}
-          whileHover={{ scale: 1.02 }}
-        >
-          <Calendar size={14} className="text-white" />
-          <p className="text-sm text-white" style={{ fontFamily: 'Castoro, serif' }}>
-            {post.dateRange.from} - {post.dateRange.to}
-          </p>
-        </motion.div>
-      )}
+      <div className="flex gap-2">
+        {post.dateRange && (
+          <motion.div 
+            className="mb-4 px-4 py-2.5 bg-gradient-to-r from-[#f68c70] to-[#f6ac69] border border-black rounded-xl inline-flex items-center gap-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Calendar size={14} className="text-white" />
+            <p className="text-sm text-white" style={{ fontFamily: 'Castoro, serif' }}>
+              {post.dateRange.from} - {post.dateRange.to}
+            </p>
+          </motion.div>
+        )}
+
+        {post.timeRange && (
+          <motion.div 
+            className="mb-4 px-4 py-2.5 bg-gradient-to-r from-[#f68c70] to-[#f6ac69] border border-black rounded-xl inline-flex items-center gap-2"
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ delay: 0.2 }}
+            whileHover={{ scale: 1.02 }}
+          >
+            <Calendar size={14} className="text-white" />
+            <p className="text-sm text-white" style={{ fontFamily: 'Castoro, serif' }}>
+              {post.timeRange.from} - {post.timeRange.to}
+            </p>
+          </motion.div>
+        )}
+      </div>
 
       {/* footer */}
       <div className="flex items-center justify-between pt-4 border-t border-black/10">
@@ -133,19 +155,19 @@ export function WebPostCard({ post, onMessage, onViewProfile }: WebPostCardProps
           transition={{ delay: 0.25 }}
         >
           <MapPin size={12} className="text-[#f55c7a]" />
-          <span>Location revealed after connection</span>
+          <span>{post.location}</span>
         </motion.div>
-        {onMessage && (
-          <motion.button
-            onClick={() => onMessage(user.id)}
-            className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
-            whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
-            whileTap={{ scale: 0.98 }}
-          >
-            <MessageCircle size={16} />
-            <span className="text-sm font-medium">Message</span>
-          </motion.button>
-        )}
+        
+        <motion.button
+          onClick={() => onRSVP(user.id)}
+          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
+          whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
+          whileTap={{ scale: 0.98 }}
+        >
+          <Bell size={16} />
+          <span className="text-sm font-medium">RSVP</span>
+        </motion.button>
+        
       </div>
     </motion.div>
   );

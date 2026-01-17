@@ -62,7 +62,7 @@ export const PostCard: React.FC<PostCardProps> = ({
           onClick={() => onMessage?.(post.userId)}
           className="flex-1"
         >
-          💬 Message
+          Message
         </Button>
       </div>
     </div>

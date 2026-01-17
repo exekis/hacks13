@@ -9,7 +9,7 @@ import { WebCreatePost } from '@/app/screens/WebCreatePost';
 import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
 
-type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings';
+type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings' | 'schedule';
 type AppScreen = 'landing' | 'onboarding' | 'main';
 
 export default function App() {
@@ -32,6 +32,10 @@ export default function App() {
   const handleMessage = (userId: string) => {
     setSelectedMessageUserId(userId);
     setActiveScreen('messages');
+  };
+
+  const handleRSVP = (userId: string) => {
+    setActiveScreen('schedule');
   };
 
   // show landing page first for new visitors
@@ -64,6 +68,7 @@ export default function App() {
         {(activeScreen === 'feed' || activeScreen === 'discover') && (
           <WebFeed
             onViewProfile={handleViewProfile}
+            onRSVP={handleRSVP}
             onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}

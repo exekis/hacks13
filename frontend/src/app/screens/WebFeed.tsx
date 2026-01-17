@@ -8,6 +8,7 @@ import { Users, FileText, Sparkles, TrendingUp, Globe } from 'lucide-react';
 interface WebFeedProps {
   onViewProfile: (userId: string) => void;
   onMessage: (userId: string) => void;
+  onRSVP: (userId: string) => void;
   friendRequests: Set<string>;
   onAddFriend: (userId: string) => void;
 }
@@ -110,7 +111,7 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend 
           <motion.button
             onClick={() => setActiveTab('all')}
             className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${
-              activeTab === 'people'
+              activeTab === 'all'
                 ? 'text-white'
                 : 'bg-white text-black hover:shadow-lg'
             }`}
@@ -222,11 +223,13 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend 
                 );
               } else {
                 return (
-                  <motion.div key={item.data.id} variants={itemVariants}><WebPostCard
-                    key={item.data.id}
-                    post={item.data}
-                    onMessage={onMessage}
-                    onViewProfile={onViewProfile}
+                  <motion.div key={item.data.id} variants={itemVariants}>
+                    <WebPostCard
+                      key={item.data.id}
+                      post={item.data}
+                      onRSVP={onRSVP}
+                      onMessage={onMessage}
+                      onViewProfile={onViewProfile}
                   /></motion.div>
                 );
               }

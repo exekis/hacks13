@@ -1,6 +1,6 @@
 import React from 'react';
 import { motion } from 'motion/react';
-import { Home, Search, MessageCircle, Plus, User, Settings, Globe, Sparkles } from 'lucide-react';
+import { Home, Search, MessageCircle, Plus, User, Settings, Globe, Sparkles, NotebookPen } from 'lucide-react';
 
 interface SidebarProps {
   activeTab: string;
@@ -9,8 +9,8 @@ interface SidebarProps {
 
 export function Sidebar({ activeTab, onTabChange }: SidebarProps) {
   const navItems = [
-    { id: 'feed', label: 'Home', icon: Home },
-    { id: 'discover', label: 'Search', icon: Search },
+    { id: 'discover', label: 'Home', icon: Home },
+    { id: 'schedule', label: 'Schedule', icon: NotebookPen },
     { id: 'messages', label: 'DMs', icon: MessageCircle },
     { id: 'create', label: 'New Post', icon: Plus },
     { id: 'profile', label: 'My Profile', icon: User },
