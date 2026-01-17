@@ -1,5 +1,5 @@
 """
-Docstring for backend.app.services.recommendations_helpers.cg_events
+Docstring for app.services.recommendations_helpers.cg_events
 
 Candidate generation for events recommendation
 """
@@ -34,8 +34,8 @@ def store_events_recs_candidates(conn: psycopg2.extensions.connection) -> List[D
     """Store top 50 candidate posts ranked by distance."""
     sql_events_cg = """
         UPDATE users u
-        -- Set events_recs column
-        SET event_recs = recs.recs
+        -- Set event_recs_emb column
+        SET event_recs_emb = recs.recs
         FROM (
         SELECT
             u2.userid,
@@ -70,34 +70,6 @@ def store_events_recs_candidates(conn: psycopg2.extensions.connection) -> List[D
     conn.commit()
 
 
-def get_event_recs(
-    conn: psycopg2.extensions.connection,
-    user_id: int,
-    num_recs: int = 50,
-) -> List[int]:
-    """
-    Return the user's event_recs as a list of post IDs.
-    Truncates to num_recs.
-    """
-    sql_get_recs = """
-        SELECT event_recs
-        FROM users
-        WHERE userid = %s;
-    """
-
-    with conn.cursor() as cur:
-        cur.execute(sql_get_recs, (user_id,))
-        row = cur.fetchone()
-
-    if not row or not row[0]:
-        return []
-
-    # row[0] is JSONB[] like:
-    print(f"TESTING RECS: {row[0][:10]}")
-    post_ids = [rec["postid"] for rec in row[0]]
-    return post_ids[:num_recs]
-
-
 if __name__ == "__main__":
     import os
     conn = psycopg2.connect(
@@ -109,10 +81,12 @@ if __name__ == "__main__":
     )
 
     store_user_avg_embedding(conn)
+    print("Stored user embeddings")
     store_events_recs_candidates(conn)
+    print("Stored event recommendations")
     
-    test_user_id = 482193
-    recs = get_event_recs(conn, test_user_id, num_recs=10)
-    print("Top 10 recommended post IDs:", recs)
+    """test_user_id = 482193
+    recs = get_event_recs_emb(conn, test_user_id, limit=10)
+    print("Top 10 recommended post IDs:", recs)"""
 
     conn.close()

@@ -5,7 +5,7 @@ unit tests for similarity helper functions
 import pytest
 from datetime import datetime, timedelta
 
-from app.services.similarity import (
+from backend.app.services.candidate_generation.similarity_helpers import (
     jaccard,
     overlap_coefficient,
     language_score,

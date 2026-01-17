@@ -5,7 +5,7 @@ unit tests for candidate generation and diversity reranking
 import pytest
 
 from app.data.demo import get_demo_state, reset_demo_state
-from app.services.recommender import (
+from backend.app.services.store_event_recs_in_db_dis import (
     generate_people_candidates,
     generate_post_candidates,
     apply_people_hard_filters,

@@ -36,8 +36,11 @@ CREATE TABLE Users (
     bio TEXT,
     AboutMe TEXT,
     Friends INT[],
+    BlockedUsers INT[],
     recs JSONB[],
-    event_recs JSONB[],
+    event_recs_emb JSONB[],
+    event_recs_dis JSONB[],
+    people_recs JSONB,
     user_embedding vector(384)
 );
 
