@@ -1,14 +1,10 @@
-<<<<<<< HEAD
-venv/
-*pycache*
-.env
-=======
 # macos
 .DS_Store
 .AppleDouble
 .LSOverride
 
 # python
+*pycache*
 __pycache__/
 *.py[cod]
 *$py.class
@@ -77,4 +73,3 @@ frontend/coverage/
 
 # misc
 .trivyignore
->>>>>>> 28fe888 (feat: add .gitignore)
