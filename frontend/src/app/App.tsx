@@ -10,8 +10,7 @@ import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
 import { Auth } from '@/app/screens/Auth';
 
-type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings';
-
+type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings' | 'schedule';
 type AppScreen = 'landing' | 'onboarding' | 'main' | 'auth';
 
 export default function App() {
@@ -35,6 +34,10 @@ export default function App() {
   const handleMessage = (userId: string) => {
     setSelectedMessageUserId(userId);
     setActiveScreen('messages');
+  };
+
+  const handleRSVP = (userId: string) => {
+    setActiveScreen('schedule');
   };
 
   // Render the landing page for new visitors
@@ -67,7 +70,7 @@ export default function App() {
               bio: "I am a debug user.",
               interests: ["Coding"],
               badges: [],
-              matchFilters: { ageRange: [18, 99], culturalSimilarity: 0 },
+              matchFilters: { ageRange: [18, 99], culturalSimilarity: 0, sharedGoals: [], languages: [], verifiedOnly: false },
               agePreference: { enabled: false, range: 10 },
               verifiedStudentsOnly: false
             };
@@ -124,11 +127,10 @@ export default function App() {
         {(activeScreen === 'feed' || activeScreen === 'discover') && (
           <WebFeed
             onViewProfile={handleViewProfile}
+            onRSVP={handleRSVP}
             onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
-            currentUserId="482193"
-            onRSVP={(postId) => console.log('RSVP', postId)}
           />
         )}
 
