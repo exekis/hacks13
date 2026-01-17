@@ -25,7 +25,7 @@ backend/
 │   │   ├── recommender.py        # Main recommendation logic
 │   │   └── similarity.py         # Scoring helper functions
 │   ├── state.py                  # Impression tracking store
-│   └── recommendations_main.py   # FastAPI application
+│   └── main.py   # FastAPI application
 ├── tests/
 │   ├── test_similarity.py        # Unit tests for scoring functions
 │   └── test_recommender.py       # Unit tests for candidate generation
@@ -51,7 +51,7 @@ pip install -r requirements.txt
 ### 3. Run the server
 
 ```bash
-uvicorn app.recommendations_main:app --reload --port 8000
+uvicorn app.main:app --reload --port 8000
 ```
 
 The API will be available at `http://localhost:8000`

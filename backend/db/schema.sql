@@ -1,12 +1,13 @@
-DROP TABLE IF EXISTS Messages;
-DROP TABLE IF EXISTS Posts;
-DROP TABLE IF EXISTS Conversations;
-DROP TABLE IF EXISTS Users;
+-- Commented out the drops cuz we're prob not changing the data anymore
+--DROP TABLE IF EXISTS Messages;
+--DROP TABLE IF EXISTS Posts;
+--DROP TABLE IF EXISTS Conversations;
+--DROP TABLE IF EXISTS Users;
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
 -- Create the Users table
-CREATE TABLE Users (
+CREATE TABLE IF NOT EXISTS Users (
     userID INT PRIMARY KEY,
     Name VARCHAR(255),
     Age INT,
@@ -36,13 +37,16 @@ CREATE TABLE Users (
     bio TEXT,
     AboutMe TEXT,
     Friends INT[],
+    BlockedUsers INT[],
     recs JSONB[],
-    event_recs JSONB[],
+    event_recs_emb JSONB[],
+    event_recs_dis JSONB[],
+    people_recs JSONB,
     user_embedding vector(384)
 );
 
 -- Create the Posts table
-CREATE TABLE Posts (
+CREATE TABLE IF NOT EXISTS Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
     location_str VARCHAR(255),
@@ -54,15 +58,19 @@ CREATE TABLE Posts (
 
 -- Create the Conversations table
 CREATE TABLE Conversations (
-    conversationID SERIAL PRIMARY KEY,
-    participants INT[]
+  conversationID SERIAL PRIMARY KEY,
+  user_a INT NOT NULL,
+  user_b INT NOT NULL,
+  last_messaged TIMESTAMPTZ DEFAULT NOW(),
+  user_low  INT GENERATED ALWAYS AS (LEAST(user_a, user_b)) STORED,
+  user_high INT GENERATED ALWAYS AS (GREATEST(user_a, user_b)) STORED
 );
 
 -- Create the Messages table
 CREATE TABLE Messages (
-    MessageID SERIAL PRIMARY KEY,
-    conversationID INT REFERENCES Conversations(conversationID),
-    SenderID INT REFERENCES Users(userID),
-    Content TEXT,
-    Timestamp TIMESTAMPTZ DEFAULT NOW()
+  messageID SERIAL PRIMARY KEY,
+  conversationID INT NOT NULL,
+  senderID INT NOT NULL,
+  message_content TEXT NOT NULL,
+  timestamp TIMESTAMPTZ DEFAULT NOW()
 );

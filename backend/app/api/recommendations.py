@@ -8,8 +8,7 @@ GET /api/recommendations/posts?user_id=<id>&limit=30
 from fastapi import APIRouter, Query, HTTPException
 
 from app.models.recommendation import PersonRecommendation, PostRecommendation
-from app.services.recommender import recommend_people, recommend_posts
-from app.data.demo import get_demo_state
+from backend.app.services.recommender_service import recommend_people, recommend_posts
 
 
 router = APIRouter(prefix="/api/recommendations", tags=["recommendations"])
@@ -32,12 +31,8 @@ async def get_people_recommendations(
     results are ranked by a deterministic scoring algorithm
     and diversified to avoid monoculture clumping
     """
-    state = get_demo_state()
-    
-    if user_id not in state["users"]:
-        raise HTTPException(status_code=404, detail=f"user {user_id} not found")
-    
     results = recommend_people(user_id, limit=limit, debug=debug)
+    print(results)
     return results
 
 
@@ -58,10 +53,5 @@ async def get_post_recommendations(
     results are ranked by a deterministic scoring algorithm
     and diversified to avoid too many posts from the same author
     """
-    state = get_demo_state()
-    
-    if user_id not in state["users"]:
-        raise HTTPException(status_code=404, detail=f"user {user_id} not found")
-    
     results = recommend_posts(user_id, limit=limit, debug=debug)
     return results

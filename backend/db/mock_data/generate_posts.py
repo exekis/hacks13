@@ -1,8 +1,12 @@
+import os
 import json
 import random
 from datetime import datetime, timedelta
 
+from dotenv import load_dotenv
 from sentence_transformers import SentenceTransformer
+from google import genai
+load_dotenv()
 
 user_ids = [
     482193,739205,615847,902364,174826,560293,831740,294618,705392,468150,
@@ -18,20 +22,53 @@ user_ids = [
 ]
 
 post_templates = [
-    "Just moved here and feeling a bit lost. Anyone want to explore the city together?",
+    "Just moved to Toronto from Mexico and feeling a bit lost. Anyone want to explore the city together?",
     "Looking for people who share my culture and want to celebrate upcoming holidays together.",
     "Is anyone interested in joining me for coffee and a chat this weekend?",
     "Trying to make friends in a new country is harder than I thought. Would love to meet others in the same boat.",
     "Planning to attend a local event soon and hoping not to go alone.",
     "Anyone here into photography or walking around the city taking pictures?",
     "Missing food from home a lot lately. Would be fun to cook together sometime.",
-    "Thinking of starting a small group for language exchange and cultural sharing.",
+    "Thinking of starting a small group for Chinese language exchange and cultural sharing.",
     "Does anyone want to join me for a museum or gallery visit this week?",
-    "New here and hoping to build a small circle of friends who understand the experience."
 ]
 
-
 random.seed(42)
+
+api_key = os.getenv("GOOGLE_API_KEY")
+client = genai.Client(api_key=api_key)
+
+def generate_post_text(templates: list[str]) -> str:
+    prompt = f"""
+You write short, friendly posts for a social app where people new to a city want to connect.
+Write ONE post (max 3 sentences). It should feel natural and specific (mention a place type, day/time idea, or small detail).
+Do NOT copy any template verbatim, but you can take inspiration from them.
+
+Templates for inspiration:
+{chr(10).join([f"- {t}" for t in templates])}
+
+Constraints:
+- Max 3 sentences total
+- No hashtags
+- No emojis
+- Avoid overly generic lines like "let's hang out sometime"
+- Make it inviting: ask a clear question at the end
+
+Return ONLY the post text, nothing else.
+""".strip()
+
+    resp = client.models.generate_content(
+        model="gemini-2.0-flash-001",
+        contents=prompt,
+    )
+    text = (resp.text or "").strip()
+
+    # Ensure <= 3 sentences (simple guard)
+    sentences = [s.strip() for s in text.replace("\n", " ").split(".") if s.strip()]
+    if len(sentences) > 3:
+        text = ". ".join(sentences[:3]) + "."
+    return text
+
 
 data = {}
 post_id = 83017452
@@ -42,31 +79,31 @@ post_keys_in_order = []
 
 for uid in user_ids:
     for _ in range(3):
-        content = random.choice(post_templates)
+        content = generate_post_text(post_templates)
         key = str(post_id)
 
         data[key] = {
             "user_id": uid,
             "time_posted": (start_time + timedelta(minutes=random.randint(0, 200000))).isoformat() + "Z",
             "post_content": content,
-            "embedding": []  # will fill below
+            "embedding": []
         }
 
         all_contents.append(content)
         post_keys_in_order.append(key)
-
         post_id += 1
 
+# Embeddings (local)
 model = SentenceTransformer("sentence-transformers/all-MiniLM-L6-v2")
-
-# shape: (num_posts, 384)
 emb = model.encode(all_contents, convert_to_numpy=True, normalize_embeddings=True)
 
-# Attach to JSON
 for key, vec in zip(post_keys_in_order, emb):
     data[key]["embedding"] = vec.tolist()
 
-with open("backend/db/mock_data/generate_posts.py", "w", encoding="utf-8") as f:
-    json.dump(data, f, indent=2)
+out_path = "backend/db/mock_data/posts.json"
+os.makedirs(os.path.dirname(out_path), exist_ok=True)
 
-print("Generated posts.json with 300 posts with embeddings.")
+with open(out_path, "w", encoding="utf-8") as f:
+    json.dump(data, f, indent=2, ensure_ascii=False)
+
+print(f"Generated {out_path} with {len(data)} posts + embeddings.")
