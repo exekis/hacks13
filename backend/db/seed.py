@@ -6,7 +6,7 @@ import os
 # Config
 # -----------------------
 DB_NAME = os.getenv("DB_NAME", "hacks13")
-DB_USER = os.getenv("DB_USER", "jennifer")
+DB_USER = os.getenv("DB_USER", "gabriel")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")  # can leave password blank
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")

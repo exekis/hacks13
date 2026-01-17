@@ -8,57 +8,78 @@ import { WebMessages } from '@/app/screens/WebMessages';
 import { WebCreatePost } from '@/app/screens/WebCreatePost';
 import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
+import { Auth } from '@/app/screens/Auth';
 
 type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings';
-type AppScreen = 'landing' | 'onboarding' | 'main';
+
+type AppScreen = 'landing' | 'onboarding' | 'main' | 'auth';
 
 export default function App() {
   const [appScreen, setAppScreen] = useState<AppScreen>('landing');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [token, setToken] = useState<string | null>(null);
   const [activeScreen, setActiveScreen] = useState<MainScreen>('feed');
   const [friendRequests, setFriendRequests] = useState<Set<string>>(new Set());
   const [selectedProfileId, setSelectedProfileId] = useState<string | undefined>();
   const [selectedMessageUserId, setSelectedMessageUserId] = useState<string | undefined>();
-  
+
   const handleAddFriend = (userId: string) => {
     setFriendRequests(prev => new Set([...prev, userId]));
   };
-  
+
   const handleViewProfile = (userId: string) => {
     setSelectedProfileId(userId);
     setActiveScreen('profile');
   };
-  
+
   const handleMessage = (userId: string) => {
     setSelectedMessageUserId(userId);
     setActiveScreen('messages');
   };
 
-  // show landing page first for new visitors
+  // Render the landing page for new visitors
   if (appScreen === 'landing') {
-    return <LandingPage onGetStarted={() => setAppScreen('onboarding')} />;
+    // onGetStarted will transition the user to the authentication screen
+    return <LandingPage onGetStarted={() => setAppScreen('auth')} />;
   }
-  
-  // show profile setup flow
+
+  // Render the authentication page for users who need to sign in or sign up
+  if (appScreen === 'auth') {
+    return <Auth
+      // On successful sign-in, set the user profile and transition to the main app
+      onSignIn={(profile: UserProfile) => {
+        setUserProfile(profile);
+        setAppScreen('main');
+      }}
+      // On sign-up, transition the user to the onboarding/profile setup screen
+      onSignUp={(authToken: string) => {
+        setToken(authToken);
+        setAppScreen('onboarding');
+      }} />;
+  }
+
+  // Render the profile setup flow for new users or if the profile is not set
   if (appScreen === 'onboarding' || !userProfile) {
-    return <ProfileSetup onComplete={(profile) => {
-      setUserProfile(profile);
-      setAppScreen('main');
-    }} />;
+    return <ProfileSetup
+      token={token || ''}
+      onComplete={(profile: UserProfile) => {
+        setUserProfile(profile);
+        setAppScreen('main');
+      }} />;
   }
-  
+
   return (
     <div className="bg-[#FFEBDA] min-h-screen">
       {/* Sidebar Navigation */}
-      <Sidebar 
-        activeTab={activeScreen} 
-        onTabChange={(tab) => {
+      <Sidebar
+        activeTab={activeScreen}
+        onTabChange={(tab: MainScreen) => {
           setSelectedProfileId(undefined);
           setSelectedMessageUserId(undefined);
-          setActiveScreen(tab as MainScreen);
-        }} 
+          setActiveScreen(tab);
+        }}
       />
-      
+
       {/* Main content area - offset by sidebar width */}
       <div className="ml-56">
         {(activeScreen === 'feed' || activeScreen === 'discover') && (
@@ -69,11 +90,11 @@ export default function App() {
             onAddFriend={handleAddFriend}
           />
         )}
-        
+
         {activeScreen === 'create' && (
           <WebCreatePost onBack={() => setActiveScreen('feed')} />
         )}
-        
+
         {activeScreen === 'messages' && (
           <WebMessages
             selectedUserId={selectedMessageUserId}
@@ -82,7 +103,7 @@ export default function App() {
             }}
           />
         )}
-        
+
         {activeScreen === 'profile' && (
           <WebProfile
             userId={selectedProfileId}
@@ -93,15 +114,15 @@ export default function App() {
             }}
             onMessage={handleMessage}
             onCreatePost={() => setActiveScreen('create')}
-            onUpdateProfile={(updates) => setUserProfile({ ...userProfile, ...updates })}
+            onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
           />
         )}
-        
+
         {activeScreen === 'settings' && (
-          <WebSettings 
+          <WebSettings
             userProfile={userProfile}
             onBack={() => setActiveScreen('profile')}
-            onUpdateProfile={(updates) => setUserProfile({ ...userProfile, ...updates })}
+            onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
           />
         )}
       </div>

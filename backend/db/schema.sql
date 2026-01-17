@@ -49,11 +49,9 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
-    location_str VARCHAR(255),
-    location_coords POINT,
-    time_posted TIMESTAMPTZ DEFAULT NOW(),
-    post_content TEXT,
-    post_embedding vector(384)
+    content TEXT,
+    is_event BOOLEAN DEFAULT FALSE,
+    time_posted TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create the Conversations table
@@ -72,5 +70,11 @@ CREATE TABLE Messages (
   conversationID INT NOT NULL,
   senderID INT NOT NULL,
   message_content TEXT NOT NULL,
-  timestamp TIMESTAMPTZ DEFAULT NOW()
+  timestamp TIMESTAMTz DEFAULT NOW()
+);
+
+-- Create the Auth table
+CREATE TABLE Auth (
+    userID INT PRIMARY KEY REFERENCES Users(userID),
+    password_hash VARCHAR(255) NOT NULL
 );

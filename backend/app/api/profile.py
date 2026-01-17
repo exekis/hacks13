@@ -1,13 +1,9 @@
-
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from jose import JWTError, jwt
 import psycopg2
 import os
-from typing import List, Optional, Dict, Any
-
-from ..schemas.profile import ProfileOut
-from ..schemas.post import CreatePostIn, PostOut
+from typing import List, Optional
 
 from .auth import oauth2_scheme, SECRET_KEY, ALGORITHM, get_db_connection, TokenData
 
@@ -32,28 +28,28 @@ class UserProfile(BaseModel):
     university: Optional[str] = None
     currentCity: str
     travelingTo: Optional[str] = None
-    languages: Optional[List[str]]
+    languages: List[str]
     hometown: Optional[str] = None
-    agePreference: Optional[AgePreference]
-    verifiedStudentsOnly: Optional[bool]
+    agePreference: AgePreference
+    verifiedStudentsOnly: bool
     culturalIdentity: Optional[List[str]] = None
-    ethnicity: Optional[List[str]]
+    ethnicity: Optional[List[str]] = None
     religion: Optional[List[str]] = None
-    culturalSimilarityImportance: Optional[int]
-    culturalComfortLevel: Optional[str]
-    languageMatchImportant: Optional[bool]
-    purposeOfStay: Optional[str]
-    lookingFor: Optional[List[str]]
-    socialVibe: Optional[List[str]]
-    availability: Optional[List[str]]
-    whocanseeposts: Optional[str]
-    hideLocationUntilFriends: Optional[bool]
-    meetupPreference: Optional[str]
+    culturalSimilarityImportance: int
+    culturalComfortLevel: str
+    languageMatchImportant: bool
+    purposeOfStay: Optional[str] = None
+    lookingFor: List[str]
+    socialVibe: List[str]
+    availability: List[str]
+    whocanseeposts: str
+    hideLocationUntilFriends: bool
+    meetupPreference: str
     boundaries: Optional[str] = None
-    bio: Optional[str]
-    interests: Optional[List[str]]
-    badges: Optional[List[str]]
-    matchFilters: Optional[MatchFilters]
+    bio: str
+    interests: List[str]
+    badges: List[str]
+    matchFilters: MatchFilters
     AboutMe: Optional[str] = None
     Friends: Optional[List[int]] = None
     recs: Optional[List[dict]] = None
@@ -96,9 +92,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "hometown": user[9],
         "agePreference": {"enabled": True, "range": user[10]},
         "verifiedStudentsOnly": user[11],
-        "culturalIdentity": user[12] if user[12] is not None else [],
-        "ethnicity": [user[13]] if user[13] is not None else [],
-        "religion": [user[14]] if user[14] is not None else [],
+        "culturalIdentity": user[12],
+        "ethnicity": [user[13]] if user[13] else None,
+        "religion": [user[14]] if user[14] else None,
         "culturalSimilarityImportance": user[15],
         "culturalComfortLevel": user[16],
         "languageMatchImportant": user[17],
@@ -133,35 +129,3 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @router.get("/users/me", response_model=UserProfile)
 async def read_users_me(current_user: UserProfile = Depends(get_current_user)):
     return current_user
-
-@router.get("/info/", response_model=ProfileOut)
-async def profile_info(user_id: int):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT userID, Name, bio FROM Users WHERE userID = %s", (user_id,))
-    profile = cur.fetchone()
-    cur.close()
-    conn.close()
-    if not profile:
-        raise HTTPException(status_code=404, detail="profile not found")
-    return ProfileOut(id=str(profile[0]), username=profile[1], display_name=profile[1], bio=profile[2])
-
-
-@router.post("/post/", response_model=PostOut)
-async def create_post(payload: CreatePostIn):
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute("SELECT * FROM Users WHERE userID = %s", (payload.author_id,))
-    author = cur.fetchone()
-    if not author:
-        raise HTTPException(status_code=404, detail="author not found")
-
-    cur.execute(
-        "INSERT INTO Posts (user_id, content, is_event) VALUES (%s, %s, %s) RETURNING PostID, user_id, content, is_event",
-        (payload.author_id, payload.content, payload.is_event)
-    )
-    post = cur.fetchone()
-    conn.commit()
-    cur.close()
-    conn.close()
-    return PostOut(id=str(post[0]), author_id=str(post[1]), content=post[2], is_event=post[3])
