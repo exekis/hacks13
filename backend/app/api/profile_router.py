@@ -1,9 +1,13 @@
+
 from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from jose import JWTError, jwt
 import psycopg2
 import os
-from typing import List, Optional
+from typing import List, Optional, Dict, Any
+
+from ..schemas.profile import ProfileOut
+from ..schemas.post import CreatePostIn, PostOut
 
 from .auth import oauth2_scheme, SECRET_KEY, ALGORITHM, get_db_connection, TokenData
 
@@ -129,3 +133,35 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @router.get("/users/me", response_model=UserProfile)
 async def read_users_me(current_user: UserProfile = Depends(get_current_user)):
     return current_user
+
+@router.get("/info/", response_model=ProfileOut)
+async def profile_info(user_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT userID, Name, bio FROM Users WHERE userID = %s", (user_id,))
+    profile = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not profile:
+        raise HTTPException(status_code=404, detail="profile not found")
+    return ProfileOut(id=str(profile[0]), username=profile[1], display_name=profile[1], bio=profile[2])
+
+
+@router.post("/post/", response_model=PostOut)
+async def create_post(payload: CreatePostIn):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Users WHERE userID = %s", (payload.author_id,))
+    author = cur.fetchone()
+    if not author:
+        raise HTTPException(status_code=404, detail="author not found")
+
+    cur.execute(
+        "INSERT INTO Posts (user_id, content, is_event) VALUES (%s, %s, %s) RETURNING PostID, user_id, content, is_event",
+        (payload.author_id, payload.content, payload.is_event)
+    )
+    post = cur.fetchone()
+    conn.commit()
+    cur.close()
+    conn.close()
+    return PostOut(id=str(post[0]), author_id=str(post[1]), content=post[2], is_event=post[3])

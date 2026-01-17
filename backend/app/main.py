@@ -1,3 +1,4 @@
+
 """
 Travelmate backend API
 
@@ -36,6 +37,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+
 @app.get("/api/health")
 async def health_check():
     return {"ok": True}
@@ -52,6 +54,10 @@ async def root():
             "POST /profile/post/",
             "GET /conversations/?user_id=... OR ?conversation_id=...",
             "POST /conversations/{convo_id}/message",
+            "POST /conversations/send-message",
+            "GET /conversations/all-conversations?user_id=123",
+            "GET /conversations/conversation/{friend_user_id}?user_id=123",
+            "GET /conversations/conversation?user_id=123",
             "GET /settings/",
             "GET /api/health",
             "GET /api/recommendations/people?user_id=<id>&limit=20",

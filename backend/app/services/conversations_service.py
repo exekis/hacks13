@@ -9,6 +9,8 @@ def get_conversations(user_id: int) -> List[Dict[str, Any]]:
     """
     Returns all the friends that a user has had a conversation with and the last message in that conversation,
     ordered by most recent first.
+
+    should return friend_name, timestamp, last_message
     """
     sql_get_conversations = """
         SELECT
@@ -60,8 +62,6 @@ def send_message(
     sql_upsert_conversation = """
         INSERT INTO Conversations (user_a, user_b, last_messaged)
         VALUES (%s, %s, NOW())
-        ON CONFLICT (LEAST(user_a, user_b), GREATEST(user_a, user_b))
-        DO UPDATE SET last_messaged = NOW()
         RETURNING conversationID;
     """
 
