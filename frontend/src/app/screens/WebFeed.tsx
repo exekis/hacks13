@@ -13,11 +13,14 @@ interface WebFeedProps {
 }
 
 export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend }: WebFeedProps) {
-  const [activeTab, setActiveTab] = useState<'people' | 'posts'>('people');
+  const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
 
   // combine and shuffle people and posts for a mixed feed
   const peopleItems = mockUsers.slice(0, 6);
   const postItems = mockPosts.slice(0, 6);
+  const allItems = [...peopleItems.map(u => ({type: 'user', data: u})), 
+                    ...postItems.map(u => ({type: 'post', data: u}))];
+  allItems.sort(() => Math.random() - 0.5);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -105,6 +108,26 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend 
           transition={{ delay: 0.3 }}
         >
           <motion.button
+            onClick={() => setActiveTab('all')}
+            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${
+              activeTab === 'people'
+                ? 'text-white'
+                : 'bg-white text-black hover:shadow-lg'
+            }`}
+            whileHover={{ scale: 1.02 }}
+            whileTap={{ scale: 0.98 }}
+          >
+            {activeTab === 'all' && (
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-[#f55c7a] to-[#f68c70]"
+                layoutId="tabBg"
+                transition={{ type: 'spring', stiffness: 400, damping: 30 }}
+              />
+            )}
+            <Users size={20} className="relative z-10" />
+            <span className="relative z-10" style={{ fontFamily: 'Castoro, serif' }}>All</span>
+          </motion.button>
+          <motion.button
             onClick={() => setActiveTab('people')}
             className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${
               activeTab === 'people'
@@ -184,6 +207,30 @@ export function WebFeed({ onViewProfile, onMessage, friendRequests, onAddFriend 
                 ))}
               </>
             )}
+
+            {activeTab === 'all' &&
+            allItems.map((item) => {
+              if (item.type === 'user') {
+                return (
+                  <motion.div key={item.data.id} variants={itemVariants}><WebPersonCard
+                    key={item.data.id}
+                    user={item.data}
+                    onViewProfile={onViewProfile}
+                    onAddFriend={onAddFriend}
+                    isFriendRequested={friendRequests.has(item.data.id)}
+                  /></motion.div>
+                );
+              } else {
+                return (
+                  <motion.div key={item.data.id} variants={itemVariants}><WebPostCard
+                    key={item.data.id}
+                    post={item.data}
+                    onMessage={onMessage}
+                    onViewProfile={onViewProfile}
+                  /></motion.div>
+                );
+              }
+            })}
           </motion.div>
         </AnimatePresence>
       </div>
