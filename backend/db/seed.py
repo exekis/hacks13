@@ -1,7 +1,9 @@
 import json
+from dotenv import load_dotenv
 import psycopg2
 import os
 
+load_dotenv()
 # -----------------------
 # Config
 # -----------------------

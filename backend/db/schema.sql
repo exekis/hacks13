@@ -3,6 +3,7 @@
 --DROP TABLE IF EXISTS Posts;
 --DROP TABLE IF EXISTS Conversations;
 --DROP TABLE IF EXISTS Users;
+--DROP TABLE IF EXISTS Auth;
 
 -- Create the Users table
 CREATE TABLE IF NOT EXISTS Users (
