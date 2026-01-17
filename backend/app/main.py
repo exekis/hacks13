@@ -44,8 +44,16 @@ async def root():
             "POST /profile/onboarding/",
             "GET /profile/info/?user_id=...",
             "POST /profile/post/",
-            "GET /conversations/?user_id=... OR ?conversation_id=...",
-            "POST /conversations/{convo_id}/message",
+            
+            # send message request
+            "POST /conversations/send-message",
+            # all conversations
+            "GET /conversations/all-conversations?user_id=123",
+            # specific conversation with friend
+            "GET /conversations/conversation/{friend_user_id}?user_id=123",
+            # most recent conversation
+            "GET /conversations/conversation?user_id=123",
+
             "GET /settings/",
             "GET /api/health",
             "GET /api/recommendations/people?user_id=<id>&limit=20",
