@@ -3,6 +3,8 @@ DROP TABLE IF EXISTS Posts;
 DROP TABLE IF EXISTS Conversations;
 DROP TABLE IF EXISTS Users;
 
+CREATE EXTENSION IF NOT EXISTS vector;
+
 -- Create the Users table
 CREATE TABLE Users (
     userID INT PRIMARY KEY,
@@ -34,7 +36,8 @@ CREATE TABLE Users (
     bio TEXT,
     AboutMe TEXT,
     Friends INT[],
-    recs JSONB[]
+    recs JSONB[],
+    user_embedding vector(384)
 );
 
 -- Create the Posts table
@@ -45,7 +48,7 @@ CREATE TABLE Posts (
     location_coords POINT,
     time_posted TIMESTAMPTZ DEFAULT NOW(),
     post_content TEXT,
-    embedding INT[]
+    post_embedding vector(384)
 );
 
 -- Create the Conversations table
