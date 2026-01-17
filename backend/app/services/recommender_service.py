@@ -8,11 +8,11 @@ from app.services.helpers.db_helpers import get_conn
 
 def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     """
-    Return recommended posts for a user, including post_id, time_posted, post_content.
+    Return recommended posts for a user, including post details and author info.
     event_recs_emb is assumed to be an array-like column where each element is a JSON object
     containing at least {"postid": <int>}.
 
-    Returns: List[{"postid": int, "time_posted": ..., "post_content": ...}]
+    Returns: List[{"postid": int, "time_posted": ..., "post_content": ..., "author_id": ..., "author_name": ..., "author_location": ...}]
     """
     sql_get_recs = """
         SELECT event_recs_emb
@@ -20,7 +20,7 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
         WHERE userid = %s;
     """
 
-    # Pull post details for the recommended IDs, preserving the same order as in recs
+    # pull post details with author info, preserving the same order as in recs
     sql_get_posts = """
         WITH rec_ids AS (
             SELECT
@@ -29,13 +29,15 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             FROM unnest(%s::int[]) WITH ORDINALITY AS t(rec_postid, ord)
         )
         SELECT
-            u.name,
             p.postid,
             p.time_posted,
-            p.post_content
+            p.post_content,
+            p.user_id,
+            u.name as author_name,
+            u.currentCity as author_location
         FROM rec_ids r
         JOIN posts p ON p.postid = r.rec_postid
-        JOIN users u ON u.userid = p.user_id
+        LEFT JOIN users u ON u.userid = p.user_id
         ORDER BY r.ord
         LIMIT %s;
     """
@@ -66,16 +68,18 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
 
             post_ids = post_ids[:limit]
 
-            # 3) fetch post details (preserving the recommendation order)
+            # 3) fetch post details with author info (preserving the recommendation order)
             cur.execute(sql_get_posts, (post_ids, limit))
             rows = cur.fetchall()
 
             return [
                 {
-                    "name": r[0],               # u.name
-                    "postid": r[1],                    # p.postid
-                    "time_posted": r[2].isoformat() if r[2] else None,
-                    "post_content": r[3],              # p.post_content
+                    "postid": r[0],
+                    "time_posted": r[1].isoformat() if r[1] else None,
+                    "post_content": r[2],
+                    "author_id": r[3],
+                    "author_name": r[4] or f"User {r[3]}",
+                    "author_location": r[5],
                 }
                 for r in rows
             ]
@@ -86,7 +90,7 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
 def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     """
     Return recommended people for a user, including:
-    userid, pronouns, currentCity, travelingTo, age, bio
+    userid, name, pronouns, currentCity, travelingTo, age, bio, languages, lookingFor, culturalIdentity
 
     users.people_recs is assumed to be JSONB (a JSON array) like:
       [{"userid": 123, "score": ...}, {"userid": 456, ...}, ...]
@@ -98,20 +102,25 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
         WHERE userid = %s;
     """
 
-    # Preserve ordering using unnest + ordinality
+    # preserve ordering using unnest + ordinality, fetch more user details
     sql_get_users = """
         WITH rec_ids AS (
             SELECT rec_userid, ord
             FROM unnest(%s::int[]) WITH ORDINALITY AS t(rec_userid, ord)
         )
         SELECT
-            u.Name,
             u.userid,
+            u.name,
             u.pronouns,
             u.currentCity,
             u.travelingTo,
             u.age,
-            u.bio
+            u.bio,
+            u.languages,
+            u.lookingFor,
+            u.culturalIdentity,
+            u.isStudent,
+            u.university
         FROM rec_ids r
         JOIN users u ON u.userid = r.rec_userid
         ORDER BY r.ord
@@ -145,13 +154,18 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
 
             return [
                 {
-                    "name":r[0],
-                    "userid": r[1],
+                    "userid": r[0],
+                    "name": r[1] or f"User {r[0]}",
                     "pronouns": r[2],
                     "currentCity": r[3],
                     "travelingTo": r[4],
                     "age": r[5],
                     "bio": r[6],
+                    "languages": r[7] or [],
+                    "lookingFor": r[8] or [],
+                    "culturalIdentity": r[9] or [],
+                    "isStudent": r[10],
+                    "university": r[11],
                 }
                 for r in rows
             ]

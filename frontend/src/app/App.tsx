@@ -88,6 +88,7 @@ export default function App() {
             onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
+            currentUserId="482193"
           />
         )}
 
