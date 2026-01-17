@@ -79,7 +79,7 @@ export default function App() {
           }}
           className="fixed bottom-4 right-4 bg-red-600/80 text-white px-4 py-2 rounded-full z-50 hover:bg-red-500 text-sm font-bold shadow-lg"
         >
-          ⚡ Dev: Skip to Feed
+          Dev: Skip to Feed
         </button>
       </>
     );

@@ -8,19 +8,31 @@ from app.services.helpers.db_helpers import get_conn
 
 def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     """
-    Return recommended posts for a user, including post details and author info.
-    event_recs_emb is assumed to be an array-like column where each element is a JSON object
-    containing at least {"postid": <int>}.
+    Return recommended posts for a user
 
-    Returns: List[{"postid": int, "time_posted": ..., "post_content": ..., "author_id": ..., "author_name": ..., "author_location": ...}]
+    Order rules:
+      1) postIDs that appear in BOTH event_recs_emb and event_recs_dis (in dis order)
+      2) remaining postIDs that appear only in dis (in dis order)
+      3) remaining postIDs that appear only in emb (in emb order)
+
+    Returns:
+      List[{
+        "postid": int,
+        "time_posted": str|None,
+        "post_content": str|None,
+        "author_id": int|None,
+        "author_name": str,
+        "author_location": str|None
+      }]
     """
     sql_get_recs = """
-        SELECT event_recs_emb
+        SELECT
+            event_recs_emb,
+            event_recs_dis
         FROM users
         WHERE userid = %s;
     """
 
-    # pull post details with author info, preserving the same order as in recs
     sql_get_posts = """
         WITH rec_ids AS (
             SELECT
@@ -33,8 +45,8 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             p.time_posted,
             p.post_content,
             p.user_id,
-            u.name as author_name,
-            u.currentCity as author_location
+            u.name AS author_name,
+            u.currentCity AS author_location
         FROM rec_ids r
         JOIN posts p ON p.postid = r.rec_postid
         LEFT JOIN users u ON u.userid = p.user_id
@@ -42,34 +54,66 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
         LIMIT %s;
     """
 
+    def extract_post_ids(recs: Any) -> List[int]:
+        """Extract post IDs from a JSONB[] array of dicts, preserving order."""
+        if not recs:
+            return []
+        out: List[int] = []
+        for rec in recs:
+            if not isinstance(rec, dict):
+                continue
+            pid = rec.get("postid")
+            if pid is None:
+                pid = rec.get("postID")
+            if pid is None:
+                continue
+            try:
+                out.append(int(pid))
+            except (TypeError, ValueError):
+                continue
+        return out
+
+    def unique_preserve_order(ids: List[int]) -> List[int]:
+        seen = set()
+        out: List[int] = []
+        for x in ids:
+            if x in seen:
+                continue
+            seen.add(x)
+            out.append(x)
+        return out
+
     conn = get_conn()
     try:
         with conn.cursor() as cur:
-            # 1) fetch the rec list
+            # 1) fetch both rec lists
             cur.execute(sql_get_recs, (user_id,))
             row = cur.fetchone()
-
-            if not row or not row[0]:
+            if not row:
                 return []
 
-            # 2) extract post ids (handle dict keys safely)
-            recs = row[0]
-            post_ids = []
-            for rec in recs:
-                # support {"postid": 123} or {"postID": 123} just in case
-                pid = rec.get("postid") if isinstance(rec, dict) else None
-                if pid is None and isinstance(rec, dict):
-                    pid = rec.get("postID")
-                if pid is not None:
-                    post_ids.append(int(pid))
+            emb_recs = row[0] or []
+            dis_recs = row[1] or []
 
-            if not post_ids:
+            emb_ids = extract_post_ids(emb_recs)
+            dis_ids = extract_post_ids(dis_recs)
+
+            if not emb_ids and not dis_ids:
                 return []
 
-            post_ids = post_ids[:limit]
+            emb_set = set(emb_ids)
 
-            # 3) fetch post details with author info (preserving the recommendation order)
-            cur.execute(sql_get_posts, (post_ids, limit))
+            # 2) build ordered unique list: (both) + (dis) + (emb)
+            both_in_dis_order = [pid for pid in dis_ids if pid in emb_set]
+            combined_ids = unique_preserve_order(both_in_dis_order + dis_ids + emb_ids)
+
+            if not combined_ids:
+                return []
+
+            combined_ids = combined_ids[:limit]
+
+            # 3) fetch post details with author info in the same order
+            cur.execute(sql_get_posts, (combined_ids, limit))
             rows = cur.fetchall()
 
             return [
@@ -78,14 +122,13 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
                     "time_posted": r[1].isoformat() if r[1] else None,
                     "post_content": r[2],
                     "author_id": r[3],
-                    "author_name": r[4] or f"User {r[3]}",
+                    "author_name": r[4] or (f"User {r[3]}" if r[3] is not None else "Unknown"),
                     "author_location": r[5],
                 }
                 for r in rows
             ]
     finally:
         conn.close()
-
 
 def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     """
