@@ -8,22 +8,24 @@ GET /api/recommendations/posts?user_id=<id>&limit=30
 from fastapi import APIRouter, Query, HTTPException
 
 from app.models.recommendation import PersonRecommendation, PostRecommendation
-from app.services.recommender_service import recommend_people, recommend_posts
+from app.services.recommender_service import recommend_people, recommend_posts, recommend_mixed_feed
 
 
 router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
 @router.get("/all-recs")
-def get_all_recommendations(user_id, limit):
+def get_all_recommendations(
+    user_id: str = Query(..., description="user id to get recommendations for"),
+    limit: int = Query(default=20, ge=1, le=50, description="max number of results")):
     """
     Get reranked list of recs from user
     """
-    pass
+    return recommend_mixed_feed(user_id, limit)
 
 @router.get("/people", response_model=list[PersonRecommendation])
 async def get_people_recommendations(
     user_id: str = Query(..., description="user id to get recommendations for"),
-    limit: int = Query(default=20, ge=1, le=100, description="max number of results")
+    limit: int = Query(default=20, ge=1, le=50, description="max number of results")
 ):
     """
     get people recommendations for a user
@@ -45,7 +47,7 @@ async def get_people_recommendations(
 @router.get("/posts", response_model=list[PostRecommendation])
 async def get_post_recommendations(
     user_id: str = Query(..., description="user id to get recommendations for"),
-    limit: int = Query(default=30, ge=1, le=100, description="max number of results")
+    limit: int = Query(default=30, ge=1, le=50, description="max number of results")
 ):
     """
     get post recommendations for a user

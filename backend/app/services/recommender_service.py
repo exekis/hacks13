@@ -1,5 +1,7 @@
 """
 Gets post and people recommendations from database
+
+python -m app.services.recommender_service
 """
 from __future__ import annotations
 from typing import Any, Dict, List
@@ -215,9 +217,36 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
     finally:
         conn.close()
 
+
+def recommend_mixed_feed(user_id: int, limit: int = 50, seed: int | None = None) -> List[Dict[str, Any]]:
+    """
+    Simplest mixed feed:
+      - pull posts + people (each up to `limit`)
+      - tag each item with type {"post","person"}
+      - shuffle everything together
+      - return first `limit`
+    """
+    import random
+
+    posts = recommend_posts(user_id, limit=limit)
+    people = recommend_people(user_id, limit=limit)
+
+    mixed: List[Dict[str, Any]] = (
+        [{"type": "post", **p} for p in posts] +
+        [{"type": "person", **u} for u in people]
+    )
+
+    rng = random.Random(seed)
+    rng.shuffle(mixed)
+
+    return mixed[:limit]
+
+
 if __name__=="__main__":
     test_user_id = 482193
     ppl_recs = recommend_people(test_user_id, limit=10)
     post_recs = recommend_posts(test_user_id, limit=10)
-    print(ppl_recs)
-    print(post_recs)
+    #print(ppl_recs)
+    #print(post_recs)
+    mixed_feed = recommend_mixed_feed(test_user_id, limit=10)
+    #print(mixed_feed)
