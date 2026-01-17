@@ -1,4 +1,6 @@
 import React, { useState } from 'react';
+import Select from 'react-select';
+import makeAnimated from 'react-select/animated';
 import { ArrowRight, ArrowLeft, Check } from 'lucide-react';
 import { UserProfile, defaultProfile } from '@/app/types/profile';
 
@@ -6,18 +8,26 @@ interface ProfileSetupProps {
   onComplete: (profile: UserProfile) => void;
 }
 
-const culturalIdentities = [
-  'Iranian', 'Arab', 'Turkish', 'Chinese', 'Indian', 'Nigerian', 'Latino', 
-  'Korean', 'Japanese', 'Vietnamese', 'Filipino', 'Pakistani', 'Mexican',
-  'Brazilian', 'Egyptian', 'Indonesian', 'Thai', 'Moroccan', 'Kenyan',
-  'South African', 'Ethiopian', 'Ghanaian', 'Colombian', 'Peruvian'
-];
+const culturalIdentities=['Iranian','Arab','Turkish','Chinese','Indian','Nigerian','Latino','Korean','Japanese','Vietnamese','Filipino','Pakistani','Mexican','Brazilian','Egyptian','Indonesian','Thai','Moroccan','Kenyan','South African','Ethiopian','Ghanaian','Colombian','Peruvian','Persian','Afghan','Iraqi','Syrian','Lebanese','Jordanian','Palestinian','Saudi','Yemeni','Emirati','Kuwaiti','Qatari','Omani','Armenian','Azerbaijani','Kurdish','Bangladeshi','Sri Lankan','Nepali','Bhutanese','Maldivian','Taiwanese','Hong Konger','Singaporean','Malaysian','Cambodian','Laotian','Burmese','Hmong','Somali','Sudanese','Ugandan','Tanzanian','Rwandan','Burundian','Zimbabwean','Zambian','Malawian','Mozambican','Angolan','Congolese','Cameroonian','Ivorian','Senegalese','Malian','Burkinabe','Beninese','Togolese','Sierra Leonean','Liberian','British','Irish','Scottish','Welsh','French','German','Italian','Spanish','Portuguese','Dutch','Belgian','Swiss','Austrian','Swedish','Norwegian','Danish','Finnish','Polish','Czech','Slovak','Hungarian','Romanian','Bulgarian','Greek','Serbian','Croatian','Bosnian','Albanian','Ukrainian','Russian','American','Canadian','Chilean','Argentinian','Uruguayan','Venezuelan','Ecuadorian','Bolivian','Paraguayan','Guatemalan','Salvadoran','Honduran','Nicaraguan','Costa Rican','Panamanian','Cuban','Dominican','Puerto Rican','Haitian','Jamaican','Indigenous','Native American','First Nations','Aboriginal Australian','Maori','Pacific Islander','Jewish','Ashkenazi Jewish','Sephardic Jewish','Mizrahi Jewish'];
 
-const languages = [
-  'English', 'Spanish', 'Mandarin', 'French', 'Arabic', 'Portuguese',
-  'Hindi', 'Russian', 'Japanese', 'Korean', 'Vietnamese', 'Turkish',
-  'Italian', 'German', 'Urdu', 'Punjabi', 'Farsi', 'Tagalog', 'Thai'
-];
+const languages=['English','Spanish','Mandarin','French','Arabic','Portuguese','Hindi','Russian','Japanese','Korean','Vietnamese','Turkish','Italian','German','Urdu','Punjabi','Farsi','Tagalog','Thai','Bengali','Marathi','Telugu','Tamil','Gujarati','Kannada','Malayalam','Odia','Burmese','Khmer','Lao','Malay','Indonesian','Javanese','Sundanese','Swahili','Hausa','Yoruba','Igbo','Amharic','Somali','Zulu','Xhosa','Afrikaans','Nepali','Sinhala','Pashto','Kurdish','Hebrew','Greek','Polish','Czech','Slovak','Hungarian','Romanian','Bulgarian','Serbian','Croatian','Bosnian','Slovenian','Albanian','Ukrainian','Belarusian','Lithuanian','Latvian','Estonian','Dutch','Swedish','Norwegian','Danish','Finnish','Icelandic','Irish','Welsh','Scottish Gaelic','Basque','Catalan','Galician','Armenian','Georgian','Azerbaijani','Kazakh','Uzbek','Turkmen','Mongolian','Tibetan','Uyghur','Hmong','Maori','Samoan','Tongan','Fijian','Haitian Creole','Quechua','Aymara','Guarani','Nahuatl','Maya'];
+
+const religions=['No Religion', 'Christianity','Catholicism','Protestantism','Orthodox Christianity','Islam','Sunni Islam','Shia Islam','Judaism','Hinduism','Buddhism','Sikhism','Taoism','Confucianism','Shinto','Jainism','Bahai Faith','Zoroastrianism','Druze','Yazidism','Rastafarianism','African Traditional Religions','Native American Spirituality','Indigenous Spirituality','Paganism','Neo-Paganism','Wicca','Celtic Paganism','Norse Paganism','Hellenism','Roman Paganism','Spiritual but not Religious','Unitarian Universalism','Deism','Agnosticism','Atheism','Humanism','Secular'];
+
+const languageOptions = languages.map(lang => ({
+  value: lang,
+  label: lang,
+}));
+
+const culturalIdentityOptions = culturalIdentities.map(identity => ({
+  value: identity,
+  label: identity,
+}));
+
+const religionOptions = religions.map(religion => ({
+  value: religion,
+  label: religion,
+}));
 
 const goals = [
   'Friends', 'Exploring the city', 'Food buddies', 'Coffee chats',
@@ -35,6 +45,8 @@ const badges = [
   'New in town', 'Studying abroad', 'Language buddy', 'Food explorer',
   'Gym buddy', 'Coffee enthusiast', 'Culture vulture', 'Night owl'
 ];
+
+const animatedComponents = makeAnimated();
 
 export function ProfileSetup({ onComplete }: ProfileSetupProps) {
   const [step, setStep] = useState(1);
@@ -69,13 +81,13 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
       <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center p-8">
         <div className="max-w-2xl w-full">
           <h2 className="text-3xl mb-2">Basic Information</h2>
-          <p className="text-[#666666] mb-8">Let's start with the basics</p>
+          <p className="text-[#666666] mb-8">Mandatory information marked with *</p>
 
           <div className="space-y-6">
             {/* Full Name */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Full name or display name
+                *Full Name 
               </label>
               <input
                 type="text"
@@ -89,7 +101,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Age */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Age (must be 18+)
+                *Age (must be 18+)
               </label>
               <input
                 type="number"
@@ -104,7 +116,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Pronouns */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Pronouns (optional)
+                Pronouns
               </label>
               <select
                 value={profile.pronouns || ''}
@@ -133,7 +145,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
                       : 'bg-white hover:bg-[#f6bc66]/20'
                   }`}
                 >
-                  Verified Student
+                  Student
                 </button>
                 <button
                   onClick={() => updateProfile({ isStudent: false })}
@@ -167,7 +179,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Current City */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Current city / where you are now
+                *Current City
               </label>
               <input
                 type="text"
@@ -178,49 +190,42 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
               />
             </div>
 
-            {/* Traveling To */}
-            <div>
-              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Where are you travelling to? (optional)
-              </label>
-              <input
-                type="text"
-                value={profile.travelingTo || ''}
-                onChange={(e) => updateProfile({ travelingTo: e.target.value })}
-                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
-                placeholder="Same as current city or different"
-              />
-            </div>
-
             {/* Languages */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Languages spoken
+                *Languages 
               </label>
-              <div className="flex flex-wrap gap-2 mb-3">
-                {languages.map((lang) => (
-                  <button
-                    key={lang}
-                    onClick={() => updateProfile({ 
-                      languages: toggleInArray(profile.languages || [], lang) 
-                    })}
-                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
-                      profile.languages?.includes(lang)
-                        ? 'bg-[#f6ac69] text-black'
-                        : 'bg-white hover:bg-[#f6bc66]/20'
-                    }`}
-                  >
-                    {lang}
-                    {profile.languages?.includes(lang) && <Check size={14} className="inline ml-1" />}
-                  </button>
-                ))}
-              </div>
+              
+              <Select
+              isMulti
+              options={languageOptions}
+              value={languageOptions.filter(option =>
+                profile.languages?.includes(option.value)
+              )}
+              onChange={(selected) => 
+                updateProfile({languages: selected.map(option => option.value,)})
+              }
+              placeholder="Select language(s)"
+              classNamePrefix="react-select"
+              styles={{
+                multiValue: (base) => ({
+                  ...base,
+                  backgroundColor: '#f68c70',
+                  borderRadius: '15px',
+                  border: '1px solid black'
+                }),
+                multiValueLabel: (base) => ({
+                    ...base,
+                    color: 'black'
+                }),
+              }}
+              />
             </div>
 
             {/* Hometown */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Hometown / where you grew up (optional)
+                Hometown / where you grew up
               </label>
               <input
                 type="text"
@@ -234,7 +239,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
 
           <button
             onClick={() => setStep(2)}
-            disabled={!profile.fullName || !profile.currentCity || (profile.languages?.length || 0) === 0}
+            disabled={!profile.fullName || !profile.age || !profile.currentCity || (profile.languages?.length || 0) === 0}
             className={`w-full mt-8 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
               profile.fullName && profile.currentCity && (profile.languages?.length || 0) > 0
                 ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
@@ -261,39 +266,63 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Cultural Identity */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Cultural identity / background
+                *Cultural identity / background
               </label>
-              <div className="flex flex-wrap gap-2">
-                {culturalIdentities.map((identity) => (
-                  <button
-                    key={identity}
-                    onClick={() => updateProfile({ 
-                      culturalIdentity: toggleInArray(profile.culturalIdentity || [], identity) 
-                    })}
-                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
-                      profile.culturalIdentity?.includes(identity)
-                        ? 'bg-[#f68c70] text-black'
-                        : 'bg-white hover:bg-[#f57c73]/20'
-                    }`}
-                  >
-                    {identity}
-                    {profile.culturalIdentity?.includes(identity) && <Check size={14} className="inline ml-1" />}
-                  </button>
-                ))}
-              </div>
+
+              <Select
+              isMulti
+              options={culturalIdentityOptions}
+              value={culturalIdentityOptions.filter(option =>
+                profile.culturalIdentity?.includes(option.value)
+              )}
+              onChange={(selected) => 
+                updateProfile({culturalIdentity: selected.map(option => option.value,)})
+              }
+              placeholder="Select cultural background(s)"
+              classNamePrefix="react-select"
+              styles={{
+                multiValue: (base) => ({
+                  ...base,
+                  backgroundColor: '#f68c70',
+                  borderRadius: '15px',
+                  border: '1px solid black'
+                }),
+                multiValueLabel: (base) => ({
+                    ...base,
+                    color: 'black'
+                }),
+              }}
+              />
             </div>
 
             {/* Religion */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Religion / spiritual identity (optional)
+                Religion / spiritual identity
               </label>
-              <input
-                type="text"
-                value={profile.religion || ''}
-                onChange={(e) => updateProfile({ religion: e.target.value })}
-                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
-                placeholder="Prefer not to say"
+              <Select
+              isMulti
+              options={religionOptions}
+              value={religionOptions.filter(option =>
+                profile.religion?.includes(option.value)
+              )}
+              onChange={(selected) => 
+                updateProfile({religion: selected.map(option => option.value,)})
+              }
+              placeholder="Select religion"
+              classNamePrefix="react-select"
+              styles={{
+                multiValue: (base) => ({
+                  ...base,
+                  backgroundColor: '#f68c70',
+                  borderRadius: '15px',
+                  border: '1px solid black'
+                }),
+                multiValueLabel: (base) => ({
+                    ...base,
+                    color: 'black'
+                }),
+              }}
               />
             </div>
 
@@ -392,29 +421,11 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
           <p className="text-[#666666] mb-8">Tell us about your plans</p>
 
           <div className="space-y-6">
-            {/* Purpose of Stay */}
-            <div>
-              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                What are you here for?
-              </label>
-              <select
-                value={profile.purposeOfStay || ''}
-                onChange={(e) => updateProfile({ purposeOfStay: e.target.value })}
-                className="w-full px-4 py-3 border border-black rounded-lg bg-white"
-              >
-                <option value="">Select one</option>
-                <option value="studying">Studying abroad / Exchange</option>
-                <option value="internship">Internship / Work</option>
-                <option value="travelling">Travelling</option>
-                <option value="moved">Just moved here</option>
-                <option value="visiting">Visiting family</option>
-              </select>
-            </div>
-
+      
             {/* Looking For (Goals) */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                What are you looking for right now?
+                *What are you looking for right now? (select all that match)
               </label>
               <div className="flex flex-wrap gap-2">
                 {goals.map((goal) => (
@@ -439,7 +450,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Social Vibe */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Your social vibe (pick 1-2)
+                *Your social vibe (select 1-2)
               </label>
               <div className="space-y-2">
                 {['Chill / lowkey', 'Extroverted / outgoing', 'Down to explore', 'More introverted', 'Depends on the day'].map((vibe) => (
@@ -500,9 +511,9 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             </button>
             <button
               onClick={() => setStep(4)}
-              disabled={!profile.purposeOfStay || (profile.lookingFor?.length || 0) === 0}
+              disabled={(profile.lookingFor?.length || 0) === 0}
               className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
-                profile.purposeOfStay && (profile.lookingFor?.length || 0) > 0
+                (profile.lookingFor?.length || 0) > 0
                   ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
                   : 'bg-[#666666] text-white cursor-not-allowed'
               }`}
@@ -619,7 +630,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Boundaries */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Any boundaries you want respected? (optional)
+                Any boundaries you want respected?
               </label>
               <textarea
                 value={profile.boundaries || ''}
@@ -664,7 +675,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Bio */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Bio - What's your story?
+                *Bio - What's your story?
               </label>
               <textarea
                 value={profile.bio || ''}
@@ -678,7 +689,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             {/* Interests */}
             <div>
               <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Interests
+                *Interests (select all that match)
               </label>
               <div className="flex flex-wrap gap-2">
                 {interests.map((interest) => (
@@ -698,32 +709,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
                   </button>
                 ))}
               </div>
-            </div>
-
-            {/* Badges */}
-            <div>
-              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Badges you want to show
-              </label>
-              <div className="flex flex-wrap gap-2">
-                {badges.map((badge) => (
-                  <button
-                    key={badge}
-                    onClick={() => updateProfile({ 
-                      badges: toggleInArray(profile.badges || [], badge) 
-                    })}
-                    className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${
-                      profile.badges?.includes(badge)
-                        ? 'bg-[#f68c70] text-black'
-                        : 'bg-white hover:bg-[#f57c73]/20'
-                    }`}
-                  >
-                    {badge}
-                    {profile.badges?.includes(badge) && <Check size={14} className="inline ml-1" />}
-                  </button>
-                ))}
-              </div>
-            </div>
+            </div>            
           </div>
 
           <div className="flex gap-4 mt-8">
@@ -736,7 +722,7 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
             </button>
             <button
               onClick={() => setStep(6)}
-              disabled={!profile.bio || (profile.interests?.length || 0) === 0}
+              // disabled={!profile.bio || (profile.interests?.length || 0) === 0}
               className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${
                 profile.bio && (profile.interests?.length || 0) > 0
                   ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
@@ -763,61 +749,17 @@ export function ProfileSetup({ onComplete }: ProfileSetupProps) {
           <p className="text-[#666666] mb-8">Customize who you want to see</p>
 
           <div className="space-y-6">
-            {/* Age Range */}
-            <div>
-              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Age range you want to see
-              </label>
-              <div className="flex items-center gap-4">
-                <input
-                  type="number"
-                  value={ageRange[0]}
-                  onChange={(e) => updateProfile({ 
-                    matchFilters: { 
-                      ...profile.matchFilters!, 
-                      ageRange: [parseInt(e.target.value) || 18, ageRange[1]] 
-                    } 
-                  })}
-                  min="18"
-                  max="100"
-                  className="w-24 px-3 py-2 border border-black rounded-lg bg-white"
-                />
-                <span>to</span>
-                <input
-                  type="number"
-                  value={ageRange[1]}
-                  onChange={(e) => updateProfile({ 
-                    matchFilters: { 
-                      ...profile.matchFilters!, 
-                      ageRange: [ageRange[0], parseInt(e.target.value) || 30] 
-                    } 
-                  })}
-                  min="18"
-                  max="100"
-                  className="w-24 px-3 py-2 border border-black rounded-lg bg-white"
-                />
-              </div>
-            </div>
+            
 
             {/* Age Preference Toggle */}
             <div>
-              <label className="flex items-center gap-3 cursor-pointer p-4 bg-white border border-black rounded-lg mb-3">
-                <input
-                  type="checkbox"
-                  checked={profile.agePreference?.enabled ?? true}
-                  onChange={(e) => updateProfile({ 
-                    agePreference: { ...profile.agePreference!, enabled: e.target.checked } 
-                  })}
-                  className="w-5 h-5"
-                />
-                <span>I prefer meeting people near my age</span>
-              </label>
+              
               
               {profile.agePreference?.enabled && (
                 <div>
-                  <label className="block mb-2 text-sm text-[#666666]">Range: ±{profile.agePreference?.range || 5} years</label>
+                  <label className="block mb-2 text-sm text-[#666666]">Age Range: ±{profile.agePreference?.range || 5} years</label>
                   <div className="flex gap-2">
-                    {[2, 5, 8].map((range) => (
+                    {[2, 3, 4, 5, 6, 7, 8].map((range) => (
                       <button
                         key={range}
                         onClick={() => updateProfile({ 

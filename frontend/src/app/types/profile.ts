@@ -16,9 +16,9 @@ export interface UserProfile {
   verifiedStudentsOnly: boolean;
 
   // Cultural Information
-  culturalIdentity: string[];
-  ethnicity?: string;
-  religion?: string;
+  culturalIdentity?: string[];
+  ethnicity: string[];
+  religion?: string[];
   culturalSimilarityImportance: number; // 0-100
   culturalComfortLevel: 'open' | 'prefer-similar' | 'strong-preference';
   languageMatchImportant: boolean;
