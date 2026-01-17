@@ -1,7 +1,8 @@
-DROP TABLE IF EXISTS Messages;
-DROP TABLE IF EXISTS Posts;
-DROP TABLE IF EXISTS Conversations;
-DROP TABLE IF EXISTS Users;
+-- Commented out the drops cuz we're prob not changing the data anymore
+--DROP TABLE IF EXISTS Messages;
+--DROP TABLE IF EXISTS Posts;
+--DROP TABLE IF EXISTS Conversations;
+--DROP TABLE IF EXISTS Users;
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -58,17 +59,18 @@ CREATE TABLE IF NOT EXISTS Posts (
 -- Create the Conversations table
 CREATE TABLE Conversations (
   conversationID SERIAL PRIMARY KEY,
-  user_a INT NOT NULL REFERENCES Users(userID),
-  user_b INT NOT NULL REFERENCES Users(userID),
+  user_a INT NOT NULL,
+  user_b INT NOT NULL,
   last_messaged TIMESTAMPTZ DEFAULT NOW(),
-  UNIQUE (LEAST(user_a, user_b), GREATEST(user_a, user_b))
+  user_low  INT GENERATED ALWAYS AS (LEAST(user_a, user_b)) STORED,
+  user_high INT GENERATED ALWAYS AS (GREATEST(user_a, user_b)) STORED
 );
 
 -- Create the Messages table
 CREATE TABLE Messages (
   messageID SERIAL PRIMARY KEY,
-  conversationID INT NOT NULL REFERENCES Conversations(conversationID) ON DELETE CASCADE,
-  senderID INT NOT NULL REFERENCES Users(userID),
+  conversationID INT NOT NULL,
+  senderID INT NOT NULL,
   message_content TEXT NOT NULL,
   timestamp TIMESTAMPTZ DEFAULT NOW()
 );

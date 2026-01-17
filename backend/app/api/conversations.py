@@ -13,7 +13,6 @@ from app.services.conversations_service import (
 
 router = APIRouter(prefix="/conversations", tags=["conversations"])
 
-
 class SendMessageRequest(BaseModel):
     user_id: int = Field(..., description="Sender user id")
     friend_id: int = Field(..., description="Recipient friend user id")

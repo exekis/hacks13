@@ -1,3 +1,4 @@
+"""
 import json
 from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy import select
@@ -48,3 +49,4 @@ async def create_post(payload: CreatePostIn, db: AsyncSession = Depends(get_db))
     await db.commit()
     await db.refresh(post)
     return post
+"""
