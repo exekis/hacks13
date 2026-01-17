@@ -33,12 +33,12 @@ class UserProfile(BaseModel):
     agePreference: AgePreference
     verifiedStudentsOnly: bool
     culturalIdentity: Optional[List[str]] = None
-    ethnicity: List[str]
+    ethnicity: Optional[List[str]] = None
     religion: Optional[List[str]] = None
     culturalSimilarityImportance: int
     culturalComfortLevel: str
     languageMatchImportant: bool
-    purposeOfStay: str
+    purposeOfStay: Optional[str] = None
     lookingFor: List[str]
     socialVibe: List[str]
     availability: List[str]
@@ -93,8 +93,8 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "agePreference": {"enabled": True, "range": user[10]},
         "verifiedStudentsOnly": user[11],
         "culturalIdentity": user[12],
-        "ethnicity": [user[13]],
-        "religion": [user[14]],
+        "ethnicity": [user[13]] if user[13] else None,
+        "religion": [user[14]] if user[14] else None,
         "culturalSimilarityImportance": user[15],
         "culturalComfortLevel": user[16],
         "languageMatchImportant": user[17],
