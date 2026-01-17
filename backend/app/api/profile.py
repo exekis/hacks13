@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic import BaseModel
 from jose import JWTError, jwt
 import psycopg2
+from psycopg2.extras import RealDictCursor
 import os
 from typing import List, Optional
 
@@ -71,7 +72,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         raise credentials_exception
     
     conn = get_db_connection()
-    cur = conn.cursor()
+    cur = conn.cursor(cursor_factory=RealDictCursor)
     cur.execute("SELECT * FROM Users WHERE Email = %s", (token_data.email,))
     user = cur.fetchone()
     cur.close()
@@ -80,47 +81,46 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     
-    # Convert tuple to dictionary and construct UserProfile
+    # construct userprofile from database row
     user_dict = {
-        "fullName": user[1],
-        "age": user[2],
-        "pronouns": user[4],
-        "isStudent": user[5],
-        "university": user[6],
-        "currentCity": user[7],
-        "languages": user[8],
-        "hometown": user[9],
-        "agePreference": {"enabled": True, "range": user[10]},
-        "verifiedStudentsOnly": user[11],
-        "culturalIdentity": user[12],
-        "ethnicity": [user[13]] if user[13] else None,
-        "religion": [user[14]] if user[14] else None,
-        "culturalSimilarityImportance": user[15],
-        "culturalComfortLevel": user[16],
-        "languageMatchImportant": user[17],
-        "purposeOfStay": user[18],
-        "lookingFor": user[19],
-        "socialVibe": user[20],
-        "whocanseeposts": user[21],
-        "hideLocationUntilFriends": user[22],
-        "meetupPreference": user[23],
-        "boundaries": user[24],
-        "bio": user[25],
-        "AboutMe": user[26],
-        "Friends": user[27],
-        "recs": user[28],
-        "event_recs": user[29],
-        "travelingTo": None,
+        "fullName": user.get("name", "Unknown"),
+        "age": user.get("age", 18),
+        "pronouns": user.get("pronouns"),
+        "isStudent": user.get("isstudent", False),
+        "university": user.get("university"),
+        "currentCity": user.get("currentcity", ""),
+        "travelingTo": user.get("travelingto"),
+        "languages": user.get("languages", []),
+        "hometown": user.get("hometown"),
+        "agePreference": {"enabled": True, "range": user.get("agepreference", 25)},
+        "verifiedStudentsOnly": user.get("verifiedstudentsonly", False),
+        "culturalIdentity": user.get("culturalidentity", []),
+        "ethnicity": [user.get("ethnicity")] if user.get("ethnicity") else [],
+        "religion": [user.get("religion")] if user.get("religion") else [],
+        "culturalSimilarityImportance": user.get("culturalsimilarityimportance", 50),
+        "culturalComfortLevel": user.get("culturalcomfortlevel", ""),
+        "languageMatchImportant": user.get("languagematchimportant", False),
+        "purposeOfStay": user.get("purposeofstay", ""),
+        "lookingFor": user.get("lookingfor", []),
+        "socialVibe": user.get("socialvibe", []),
+        "whocanseeposts": user.get("whocanseeposts", ""),
+        "hideLocationUntilFriends": user.get("hidelocationuntilfriends", False),
+        "meetupPreference": user.get("meetuppreference", ""),
+        "boundaries": user.get("boundaries", ""),
+        "bio": user.get("bio", ""),
+        "AboutMe": user.get("aboutme", ""),
+        "Friends": user.get("friends", []),
+        "recs": [],
+        "event_recs": [],
         "availability": [],
-
         "interests": [],
         "badges": [],
         "matchFilters": {
             "ageRange": [18, 30],
             "sharedGoals": [],
-            "languages": [],
-            "verifiedOnly": False,
-            "culturalSimilarity": 50
+            "languages": user.get("languages", []),
+            "verifiedOnly": user.get("verifiedstudentsonly", False),
+            "culturalSimilarity": user.get("culturalsimilarityimportance", 50)
         }
     }
     return UserProfile(**user_dict)

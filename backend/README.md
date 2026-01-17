@@ -2,6 +2,32 @@
 
 A deterministic, fair recommendation algorithm for the Travelmate app.
 
+## Quick Start (Database + Backend)
+
+```bash
+# from project root
+cd /path/to/hack13
+
+# create and activate virtual environment
+python -m venv .venv
+source .venv/bin/activate
+
+# install dependencies
+pip install -r backend/requirements.txt
+
+# setup database (creates db, tables, seeds data, generates recommendations)
+DB_USER=$(whoami) python backend/db/setup_db.py
+
+# start backend
+./scripts/backend.sh
+```
+
+The setup script handles everything:
+- Creates the `hacks13` database if needed
+- Creates all tables with correct schema
+- Seeds 100 users, 300 posts, 50 conversations, 173 messages
+- Generates recommendations for all users
+
 ## Overview
 
 This backend provides two main endpoints for recommendations:
@@ -26,13 +52,32 @@ backend/
 │   │   └── similarity.py         # Scoring helper functions
 │   ├── state.py                  # Impression tracking store
 │   └── main.py   # FastAPI application
+├── db/
+│   ├── setup_db.py               # Complete database setup script
+│   ├── mock_data/                # JSON seed data files
+│   └── schema.sql                # SQL schema (reference only)
 ├── tests/
 │   ├── test_similarity.py        # Unit tests for scoring functions
 │   └── test_recommender.py       # Unit tests for candidate generation
 └── requirements.txt
 ```
 
-## Quick Start
+## Database Setup
+
+The easiest way to set up the database:
+
+```bash
+DB_USER=$(whoami) python backend/db/setup_db.py
+```
+
+Environment variables:
+- `DB_NAME` - database name (default: `hacks13`)
+- `DB_USER` - database user (default: current user)
+- `DB_HOST` - database host (default: `localhost`)
+- `DB_PORT` - database port (default: `5432`)
+- `DB_PASSWORD` - database password (default: empty)
+
+## Manual Setup (Alternative)
 
 ### 1. Create virtual environment
 

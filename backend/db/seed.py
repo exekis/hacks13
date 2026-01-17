@@ -104,11 +104,42 @@ def load_posts(cur, conn, posts_file: str) -> None:
     with open(posts_file, "r", encoding="utf-8") as f:
         posts_data = json.load(f)
 
+    # check if post_embedding column exists (for vector db support)
+    cur.execute("""
+        SELECT column_name FROM information_schema.columns 
+        WHERE table_name = 'posts' AND column_name = 'post_embedding'
+    """)
+    has_embedding_column = cur.fetchone() is not None
+
     count = 0
     for post_key, post in posts_data.items():
         try:
+            # check if user exists
             cur.execute("SELECT 1 FROM Users WHERE userID = %s", (post["user_id"],))
-            if cur.fetchone():
+            if not cur.fetchone():
+                # skip post if user not found
+                continue
+
+            if has_embedding_column and post.get("embedding"):
+                # insert with embedding if column exists and data has embedding
+                cur.execute(
+                    """
+                    INSERT INTO Posts (
+                        PostID, user_id,
+                        time_posted, content, post_embedding
+                    )
+                    VALUES (%s, %s, %s, %s, %s)
+                    """,
+                    (
+                        int(post_key),
+                        post["user_id"],
+                        post.get("time_posted"),
+                        post.get("post_content"),
+                        post.get("embedding"),
+                    ),
+                )
+            else:
+                # insert without embedding
                 cur.execute(
                     """
                         INSERT INTO Posts (

@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from jose import JWTError, jwt
-from passlib.context import CryptContext
 from pydantic import BaseModel
 from datetime import datetime, timedelta
 import os
 import psycopg2
+import hashlib
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -13,8 +13,6 @@ load_dotenv()
 SECRET_KEY = os.environ.get("SECRET_KEY")
 ALGORITHM = os.environ.get("ALGORITHM")
 ACCESS_TOKEN_EXPIRE_MINUTES = 45
-
-pwd_context = CryptContext(schemes=["argon2"], deprecated="auto")
 
 router = APIRouter()
 
@@ -42,11 +40,17 @@ def get_db_connection():
         password=os.environ.get("DB_PASSWORD"),
     )
 
-def verify_password(plain_password, hashed_password):
-    return pwd_context.verify(plain_password, hashed_password)
+def hash_password(password: str) -> str:
+    """simple sha256 hash for demo purposes"""
+    return hashlib.sha256(password.encode()).hexdigest()
 
-def get_password_hash(password):
-    return pwd_context.hash(password)
+def verify_password(plain_password: str, hashed_password: str) -> bool:
+    """verify password against sha256 hash"""
+    return hash_password(plain_password) == hashed_password
+
+def get_password_hash(password: str) -> str:
+    """get sha256 hash of password"""
+    return hash_password(password)
 
 def create_access_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()

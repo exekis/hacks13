@@ -49,18 +49,25 @@ class Post(BaseModel):
 
 class PersonRecommendation(BaseModel):
     """API response shape for person recommendations"""
-    name: str
     userid: int
+    name: str
     pronouns: Optional[str] = None
     currentCity: Optional[str] = None
     travelingTo: Optional[str] = None
     age: Optional[int] = None
     bio: Optional[str] = None
+    languages: list[str] = Field(default_factory=list)
+    lookingFor: list[str] = Field(default_factory=list)
+    culturalIdentity: list[str] = Field(default_factory=list)
+    isStudent: Optional[bool] = None
+    university: Optional[str] = None
 
 
 class PostRecommendation(BaseModel):
     """API response shape for post recommendations"""
     postid: int
-    name: str
     time_posted: Optional[str] = None
     post_content: str
+    author_id: Optional[int] = None
+    author_name: Optional[str] = None
+    author_location: Optional[str] = None
