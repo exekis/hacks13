@@ -47,3 +47,24 @@ This document describes how to set up the PostgreSQL database for this project.
     ```bash
     python3 db/seed.py
     ```
+
+## To Query the DB
+- In backend/
+`psql -U [username] -d hacks13`
+
+- Should now see `hacks13=#` prompt in terminal
+
+- To list all tables `\dt`
+
+- Can directly query here, ex: `SELECT * FROM posts LIMIT 10;`
+
+- To modify table schema, example:
+```sql
+ALTER TABLE posts
+ALTER COLUMN embedding TYPE FLOAT8[]
+```
+
+- To reset table to blank:
+```sql
+TRUNCATE TABLE posts RESTART IDENTITY;
+```

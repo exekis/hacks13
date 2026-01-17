@@ -46,6 +46,25 @@ source venv/bin/activate  # On Windows: venv\Scripts\activate
 pip install -r requirements.txt
 ```
 
+Set up pgvector: https://github.com/pgvector/pgvector
+
+```bash
+# Mac
+cd /tmp
+git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git
+cd pgvector
+make
+make install # may need sudo
+
+# Windows
+set "PGROOT=C:\Program Files\PostgreSQL\18"
+cd %TEMP%
+git clone --branch v0.8.1 https://github.com/pgvector/pgvector.git
+cd pgvector
+nmake /F Makefile.win
+nmake /F Makefile.win install
+```
+
 ### 3. Run the server
 
 ```bash
