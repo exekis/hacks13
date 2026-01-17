@@ -4,8 +4,6 @@
 --DROP TABLE IF EXISTS Conversations;
 --DROP TABLE IF EXISTS Users;
 
-CREATE EXTENSION IF NOT EXISTS vector;
-
 -- Create the Users table
 CREATE TABLE IF NOT EXISTS Users (
     userID INT PRIMARY KEY,
@@ -41,8 +39,7 @@ CREATE TABLE IF NOT EXISTS Users (
     recs JSONB[],
     event_recs_emb JSONB[],
     event_recs_dis JSONB[],
-    people_recs JSONB,
-    user_embedding vector(384)
+    people_recs JSONB
 );
 
 -- Create the Posts table
@@ -71,7 +68,7 @@ CREATE TABLE Messages (
   conversationID INT NOT NULL,
   senderID INT NOT NULL,
   message_content TEXT NOT NULL,
-  timestamp TIMESTAMTz DEFAULT NOW()
+  timestamp TIMESTAMPTZ DEFAULT NOW()
 );
 
 -- Create the Auth table
