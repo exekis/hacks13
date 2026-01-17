@@ -59,7 +59,17 @@ def send_message(
     if not message_content or not message_content.strip():
         raise ValueError("message_content cannot be empty")
 
-    sql_upsert_conversation = """
+    # use ORDER BY to always get the oldest (original) conversation for consistency
+    sql_find_conversation = """
+        SELECT conversationID
+        FROM Conversations
+        WHERE (user_a = %s AND user_b = %s)
+           OR (user_a = %s AND user_b = %s)
+        ORDER BY conversationID ASC
+        LIMIT 1;
+    """
+
+    sql_create_conversation = """
         INSERT INTO Conversations (user_a, user_b, last_messaged)
         VALUES (%s, %s, NOW())
         RETURNING conversationID;
@@ -80,21 +90,29 @@ def send_message(
     conn = get_conn()
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Ensure consistent ordering for the unique constraint
+            # ensure consistent ordering for the unique constraint
             a, b = (user_id, friend_id) if user_id < friend_id else (friend_id, user_id)
 
-            cur.execute(sql_upsert_conversation, (a, b))
+            # first check if conversation already exists (get oldest one for consistency)
+            cur.execute(sql_find_conversation, (a, b, b, a))
             convo_row = cur.fetchone()
-            if not convo_row:
-                raise RuntimeError("Failed to create or fetch conversation")
-            convo_id = convo_row["conversationid"]
+            
+            if convo_row:
+                convo_id = convo_row["conversationid"]
+            else:
+                # create new conversation
+                cur.execute(sql_create_conversation, (a, b))
+                convo_row = cur.fetchone()
+                if not convo_row:
+                    raise RuntimeError("Failed to create conversation")
+                convo_id = convo_row["conversationid"]
 
             cur.execute(sql_insert_message, (convo_id, user_id, message_content.strip()))
             msg_row = cur.fetchone()
             if not msg_row:
                 raise RuntimeError("Failed to insert message")
 
-            # Keep last_messaged correct
+            # keep last_messaged correct
             cur.execute(sql_touch_conversation, (convo_id,))
 
         conn.commit()
@@ -134,12 +152,11 @@ def open_conversation(
         LIMIT 1;
     """
 
-    sql_get_convo_for_pair = """
+    sql_get_all_convos_for_pair = """
         SELECT conversationID
         FROM Conversations
         WHERE (user_a = %s AND user_b = %s)
-           OR (user_a = %s AND user_b = %s)
-        LIMIT 1;
+           OR (user_a = %s AND user_b = %s);
     """
 
     sql_get_friend_name = """
@@ -148,52 +165,59 @@ def open_conversation(
         WHERE userID = %s;
     """
 
-    sql_get_messages = """
+    sql_get_messages_for_convos = """
         SELECT messageID, senderID, message_content, timestamp
         FROM Messages
-        WHERE conversationID = %s
+        WHERE conversationID = ANY(%s)
         ORDER BY timestamp ASC;
     """
 
     conn = get_conn()
     try:
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            # Determine which conversation to open
+            # determine which conversation to open
             if friend_id is None:
                 cur.execute(sql_get_most_recent_convo, (user_id, user_id, user_id))
                 row = cur.fetchone()
                 if not row:
                     return {"conversationID": None, "friend_user_id": None, "friend_name": None, "messages": []}
-                conversation_id = row["conversationid"]
                 friend_user_id = row["friend_user_id"]
+                # get all conversations with this friend (in case of duplicates)
+                a, b = (user_id, friend_user_id) if user_id < friend_user_id else (friend_user_id, user_id)
+                cur.execute(sql_get_all_convos_for_pair, (a, b, b, a))
             else:
-                a, b = (user_id, friend_id) if user_id < friend_id else (friend_id, user_id)
-                cur.execute(sql_get_convo_for_pair, (a, b, b, a))
-                row = cur.fetchone()
-                if not row:
-                    # No conversation yet: return empty thread metadata (still show friend name if exists)
-                    cur.execute(sql_get_friend_name, (friend_id,))
-                    f = cur.fetchone()
-                    return {
-                        "conversationID": None,
-                        "friend_user_id": friend_id,
-                        "friend_name": f["name"] if f else None,
-                        "messages": [],
-                    }
-                conversation_id = row["conversationid"]
                 friend_user_id = friend_id
+                a, b = (user_id, friend_id) if user_id < friend_id else (friend_id, user_id)
+                cur.execute(sql_get_all_convos_for_pair, (a, b, b, a))
 
-            # Get friend name
+            convo_rows = cur.fetchall()
+            if not convo_rows:
+                # no conversation yet: return empty thread metadata (still show friend name if exists)
+                cur.execute(sql_get_friend_name, (friend_user_id,))
+                f = cur.fetchone()
+                return {
+                    "conversationID": None,
+                    "friend_user_id": friend_user_id,
+                    "friend_name": f["name"] if f else None,
+                    "messages": [],
+                }
+
+            # collect all conversation ids (handles duplicates)
+            convo_ids = [row["conversationid"] for row in convo_rows]
+            # use the first one as the primary conversation id
+            primary_convo_id = convo_ids[0]
+
+            # get friend name
             cur.execute(sql_get_friend_name, (friend_user_id,))
             friend_row = cur.fetchone()
             friend_name = friend_row["name"] if friend_row else None
 
-            # Get messages
-            cur.execute(sql_get_messages, (conversation_id,))
+            # get messages from ALL conversations between this pair
+            cur.execute(sql_get_messages_for_convos, (convo_ids,))
             messages = cur.fetchall()
 
         return {
-            "conversationID": conversation_id,
+            "conversationID": primary_convo_id,
             "friend_user_id": friend_user_id,
             "friend_name": friend_name,
             "messages": messages,
