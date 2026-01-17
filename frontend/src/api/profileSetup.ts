@@ -34,7 +34,7 @@ interface Step3Data {
 }
 
 interface Step4Data {
-  whoCanMessage: string;
+
   whoCanSeePosts: string;
   hideLocationUntilFriends: boolean;
   meetupPreference: string;

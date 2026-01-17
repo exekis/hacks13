@@ -29,7 +29,6 @@ CREATE TABLE IF NOT EXISTS Users (
     purposeOfStay VARCHAR(255),
     lookingFor TEXT[],
     socialVibe TEXT[],
-    whoCanMessage VARCHAR(255),
     whoCanSeePosts VARCHAR(255),
     hideLocationUntilFriends BOOLEAN,
     meetupPreference VARCHAR(255),

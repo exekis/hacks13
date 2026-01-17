@@ -1,5 +1,6 @@
 """api package"""
 
-from .recommendations_router import router as recommendations_router
+from . import auth
+from . import profile_setup
 
-__all__ = ["recommendations_router"]
+__all__ = ["auth", "profile_setup"]

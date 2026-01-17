@@ -28,28 +28,28 @@ class UserProfile(BaseModel):
     university: Optional[str] = None
     currentCity: str
     travelingTo: Optional[str] = None
-    languages: Optional[List[str]]
+    languages: List[str]
     hometown: Optional[str] = None
-    agePreference: Optional[AgePreference]
-    verifiedStudentsOnly: Optional[bool]
+    agePreference: AgePreference
+    verifiedStudentsOnly: bool
     culturalIdentity: Optional[List[str]] = None
-    ethnicity: Optional[List[str]]
+    ethnicity: List[str]
     religion: Optional[List[str]] = None
-    culturalSimilarityImportance: Optional[int]
-    culturalComfortLevel: Optional[str]
-    languageMatchImportant: Optional[bool]
-    purposeOfStay: Optional[str]
-    lookingFor: Optional[List[str]]
-    socialVibe: Optional[List[str]]
-    availability: Optional[List[str]]
-    whocanseeposts: Optional[str]
-    hideLocationUntilFriends: Optional[bool]
-    meetupPreference: Optional[str]
+    culturalSimilarityImportance: int
+    culturalComfortLevel: str
+    languageMatchImportant: bool
+    purposeOfStay: str
+    lookingFor: List[str]
+    socialVibe: List[str]
+    availability: List[str]
+    whocanseeposts: str
+    hideLocationUntilFriends: bool
+    meetupPreference: str
     boundaries: Optional[str] = None
-    bio: Optional[str]
-    interests: Optional[List[str]]
-    badges: Optional[List[str]]
-    matchFilters: Optional[MatchFilters]
+    bio: str
+    interests: List[str]
+    badges: List[str]
+    matchFilters: MatchFilters
     AboutMe: Optional[str] = None
     Friends: Optional[List[int]] = None
     recs: Optional[List[dict]] = None
@@ -92,9 +92,9 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "hometown": user[9],
         "agePreference": {"enabled": True, "range": user[10]},
         "verifiedStudentsOnly": user[11],
-        "culturalIdentity": user[12] if user[12] is not None else [],
-        "ethnicity": [user[13]] if user[13] is not None else [],
-        "religion": [user[14]] if user[14] is not None else [],
+        "culturalIdentity": user[12],
+        "ethnicity": [user[13]],
+        "religion": [user[14]],
         "culturalSimilarityImportance": user[15],
         "culturalComfortLevel": user[16],
         "languageMatchImportant": user[17],

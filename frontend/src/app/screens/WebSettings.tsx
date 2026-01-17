@@ -29,19 +29,19 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
     <div className="min-h-screen bg-gradient-to-br from-[#FFEBDA] via-[#fff5ef] to-[#FFEBDA] py-8 relative overflow-hidden">
       {/* animated background elements */}
       <div className="absolute inset-0 pointer-events-none">
-        <motion.div 
+        <motion.div
           className="absolute w-96 h-96 rounded-full bg-[#f55c7a]/5 -top-48 -right-48"
           animate={{ scale: [1, 1.1, 1], rotate: [0, 10, 0] }}
           transition={{ duration: 15, repeat: Infinity, ease: 'easeInOut' }}
         />
-        <motion.div 
+        <motion.div
           className="absolute w-64 h-64 rounded-full bg-[#f6ac69]/5 bottom-20 -left-32"
           animate={{ scale: [1, 1.2, 1] }}
           transition={{ duration: 12, repeat: Infinity, ease: 'easeInOut', delay: 2 }}
         />
       </div>
 
-      <motion.div 
+      <motion.div
         className="max-w-3xl mx-auto px-6 relative z-10"
         variants={containerVariants}
         initial="hidden"
@@ -59,7 +59,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
           Back
         </motion.button>
 
-        <motion.div 
+        <motion.div
           className="flex items-center gap-3 mb-8"
           variants={itemVariants}
         >
@@ -75,7 +75,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
         </motion.div>
 
         {/* safety and privacy settings */}
-        <motion.div 
+        <motion.div
           className="bg-white border border-black rounded-2xl mb-6 overflow-hidden"
           variants={itemVariants}
           whileHover={{ boxShadow: '0 8px 20px -8px rgba(245, 92, 122, 0.15)' }}
@@ -91,8 +91,8 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
             <motion.div whileHover={{ x: 2 }} transition={{ type: 'spring', stiffness: 400 }}>
               <label className="block mb-2 font-medium">Who can message you?</label>
               <select
-                value={userProfile.whoCanMessage}
-                onChange={(e) => onUpdateProfile({ whoCanMessage: e.target.value as any })}
+
+
                 className="w-full px-4 py-2.5 border border-black rounded-xl bg-white focus:ring-2 focus:ring-[#f55c7a]/30 outline-none transition-all"
               >
                 <option value="friends">Friends only</option>
@@ -116,7 +116,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
             </motion.div>
 
             {/* hide location */}
-            <motion.label 
+            <motion.label
               className="flex items-center gap-3 cursor-pointer p-3 bg-gradient-to-r from-[#FFEBDA] to-[#fff5ef] border border-black rounded-xl"
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
@@ -159,7 +159,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
         </motion.div>
 
         {/* match preferences */}
-        <motion.div 
+        <motion.div
           className="bg-white border border-black rounded-2xl mb-6 overflow-hidden"
           variants={itemVariants}
           whileHover={{ boxShadow: '0 8px 20px -8px rgba(245, 92, 122, 0.15)' }}
@@ -178,11 +178,11 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
                 <input
                   type="number"
                   value={userProfile.matchFilters.ageRange[0]}
-                  onChange={(e) => onUpdateProfile({ 
-                    matchFilters: { 
-                      ...userProfile.matchFilters, 
-                      ageRange: [parseInt(e.target.value) || 18, userProfile.matchFilters.ageRange[1]] 
-                    } 
+                  onChange={(e) => onUpdateProfile({
+                    matchFilters: {
+                      ...userProfile.matchFilters,
+                      ageRange: [parseInt(e.target.value) || 18, userProfile.matchFilters.ageRange[1]]
+                    }
                   })}
                   min="18"
                   max="100"
@@ -192,11 +192,11 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
                 <input
                   type="number"
                   value={userProfile.matchFilters.ageRange[1]}
-                  onChange={(e) => onUpdateProfile({ 
-                    matchFilters: { 
-                      ...userProfile.matchFilters, 
-                      ageRange: [userProfile.matchFilters.ageRange[0], parseInt(e.target.value) || 30] 
-                    } 
+                  onChange={(e) => onUpdateProfile({
+                    matchFilters: {
+                      ...userProfile.matchFilters,
+                      ageRange: [userProfile.matchFilters.ageRange[0], parseInt(e.target.value) || 30]
+                    }
                   })}
                   min="18"
                   max="100"
@@ -206,7 +206,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
             </motion.div>
 
             {/* verified students only */}
-            <motion.label 
+            <motion.label
               className="flex items-center gap-3 cursor-pointer p-3 bg-gradient-to-r from-[#FFEBDA] to-[#fff5ef] border border-black rounded-xl"
               whileHover={{ scale: 1.01 }}
               whileTap={{ scale: 0.99 }}
@@ -228,11 +228,11 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
                 min="0"
                 max="100"
                 value={userProfile.matchFilters.culturalSimilarity}
-                onChange={(e) => onUpdateProfile({ 
-                  matchFilters: { 
-                    ...userProfile.matchFilters, 
-                    culturalSimilarity: parseInt(e.target.value) 
-                  } 
+                onChange={(e) => onUpdateProfile({
+                  matchFilters: {
+                    ...userProfile.matchFilters,
+                    culturalSimilarity: parseInt(e.target.value)
+                  }
                 })}
                 className="w-full h-2 rounded-full appearance-none bg-gradient-to-r from-[#f6bc66] to-[#f55c7a] cursor-pointer"
               />
@@ -245,7 +245,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
         </motion.div>
 
         {/* account settings */}
-        <motion.div 
+        <motion.div
           className="bg-white border border-black rounded-2xl mb-6 overflow-hidden"
           variants={itemVariants}
           whileHover={{ boxShadow: '0 8px 20px -8px rgba(245, 92, 122, 0.15)' }}
@@ -258,7 +258,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
           </div>
           <div className="divide-y divide-black/10">
             {['Change password', 'Email preferences'].map((item, index) => (
-              <motion.button 
+              <motion.button
                 key={item}
                 className="w-full p-4 text-left hover:bg-[#FFEBDA]/50 transition-colors flex items-center justify-between"
                 whileHover={{ x: 4, backgroundColor: 'rgba(255, 235, 218, 0.5)' }}
@@ -268,7 +268,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
                 <ChevronRight size={20} className="text-[#666666]" />
               </motion.button>
             ))}
-            <motion.button 
+            <motion.button
               className="w-full p-4 text-left text-[#f55c7a] flex items-center justify-between"
               whileHover={{ x: 4, backgroundColor: 'rgba(245, 92, 122, 0.05)' }}
               whileTap={{ scale: 0.99 }}
@@ -280,7 +280,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
         </motion.div>
 
         {/* support */}
-        <motion.div 
+        <motion.div
           className="bg-white border border-black rounded-2xl mb-6 overflow-hidden"
           variants={itemVariants}
           whileHover={{ boxShadow: '0 8px 20px -8px rgba(245, 92, 122, 0.15)' }}
@@ -293,7 +293,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
           </div>
           <div className="divide-y divide-black/10">
             {['Help center', 'Contact us', 'Terms of service', 'Privacy policy'].map((item) => (
-              <motion.button 
+              <motion.button
                 key={item}
                 className="w-full p-4 text-left hover:bg-[#FFEBDA]/50 transition-colors flex items-center justify-between"
                 whileHover={{ x: 4, backgroundColor: 'rgba(255, 235, 218, 0.5)' }}
@@ -307,7 +307,7 @@ export function WebSettings({ userProfile, onBack, onUpdateProfile }: WebSetting
         </motion.div>
 
         {/* logout button */}
-        <motion.button 
+        <motion.button
           className="w-full mt-6 p-4 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl flex items-center justify-center gap-2 shadow-lg"
           variants={itemVariants}
           whileHover={{ scale: 1.01, boxShadow: '0 8px 20px rgba(245, 92, 122, 0.4)' }}

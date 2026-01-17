@@ -52,11 +52,37 @@ export const login = async (email: string, password: string): Promise<{ access_t
 };
 
 /**
- * Fetches the current user's profile.
- * @param token The user's access token.
- * @returns A promise that resolves to the user's profile.
+ * Stores the access token in local storage.
+ * @param token The access token to store.
  */
-export const getMyProfile = async (token: string): Promise<UserProfile> => {
+export const storeToken = (token: string) => {
+  localStorage.setItem('access_token', token);
+};
+
+/**
+ * Retrieves the access token from local storage.
+ * @returns The access token, or null if it's not found.
+ */
+export const getToken = (): string | null => {
+  return localStorage.getItem('access_token');
+};
+
+/**
+ * Clears the access token from local storage.
+ */
+export const clearToken = () => {
+  localStorage.removeItem('access_token');
+};
+
+/**
+  * Fetches the current user's profile.
+  * @returns A promise that resolves to the user's profile.
+  */
+export const getMyProfile = async (): Promise<UserProfile> => {
+    const token = getToken();
+    if (!token) {
+        throw new Error("No access token found");
+    }
     const response = await fetch(`${API_URL}/users/me`, {
         headers: {
             Authorization: `Bearer ${token}`

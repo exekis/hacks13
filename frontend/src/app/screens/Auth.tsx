@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/app/components/ui/button';
 import { Input } from '@/app/components/ui/input';
 import { UserProfile } from '@/app/types/profile';
-import { login, signup, getMyProfile } from '@/api/auth';
+import { login, signup, getMyProfile, storeToken } from '@/api/auth';
 
 interface AuthProps {
   onSignIn: (profile: UserProfile) => void;
@@ -20,7 +20,8 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
     setError(null);
     try {
       const { access_token } = await login(email, password);
-      const profile = await getMyProfile(access_token);
+      storeToken(access_token);
+      const profile = await getMyProfile();
       onSignIn(profile);
     } catch (err: unknown) {
       setError('Failed to sign in. Please check your credentials.');
@@ -34,6 +35,7 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
     setError(null);
     try {
       const { access_token } = await signup(email, password);
+      storeToken(access_token);
       onSignUp(access_token);
     } catch (err: unknown) {
       setError('Failed to sign up. Please try again.');

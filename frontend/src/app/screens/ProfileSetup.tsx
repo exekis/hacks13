@@ -144,8 +144,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                 <button
                   onClick={() => updateProfile({ isStudent: true })}
                   className={`flex-1 px-4 py-3 border border-black rounded-lg transition-colors ${profile.isStudent
-                      ? 'bg-[#f55c7a] text-white'
-                      : 'bg-white hover:bg-[#f6bc66]/20'
+                    ? 'bg-[#f55c7a] text-white'
+                    : 'bg-white hover:bg-[#f6bc66]/20'
                     }`}
                 >
                   Student
@@ -153,8 +153,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                 <button
                   onClick={() => updateProfile({ isStudent: false })}
                   className={`flex-1 px-4 py-3 border border-black rounded-lg transition-colors ${profile.isStudent === false
-                      ? 'bg-[#f55c7a] text-white'
-                      : 'bg-white hover:bg-[#f6bc66]/20'
+                    ? 'bg-[#f55c7a] text-white'
+                    : 'bg-white hover:bg-[#f6bc66]/20'
                     }`}
                 >
                   Not a student
@@ -264,8 +264,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
             }}
             disabled={!profile.fullName || !profile.age || !profile.currentCity || (profile.languages?.length || 0) === 0 || loading}
             className={`w-full mt-8 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${profile.fullName && profile.currentCity && (profile.languages?.length || 0) > 0 && !loading
-                ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
-                : 'bg-[#666666] text-white cursor-not-allowed'
+              ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+              : 'bg-[#666666] text-white cursor-not-allowed'
               }`}
           >
             {loading ? 'Saving...' : 'Continue'}
@@ -384,8 +384,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                     key={option.value}
                     onClick={() => updateProfile({ culturalComfortLevel: option.value as any })}
                     className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${profile.culturalComfortLevel === option.value
-                        ? 'bg-[#f6bc66] text-black'
-                        : 'bg-white hover:bg-[#f6ac69]/20'
+                      ? 'bg-[#f6bc66] text-black'
+                      : 'bg-white hover:bg-[#f6ac69]/20'
                       }`}
                   >
                     {option.label}
@@ -439,8 +439,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
               }}
               disabled={(profile.culturalIdentity?.length || 0) === 0 || loading}
               className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${(profile.culturalIdentity?.length || 0) > 0 && !loading
-                  ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
-                  : 'bg-[#666666] text-white cursor-not-allowed'
+                ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                : 'bg-[#666666] text-white cursor-not-allowed'
                 }`}
             >
               {loading ? 'Saving...' : 'Continue'}
@@ -475,8 +475,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                       lookingFor: toggleInArray(profile.lookingFor || [], goal)
                     })}
                     className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${profile.lookingFor?.includes(goal)
-                        ? 'bg-[#f6ac69] text-black'
-                        : 'bg-white hover:bg-[#f6bc66]/20'
+                      ? 'bg-[#f6ac69] text-black'
+                      : 'bg-white hover:bg-[#f6bc66]/20'
                       }`}
                   >
                     {goal}
@@ -504,8 +504,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                       }
                     }}
                     className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${profile.socialVibe?.includes(vibe)
-                        ? 'bg-[#f68c70] text-black'
-                        : 'bg-white hover:bg-[#f57c73]/20'
+                      ? 'bg-[#f68c70] text-black'
+                      : 'bg-white hover:bg-[#f57c73]/20'
                       }`}
                   >
                     {vibe}
@@ -527,8 +527,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                       availability: toggleInArray(profile.availability || [], time)
                     })}
                     className={`px-4 py-2 border border-black rounded-lg transition-colors ${profile.availability?.includes(time)
-                        ? 'bg-[#f6bc66] text-black'
-                        : 'bg-white hover:bg-[#f6ac69]/20'
+                      ? 'bg-[#f6bc66] text-black'
+                      : 'bg-white hover:bg-[#f6ac69]/20'
                       }`}
                   >
                     {time}
@@ -567,8 +567,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
               }}
               disabled={(profile.lookingFor?.length || 0) === 0 || loading}
               className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${(profile.lookingFor?.length || 0) > 0 && !loading
-                  ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
-                  : 'bg-[#666666] text-white cursor-not-allowed'
+                ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                : 'bg-[#666666] text-white cursor-not-allowed'
                 }`}
             >
               {loading ? 'Saving...' : 'Continue'}
@@ -602,8 +602,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                 ].map((option) => (
                   <button
                     key={option.value}
-                    onClick={() => updateProfile({ whoCanMessage: option.value as any })}
-                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${profile.whoCanMessage === option.value
+
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors 
                         ? 'bg-[#f55c7a] text-white'
                         : 'bg-white hover:bg-[#f6bc66]/20'
                       }`}
@@ -629,8 +629,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                     key={option.value}
                     onClick={() => updateProfile({ whoCanSeePosts: option.value as any })}
                     className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${profile.whoCanSeePosts === option.value
-                        ? 'bg-[#f55c7a] text-white'
-                        : 'bg-white hover:bg-[#f6bc66]/20'
+                      ? 'bg-[#f55c7a] text-white'
+                      : 'bg-white hover:bg-[#f6bc66]/20'
                       }`}
                   >
                     {option.label}
@@ -667,8 +667,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                     key={option.value}
                     onClick={() => updateProfile({ meetupPreference: option.value as any })}
                     className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${profile.meetupPreference === option.value
-                        ? 'bg-[#f6ac69] text-black'
-                        : 'bg-white hover:bg-[#f6bc66]/20'
+                      ? 'bg-[#f6ac69] text-black'
+                      : 'bg-white hover:bg-[#f6bc66]/20'
                       }`}
                   >
                     {option.label}
@@ -706,7 +706,7 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                 setError(null);
                 try {
                   await saveStep4({
-                    whoCanMessage: profile.whoCanMessage || 'friends',
+
                     whoCanSeePosts: profile.whoCanSeePosts || 'friends',
                     hideLocationUntilFriends: profile.hideLocationUntilFriends ?? true,
                     meetupPreference: profile.meetupPreference || 'public-first',
@@ -768,8 +768,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                       interests: toggleInArray(profile.interests || [], interest)
                     })}
                     className={`px-3 py-1.5 text-sm border border-black rounded-full transition-colors ${profile.interests?.includes(interest)
-                        ? 'bg-[#f6ac69] text-black'
-                        : 'bg-white hover:bg-[#f6bc66]/20'
+                      ? 'bg-[#f6ac69] text-black'
+                      : 'bg-white hover:bg-[#f6bc66]/20'
                       }`}
                   >
                     {interest}
@@ -809,8 +809,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
               }}
               disabled={!profile.bio || (profile.interests?.length || 0) === 0 || loading}
               className={`flex-1 px-6 py-3 border border-black rounded-lg transition-colors flex items-center justify-center gap-2 ${profile.bio && (profile.interests?.length || 0) > 0 && !loading
-                  ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
-                  : 'bg-[#666666] text-white cursor-not-allowed'
+                ? 'bg-[#f55c7a] text-white hover:bg-[#f57c73]'
+                : 'bg-[#666666] text-white cursor-not-allowed'
                 }`}
             >
               {loading ? 'Saving...' : 'Continue'}
@@ -850,8 +850,8 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                           agePreference: { ...profile.agePreference!, range }
                         })}
                         className={`px-4 py-2 border border-black rounded-lg transition-colors ${profile.agePreference?.range === range
-                            ? 'bg-[#f6bc66] text-black'
-                            : 'bg-white hover:bg-[#f6ac69]/20'
+                          ? 'bg-[#f6bc66] text-black'
+                          : 'bg-white hover:bg-[#f6ac69]/20'
                           }`}
                       >
                         ±{range}

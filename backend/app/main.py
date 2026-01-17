@@ -7,22 +7,18 @@ Merged FastAPI application:
 - Auth and Profile setup endpoints
 - CORS + health check preserved
 """
-
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 
 load_dotenv()
 
-# import routers
-from app.api import (
-    auth,
-    profile_setup,
-    conversations_router,
-    profile_router,
-    recommendations_router,
-    settings_router
-)
+# IMPORTANT: import the APIRouter objects, not the modules
+from app.api.conversations_router import router as conversations_router
+from app.api.settings_router import router as settings_router
+from app.api.profile_router import router as profile_router
+from app.api.recommendations_router import router as recommendations_router
+from app.api import auth, profile_setup
 
 
 app = FastAPI(title="Travelmate API")
@@ -42,16 +38,14 @@ app.add_middleware(
 
 @app.get("/api/health")
 async def health_check():
-    """Health check endpoint."""
     return {"ok": True}
 
 
 @app.get("/")
 async def root():
-    """Root endpoint with API info."""
     return {
-        "app": settings_router.app_name if hasattr(settings_router, "app_name") else "Travelmate API",
-        "version": getattr(settings_router, "version", "1.0.0"),
+        "app": "Travelmate API",
+        "version": "1.0.0",
         "endpoints": [
             "POST /profile/onboarding/",
             "GET /profile/info/?user_id=...",
@@ -59,8 +53,6 @@ async def root():
             "GET /conversations/?user_id=... OR ?conversation_id=...",
             "POST /conversations/{convo_id}/message",
             "GET /settings/",
-
-            # recommendations endpoints
             "GET /api/health",
             "GET /api/recommendations/people?user_id=<id>&limit=20",
             "GET /api/recommendations/posts?user_id=<id>&limit=20",
@@ -68,10 +60,10 @@ async def root():
     }
 
 
-# Routers
+# Routers (note: these are APIRouter objects)
 app.include_router(auth.router)
 app.include_router(profile_setup.router)
 app.include_router(conversations_router)
-app.include_router(profile_router)
-app.include_router(recommendations_router, prefix="api")
 app.include_router(settings_router)
+app.include_router(recommendations_router, prefix="/api")
+app.include_router(profile_router)
