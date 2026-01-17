@@ -15,11 +15,11 @@ from dotenv import load_dotenv
 load_dotenv()
 
 # IMPORTANT: import the APIRouter objects, not the modules
-from app.api.conversations_router import router as conversations_router
-from app.api.settings_router import router as settings_router
-from app.api.profile_router import router as profile_router
-from app.api.recommendations_router import router as recommendations_router
-from app.api import auth, profile_setup
+from api.conversations_router import router as conversations_router
+from api.settings_router import router as settings_router
+from api.profile_router import router as profile_router
+from api.recommendations_router import router as recommendations_router
+from api import auth, profile_setup
 
 
 app = FastAPI(title="Travelmate API")
