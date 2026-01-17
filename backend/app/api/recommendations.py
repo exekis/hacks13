@@ -19,7 +19,11 @@ def refresh_recommendations():
     """
     Refresh user recommendations. This refreshes everyone for now LOL
     """
-    return refresh_feed()
+    res = refresh_feed()
+    if res == "Stored all":
+        return True
+    else:
+        return False
 
 @router.get("/all-recs")
 def get_all_recommendations(
