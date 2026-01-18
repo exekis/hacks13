@@ -173,36 +173,66 @@ seed_database() {
 
 # generate recommendations
 generate_recommendations() {
-    local use_vector=$1
-    
+    local use_vector="${1:-}"
+
     echo "[db-setup] generating recommendations..."
-    
-    SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-    PROJECT_ROOT="$(dirname "$SCRIPT_DIR")"
-    
-    cd "$PROJECT_ROOT"
-    
+
+    local SCRIPT_DIR PROJECT_ROOT PY PSQL_BIN REC_COUNT
+
+    SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+    PROJECT_ROOT="$(cd "$SCRIPT_DIR/.." && pwd)"
+
+    # pick python
+    if command -v python3 >/dev/null 2>&1; then
+        PY="python3"
+    else
+        PY="python"
+    fi
+
+    # pick psql
+    if [ -n "${PSQL:-}" ]; then
+        PSQL_BIN="$PSQL"
+    else
+        PSQL_BIN="psql"
+    fi
+
+    cd "$PROJECT_ROOT" || return 1
+
     # activate virtual environment if available
     if [ -f ".venv/bin/activate" ]; then
-        source .venv/bin/activate
+        # shellcheck disable=SC1091
+        source ".venv/bin/activate"
     fi
-    
+
     export DB_NAME DB_USER DB_HOST DB_PORT DB_PASSWORD
-    
+
     # check if recommendations already exist
-    REC_COUNT=$($PSQL -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -t -c "SELECT COUNT(*) FROM users WHERE people_recs IS NOT NULL;" | tr -d ' ')
-    if [ "$REC_COUNT" -gt "0" ]; then
+    REC_COUNT="$("$PSQL_BIN" -h "$DB_HOST" -p "$DB_PORT" -U "$DB_USER" -d "$DB_NAME" -tA \
+        -c "SELECT COUNT(*) FROM users WHERE people_recs IS NOT NULL;" 2>/dev/null | tr -d '[:space:]')"
+
+    REC_COUNT="${REC_COUNT:-0}"
+    if [[ "$REC_COUNT" =~ ^[0-9]+$ ]] && [ "$REC_COUNT" -gt 0 ]; then
         echo "[db-setup] $REC_COUNT users already have recommendations"
         return 0
     fi
-    
-    # use the unified recommendation generator
-    # it automatically detects vector support and falls back appropriately
-    python backend/db/generate_all_recs.py 2>&1 || {
+
+    cd "$PROJECT_ROOT/backend" || return 1
+
+    # generate post recs using deterministic algo
+    "$PY" -m app.services.helpers.store_event_recs_in_db_dis
+
+    # generate post recs using embeddings
+    "$PY" -m app.services.helpers.store_event_recs_in_db_emb
+
+    # generate people recs
+    "$PY" -m app.services.helpers.store_people_recs_in_db
+
+    # unified generator 
+    "$PY" -m db.generate_all_recs 2>&1 || {
         echo "[db-setup] unified recs failed, trying simple recs..."
-        python backend/db/generate_recs.py 2>&1 || true
+        "$PY" -m db.generate_recs 2>&1 || true
     }
-    
+
     echo "[db-setup] recommendations generated"
 }
 
