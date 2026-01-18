@@ -9,15 +9,16 @@ interface WebPostCardProps {
   post: Post & { authorName?: string; authorLocation?: string; authorAvatar?: string };
   onRSVP?: (userId: string) => void;
   onViewProfile?: (userId: string) => void;
+  onMessage?: (userId: string, userName?: string, userAvatar?: string) => void;
 }
 
-export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   
   // try to find user in mock data, fall back to post author info
   const mockUser = mockUsers.find(u => u.id === post.userId);
-  const displayName = mockUser?.name || post.authorName || `User ${post.userId}`;
+  const displayName = post.authorName || mockUser?.name || 'Traveler';
   const displayLocation = mockUser?.location || post.authorLocation || post.location;
   const displayAvatar = mockUser?.avatar || post.authorAvatar;
 
@@ -93,7 +94,10 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
             animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
             transition={{ duration: 0.3 }}
           >
-  
+            <Heart 
+              size={20} 
+              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
+            />
           </motion.div>
         </motion.button>
       </div>
@@ -169,7 +173,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
         </motion.div>
         
         <motion.button
-          onClick={() => onRSVP?.(post.userId)}
+          onClick={() => onMessage ? onMessage(post.userId, displayName, displayAvatar) : onRSVP?.(post.userId)}
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
           whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
           whileTap={{ scale: 0.98 }}
