@@ -505,38 +505,48 @@ def recommend_posts(
 
 
 
-def store_post_recs_dis(conn, limit: int = 30) -> int:
+def store_post_recs_dis(conn: psycopg2.extensions.connection, limit: int = 30, refresh: bool = False) -> int:
     """
     Compute + STORE event_recs_dis for ALL users.
-    Stores as JSONB[] like: [{"postid": 123}, {"postid": 456}, ...]
+
+    Assumes users.event_recs_dis is type JSONB (not JSONB[]), and we store
+    a JSON array of ints like: [123, 456, 789].
+
+    If refresh=True, the recommendations are randomly shuffled before storing.
+
     Returns the number of users updated.
     """
+    from psycopg2.extras import Json
+    import random
+
     updated = 0
-    try:
-        # fetch all user ids
+    # fetch all user ids
+    with conn.cursor() as cur:
+        cur.execute("SELECT userid FROM users;")
+        all_user_ids = [int(r[0]) for r in cur.fetchall()]
+
+    # compute + store for each user
+    for uid in all_user_ids:
+        post_ids = recommend_posts(uid, limit)  # List[int]
+
+        if refresh:
+            random.shuffle(post_ids)
+
+        post_ids = post_ids[:limit]
+
         with conn.cursor() as cur:
-            cur.execute("SELECT userid FROM users;")
-            all_user_ids = [int(r[0]) for r in cur.fetchall()]
+            cur.execute(
+                """
+                UPDATE users
+                SET event_recs_dis = %s::jsonb
+                WHERE userid = %s;
+                """,
+                (Json(post_ids), uid),
+            )
+        updated += 1
 
-        # compute + store for each user
-        for uid in all_user_ids:
-            post_ids = recommend_posts(uid, limit)  # List[int]
-
-            with conn.cursor() as cur:
-                cur.execute(
-                    """
-                    UPDATE users
-                    SET event_recs_dis = %s
-                    WHERE userid = %s;
-                    """,
-                    (Json(post_ids), uid),
-                )
-            updated += 1
-
-        conn.commit()
-        return updated
-    finally:
-        conn.close()
+    conn.commit()
+    return updated
 
 if __name__ == "__main__":
     limit_env = os.getenv("EVENT_RECS_LIMIT", "30")

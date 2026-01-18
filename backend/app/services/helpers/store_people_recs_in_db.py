@@ -321,13 +321,17 @@ def _rerank_people(
 # Public API: store people recs for all users
 # ----------------------------
 
-def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50) -> None:
+def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50, refresh: bool = False) -> None:
     """
     For EACH user in the DB:
       - generate candidates via SQL (FOF + location + overlap)
-      - score + rerank using the same deterministic rules
-      - store users.people_recs = JSONB[] (userid + score + tags + mutual friends)
+      - score + rerank (deterministic)
+      - store users.people_recs
+
+    If refresh=True, keep the same top `limit` results but store them in random order.
     """
+    import random
+    from psycopg2.extras import Json, RealDictCursor
 
     with conn.cursor(cursor_factory=RealDictCursor) as cur:
         cur.execute("SELECT userid FROM users;")
@@ -388,7 +392,11 @@ def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50) -> 
             limit=limit,
         )
 
-        # serialize to JSONB[] payload
+        # If refresh=True, randomize ordering of the selected results
+        if refresh and reranked:
+            random.shuffle(reranked)
+
+        # serialize payload
         payload: List[Dict[str, Any]] = []
         viewer_friends = friends_map[int(uid)]
 
@@ -406,12 +414,14 @@ def store_people_recs(conn: psycopg2.extensions.connection, limit: int = 50) -> 
             tags.extend((cand.get("culturalidentity") or [])[:2])
             tags = tags[:6]
 
-            payload.append({
-                "userid": int(sc.id),
-                "mutual_friends_count": mutual_count,
-                "tags": tags,
-                "score": sc.score,
-            })
+            payload.append(
+                {
+                    "userid": int(sc.id),
+                    "mutual_friends_count": mutual_count,
+                    "tags": tags,
+                    "score": sc.score,
+                }
+            )
 
         with conn.cursor() as cur:
             cur.execute(SQL_UPDATE_PEOPLE_RECS, (Json(payload), int(uid)))

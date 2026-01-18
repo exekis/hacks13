@@ -15,12 +15,13 @@ router = APIRouter(prefix="/recommendations", tags=["recommendations"])
 
 
 @router.get("/refresh")
-def refresh_recommendations():
+def refresh_recommendations(refresh: bool = Query(default=True, description="incorporate some randomness")):
     """
-    Refresh user recommendations. This refreshes everyone for now LOL
+    Refresh user recommendations.
     """
-    res = refresh_feed()
-    if res == "Stored all":
+    res = refresh_feed(refresh)
+    
+    if res == "success":
         return True
     else:
         return False
