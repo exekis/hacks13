@@ -72,7 +72,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
                 key={msg.id}
                 className={`flex gap-3 ${msg.isOwn ? 'flex-row-reverse' : ''}`}
               >
-                {!msg.isOwn && <Avatar emoji={user?.avatar} size="sm" />}
+                {!msg.isOwn && <Avatar src={user?.avatar} name={user?.name} size="sm" />}
                 <div className={`flex flex-col ${msg.isOwn ? 'items-end' : 'items-start'} max-w-[75%]`}>
                   <div
                     className={`px-4 py-3 rounded-3xl ${
@@ -144,7 +144,7 @@ export const MessagesScreen: React.FC<MessagesScreenProps> = ({
               >
                 <div className="flex items-start gap-3">
                   <div className="relative">
-                    <Avatar emoji={user.avatar} size="md" />
+                    <Avatar src={user.avatar} name={user.name} size="md" />
                     {conv.unread > 0 && (
                       <div className="absolute -top-1 -right-1 w-5 h-5 bg-[#f55c7a] text-white text-xs rounded-full flex items-center justify-center font-bold">
                         {conv.unread}

@@ -94,30 +94,52 @@ export const VerificationBadge: React.FC<BadgeProps> = ({ type, className = '' }
 interface AvatarProps {
   src?: string;
   emoji?: string;
+  name?: string;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   className?: string;
 }
 
+// helper to get initials from a name
+const getInitials = (name: string): string => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) {
+    return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+  }
+  return parts[0].substring(0, 2).toUpperCase();
+};
+
 export const Avatar: React.FC<AvatarProps> = ({ 
   src, 
-  emoji, 
+  emoji,
+  name, 
   size = 'md', 
   className = '' 
 }) => {
   const sizeStyles = {
-    sm: 'w-8 h-8 text-lg',
-    md: 'w-12 h-12 text-2xl',
-    lg: 'w-16 h-16 text-3xl',
-    xl: 'w-24 h-24 text-5xl'
+    sm: 'w-8 h-8 text-xs',
+    md: 'w-12 h-12 text-sm',
+    lg: 'w-16 h-16 text-lg',
+    xl: 'w-24 h-24 text-2xl'
+  };
+  
+  // determine what to render: image, initials, emoji, or default
+  const renderContent = () => {
+    if (src) {
+      return (
+        <img src={src} alt="avatar" className="w-full h-full rounded-full object-cover" />
+      );
+    }
+    if (name) {
+      return (
+        <span className="font-semibold text-white">{getInitials(name)}</span>
+      );
+    }
+    return <span>{emoji || '👤'}</span>;
   };
   
   return (
     <div className={`${sizeStyles[size]} rounded-full bg-gradient-to-br from-[#f55c7a] to-[#f6ac69] flex items-center justify-center shadow-md ${className}`}>
-      {src ? (
-        <img src={src} alt="avatar" className="w-full h-full rounded-full object-cover" />
-      ) : (
-        <span>{emoji || '👤'}</span>
-      )}
+      {renderContent()}
     </div>
   );
 };
