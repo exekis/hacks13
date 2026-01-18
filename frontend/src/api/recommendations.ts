@@ -218,6 +218,10 @@ export function backendPostToMockPost(rec: BackendPostRecommendation) {
     userId: rec.author_id?.toString() || '0',
     authorName: rec.author_name || `User ${rec.author_id}`,
     authorLocation: rec.author_location || undefined,
+    // generate avatar url based on author_id
+    authorAvatar: rec.author_id 
+      ? `https://randomuser.me/api/portraits/${rec.author_id % 2 === 0 ? 'women' : 'men'}/${(rec.author_id % 99) + 1}.jpg`
+      : undefined,
     
     content: rec.post_content,
     image: undefined,
