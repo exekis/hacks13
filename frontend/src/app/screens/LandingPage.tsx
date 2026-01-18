@@ -340,7 +340,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Why Travelmate?
             </h2>
             <p className="text-[#666666] text-lg max-w-2xl mx-auto">
-              Being abroad can be isolating, but also a great way to discover yourself. We want to make the process easier by helping you find community wherever you go.
+              Being abroad can be isolating, but also a great way to discover yourself. We want to make the process easier by helping you find community wherever you go, exploring the world while embracing your unique identity.
             </p>
           </motion.div>
 

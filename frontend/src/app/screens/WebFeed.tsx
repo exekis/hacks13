@@ -164,7 +164,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
           </div>
           <p className="text-[#666666] flex items-center gap-2">
             <Sparkles className="w-4 h-4 text-[#f6ac69]" />
-            Connect with travelers and students near you
+            In an unfamiliar place, find the people who feel like home.
           </p>
         </motion.div>
 
@@ -179,7 +179,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
             <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f55c7a]/10 rounded-full">
               <TrendingUp className="w-4 h-4 text-[#f55c7a]" />
               <span className="text-sm font-medium text-[#f55c7a]">
-                {hasLoadedOnce ? `${peopleItems.length} matches` : 'Make some new matches today!'}
+                {hasLoadedOnce ? `${peopleItems.length} matches` : 'Make some new friends today!'}
               </span>
             </div>
             <div className="flex items-center gap-2 text-sm text-[#666666]">
