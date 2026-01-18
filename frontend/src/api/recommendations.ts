@@ -31,6 +31,7 @@ export interface BackendPostRecommendation {
   author_id: number | null;
   author_name: string | null;
   author_location: string | null;
+  capacity?: number;
 }
 
 // frontend-compatible types (for ui components)
@@ -324,7 +325,9 @@ export function backendPostToMockPost(rec: BackendPostRecommendation) {
     content: rec.post_content,
     // generate category-based image for ~60% of posts
     image: getPostImageUrl(rec.postid, rec.post_content),
-    dateRange: undefined,
+    dateRange: { from: '', to: '' },
+    timeRange: { from: '', to: '' },
+    capacity: rec.capacity || 0,
     location: 'Location revealed after connection',
     timestamp,
   };

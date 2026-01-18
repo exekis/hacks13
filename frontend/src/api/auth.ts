@@ -104,3 +104,16 @@ export const getMyProfile = async (): Promise<UserProfile> => {
     }
     return response.json();
 }
+
+/**
+ * Fetches a user's profile by their ID.
+ * @param userId The ID of the user to fetch.
+ * @returns A promise that resolves to the user's profile.
+ */
+export const fetchUserProfile = async (userId: string): Promise<UserProfile> => {
+  const response = await fetch(`${API_URL}/profile/users/${userId}`);
+  if (!response.ok) {
+    throw new Error("Failed to fetch user profile");
+  }
+  return response.json();
+};

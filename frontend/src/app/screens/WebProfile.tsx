@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { mockUsers, mockPosts, Post } from '@/app/data/mockData';
+import { mockPosts, Post } from '@/app/data/mockData';
 import { User, MapPin, Edit, Plus, Globe, ArrowLeft, CheckCircle, Sparkles, Heart, MessageCircle } from 'lucide-react';
 import { WebPostCard } from '@/app/components/WebPostCard';
 import { UserProfile } from '@/app/types/profile';
 import { fetchUserPosts, PostResponse } from '@/api/posts';
+import { fetchUserProfile } from '@/api/auth';
 
 interface WebProfileProps {
   userId?: string;
@@ -13,35 +14,43 @@ interface WebProfileProps {
   onRSVP?: (userId: string) => void;
   onCreatePost?: () => void;
   onUpdateProfile?: (updates: Partial<UserProfile>) => void;
+  onMessage?: (userId: string, userName: string, userAvatar?: string) => void;
 }
 
-export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, onUpdateProfile }: WebProfileProps) {
+export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, onUpdateProfile, onMessage }: WebProfileProps) {
   const [isEditingAge, setIsEditingAge] = useState(false);
   const [ownPosts, setOwnPosts] = useState<Post[]>([]);
+  const [viewedProfile, setViewedProfile] = useState<UserProfile | null>(null);
   
-  // get current user id from localstorage
   const currentUserId = localStorage.getItem('user_id');
   
-  // if viewing someone else's profile, show their data
   const isOwnProfile = !userId || userId === currentUserId;
-  const displayUser = isOwnProfile ? null : mockUsers.find(u => u.id === userId);
+
+  useEffect(() => {
+    if (!isOwnProfile && userId) {
+      fetchUserProfile(userId)
+        .then(profile => setViewedProfile(profile))
+        .catch(err => console.error("Failed to fetch user profile", err));
+    }
+  }, [userId, isOwnProfile]);
+
+  const displayUser = isOwnProfile ? userProfile : viewedProfile;
   
-  // fetch own posts from api
   useEffect(() => {
     if (isOwnProfile && currentUserId) {
       fetchUserPosts(currentUserId).then((posts: PostResponse[]) => {
         
-        // transform to mock post format for webpostcard
         const transformed: Post[] = posts.map(p => ({
           id: p.id,
             userId: p.user_id,
             content: p.post_content,
-            
             location: p.location_str,
             timestamp: new Date(p.time_posted).toLocaleString(),
             capacity: p.capacity,
             authorName: p.author_name,
-            authorLocation: p.author_location
+            authorLocation: p.author_location,
+            dateRange: { from: '', to: '' },
+            timeRange: { from: '', to: '' }
         }));
         setOwnPosts(transformed);
       }).catch(() => {
@@ -50,7 +59,6 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
     }
   }, [isOwnProfile, currentUserId, userProfile?.fullName]);
           
-  // for own profile use fetched posts, for others use mock
   const userPosts = isOwnProfile ? ownPosts : mockPosts.filter(p => p.userId === userId);
 
   const containerVariants = {
@@ -61,7 +69,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
     },
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
   };
@@ -71,7 +79,6 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
     visible: { opacity: 1, scale: 1 },
   };
 
-  // for own profile, use userProfile data
   if (isOwnProfile) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-[#FFEBDA] via-[#fff5ef] to-[#FFEBDA] py-8 relative overflow-hidden">
@@ -418,8 +425,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
     );
   }
 
-  // viewing someone else's profile - show mock data
-  if (!displayUser) return null;
+  if (!displayUser) return <div>Loading...</div>;
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFEBDA] via-[#fff5ef] to-[#FFEBDA] py-8 relative overflow-hidden">
@@ -484,12 +490,12 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.2 }}
               >
-                {displayUser.name}
+                {displayUser.fullName}
               </motion.h2>
               {displayUser.pronouns && (
                 <p className="text-[#666666] mb-2">{displayUser.pronouns}</p>
               )}
-              {displayUser.location && (
+              {displayUser.currentCity && (
                 <motion.div 
                   className="flex items-center gap-2 text-[#666666] mb-4"
                   initial={{ opacity: 0, x: -10 }}
@@ -497,7 +503,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
                   transition={{ delay: 0.3 }}
                 >
                   <MapPin size={16} className="text-[#f55c7a]" />
-                  <span>{displayUser.location}</span>
+                  <span>{displayUser.currentCity}</span>
                 </motion.div>
               )}
               {displayUser.university && (
@@ -507,7 +513,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
               {/* action buttons for other profiles */}
               <div className="flex gap-3 mt-4">
                 <motion.button
-                  onClick={() => onMessage?.(displayUser.id)}
+                  onClick={() => onMessage?.(userId || '', displayUser.fullName || '', undefined)}
                   className="px-5 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl flex items-center gap-2 shadow-md"
                   whileHover={{ scale: 1.02, boxShadow: '0 6px 16px rgba(245, 92, 122, 0.4)' }}
                   whileTap={{ scale: 0.98 }}
@@ -549,7 +555,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
               Interests
             </h3>
             <div className="flex flex-wrap gap-2">
-              {displayUser.goals.map((goal, index) => (
+              {displayUser.lookingFor.map((goal, index) => (
                 <motion.span
                   key={index}
                   className="px-4 py-2 bg-gradient-to-r from-[#f6ac69] to-[#f6bc66] border border-black rounded-full shadow-sm"
@@ -593,7 +599,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
           )}
 
           {/* cultural background */}
-          {displayUser.culturalBackground && displayUser.culturalBackground.length > 0 && (
+          {displayUser.culturalIdentity && displayUser.culturalIdentity.length > 0 && (
             <motion.div
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -601,7 +607,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
             >
               <h3 className="text-lg mb-3" style={{ fontFamily: 'Castoro, serif' }}>Cultural Background</h3>
               <div className="flex flex-wrap gap-2">
-                {displayUser.culturalBackground.map((bg, index) => (
+                {displayUser.culturalIdentity.map((bg, index) => (
                   <motion.span
                     key={index}
                     className="px-4 py-2 bg-gradient-to-r from-[#f6bc66] to-[#f6ac69] border border-black rounded-full shadow-sm"
@@ -625,7 +631,7 @@ export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, 
           transition={{ delay: 0.5 }}
         >
           <MessageCircle size={24} className="text-[#f55c7a]" />
-          {displayUser.name.split(' ')[0]}'s Posts
+          {displayUser.fullName.split(' ')[0]}'s Posts
         </motion.h3>
 
         <div className="space-y-4">
