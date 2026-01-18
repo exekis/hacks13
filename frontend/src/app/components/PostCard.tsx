@@ -18,14 +18,14 @@ export const PostCard: React.FC<PostCardProps> = ({
 }) => {
   let user = mockUsers.find(u => u.id === post.userId);
   
-  // Fallback for real backend data that might not be in mockUsers
+  // fallback for real backend data that might not be in mockUsers
   if (!user) {
     user = {
       id: post.userId,
       name: (post as any).authorName || 'Unknown User',
-      avatar: '👤',
+      avatar: undefined,
       verified: { student: false },
-      // Add minimum required fields to satisfy the UI
+      // add minimum required fields to satisfy the ui
       age: 0,
       pronouns: '',
       role: 'Member',
@@ -37,12 +37,12 @@ export const PostCard: React.FC<PostCardProps> = ({
     } as any;
   }
 
-  // if (!user) return null; // Logic handled above
+  // if (!user) return null; // logic handled above
   
   return (
     <div className="bg-white rounded-3xl p-5 shadow-md">
       <div className="flex items-start gap-3 mb-3">
-        <Avatar emoji={user.avatar} size="md" />
+        <Avatar src={user.avatar} name={user.name} size="md" />
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 mb-1">
             <h4 className="font-semibold text-[#3d3430]">{user.name}</h4>

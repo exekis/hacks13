@@ -22,7 +22,7 @@ export const PersonCard: React.FC<PersonCardProps> = ({
       onClick={() => onViewProfile?.(user.id)}
     >
       <div className="flex items-start gap-4">
-        <Avatar emoji={user.avatar} size="lg" />
+        <Avatar src={user.avatar} name={user.name} size="lg" />
         
         <div className="flex-1 min-w-0">
           <div className="flex items-start justify-between gap-2 mb-1">

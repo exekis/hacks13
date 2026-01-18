@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Post, mockUsers } from '@/app/data/mockData';
 import { User, Bell, MapPin, Calendar, Users, Heart } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
+import { Avatar } from '@/app/components/DesignSystem';
 
 interface WebPostCardProps {
   post: Post & { authorName?: string; authorLocation?: string };
@@ -41,12 +42,17 @@ export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostC
       {/* header */}
       <div className="flex items-start gap-3 mb-4">
         <motion.div 
-          className="w-12 h-12 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center flex-shrink-0 cursor-pointer"
+          className="cursor-pointer"
           onClick={() => onViewProfile?.(post.userId)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
-          <User size={24} className="text-black" />
+          <Avatar 
+            src={mockUser?.avatar} 
+            name={displayName}
+            size="md"
+            className="border border-black"
+          />
         </motion.div>
         <div className="flex-1 min-w-0">
           <motion.h4 
