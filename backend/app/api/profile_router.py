@@ -171,19 +171,41 @@ async def create_post(payload: CreatePostIn):
     return PostOut(id=str(post[0]), author_id=str(post[1]), content=post[2] or "", is_event=payload.is_event)
 
 
-@router.get("/posts/{user_id}", response_model=list[PostOut])
+@router.get("/posts/{user_id}")
 async def get_user_posts(user_id: int):
     """get all posts by a specific user"""
-    conn = get_db_connection()
-    cur = conn.cursor()
-    cur.execute(
-        "SELECT PostID, user_id, post_content FROM Posts WHERE user_id = %s ORDER BY time_posted DESC",
-        (user_id,)
-    )
-    posts = cur.fetchall()
-    cur.close()
-    conn.close()
-    return [
-        PostOut(id=str(p[0]), author_id=str(p[1]), content=p[2] or "", is_event=False)
-        for p in posts
-    ]
+    try: 
+        conn = get_db_connection()
+        cur = conn.cursor()
+        cur.execute(
+            """
+                SELECT p.PostID, p.user_id, p.post_content, p.capacity, p.start_time, p.end_time, p.location_str, p.is_event, p.time_posted, u.Name, u.currentCity
+                FROM Posts p
+                JOIN Users u ON p.user_id = u.userID
+                WHERE p.user_id = %s;
+            """, (user_id,)
+        )
+        posts = cur.fetchall()
+        cur.close()
+        conn.close()
+        response_posts = [
+            {
+                "id": post[0],
+                "user_id": post[1],
+                "post_content": post[2],
+                "capacity": post[3],
+                "start_time": post[4],
+                "end_time": post[5],
+                "location_str": post[6],
+                "is_event": post[7],
+                "time_posted": post[8],
+                "author_name": post[9],
+                "author_location": post[10]
+            }
+            for post in posts
+        ]
+        return response_posts
+
+    except Exception as e:
+            print("Error fetching user posts:", e)
+            raise HTTPException(status_code=500, detail=str(e))

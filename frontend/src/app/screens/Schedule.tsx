@@ -4,7 +4,7 @@ import { mockUsers, mockPosts, Post } from '@/app/data/mockData';
 import { Plus, MessageCircle } from 'lucide-react';
 import { WebPostCard } from '@/app/components/WebPostCard';
 import { UserProfile } from '@/app/types/profile';
-import { fetchRsvpdPosts, PostResponse, rsvpToPost } from '@/api/posts';
+import { fetchUserPosts, fetchRsvpdPosts, PostResponse, rsvpToPost } from '@/api/posts';
 
 interface ScheduleProps {
   userId?: string;
@@ -14,9 +14,38 @@ interface ScheduleProps {
 
 export function Schedule({ userId, onRSVP }: ScheduleProps) {  
   const [rsvpdPosts, setRsvpdPosts] = useState<Post[]>([]);
+  const [ownPosts, setOwnPosts] = useState<Post[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
   // get user's posts
   const userPosts = mockPosts.filter(p => p.userId === (userId || '1'));
+  const currentUserId = localStorage.getItem('user_id');
+
+  useEffect(() => {
+    if (userId) {
+      fetchUserPosts(userId).then(posts => {
+        const formattedPosts: Post[] = posts.map(p => {
+          const fromDate = new Date(p.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const toDate = new Date(p.end_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const fromTime = new Date(p.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+          const toTime = new Date(p.end_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+          return {
+            id: p.id,
+            userId: p.user_id,
+            content: p.post_content,
+            dateRange: { from: fromDate, to: toDate },
+            timeRange: { from: fromTime, to: toTime },
+            location: p.location_str,
+            timestamp: new Date(p.time_posted).toLocaleString(),
+            capacity: p.capacity,
+            authorName: p.author_name,
+            authorLocation: p.author_location
+          }
+        });
+        setOwnPosts(formattedPosts);
+      });
+    }
+  }, [currentUserId, refreshKey]);
 
   useEffect(() => {
     if (userId) {
@@ -133,15 +162,14 @@ return (
         </motion.div>
         
             
-        {/* hosting events section */}
+    {/* hosting events section */}
         <motion.div className="space-y-4" variants={containerVariants}>
-        <h3 className="text-2xl flex items-center gap-2 pt-10" style={{ fontFamily: 'Castoro, serif' }}>
+        <h3 className="text-2xl flex items-center gap-2" style={{ fontFamily: 'Castoro, serif' }}>
             <MessageCircle size={24} className="text-[#f55c7a]" />
             Events I'm Hosting
         </h3>
-
-        {userPosts.length > 0 ? (
-            userPosts.map((post, index) => (
+        {ownPosts.length > 0 ? (
+            ownPosts.map((post, index) => (
             <motion.div key={post.id} variants={itemVariants}>
                 <WebPostCard
                 post={post}
@@ -162,7 +190,7 @@ return (
             >
                 <Plus className="w-8 h-8 text-[#f55c7a]" />
             </motion.div>
-            <p className="text-[#666666]">You haven't created any future events yet</p>
+            <p className="text-[#666666]">You haven't planned any events yet</p>
             <p className="text-sm text-[#999] mt-1">Share your travel plans with the community!</p>
             </motion.div>
         )}

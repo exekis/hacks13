@@ -11,6 +11,8 @@ export interface CreatePostRequest {
 }
 
 export interface PostResponse {
+  content: any;
+  author_id: any;
   id: string;
   user_id: string;
   post_content: string;
@@ -55,7 +57,6 @@ export async function fetchUserPosts(userId: string): Promise<PostResponse[]> {
     // return empty array if endpoint doesn't exist or fails
     return [];
   }
-
   return response.json();
 }
 

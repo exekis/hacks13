@@ -5,6 +5,7 @@ import { getUserId, API_URL } from '@/api/auth';
 
 interface WebCreatePostProps {
   onBack: () => void;
+  
 }
 
 export function WebCreatePost({ onBack }: WebCreatePostProps) {
