@@ -2,6 +2,7 @@ import json
 from dotenv import load_dotenv
 import psycopg2
 import os
+import hashlib
 
 load_dotenv()
 # -----------------------
@@ -217,6 +218,34 @@ def create_auth_table(cur, conn) -> None:
     conn.commit()
     print("Auth table created successfully.")
 
+
+def seed_auth_for_all_users(cur, conn) -> None:
+    """
+    Creates a default password for every user in Users that doesn't already have an Auth row.
+    Default password: "password123" (hashed with sha256).
+    """
+    default_plain = "password123"
+    default_hash = hashlib.sha256(default_plain.encode("utf-8")).hexdigest()
+
+    cur.execute("SELECT userID FROM Users;")
+    user_ids = [row[0] for row in cur.fetchall()]
+
+    inserted = 0
+    for uid in user_ids:
+        cur.execute("SELECT 1 FROM Auth WHERE userID = %s", (uid,))
+        if cur.fetchone():
+            continue
+
+        cur.execute(
+            "INSERT INTO Auth (userID, password_hash) VALUES (%s, %s)",
+            (uid, default_hash),
+        )
+        inserted += 1
+
+    conn.commit()
+    print(f"Seeded Auth rows for {inserted} users (default password: {default_plain}).")
+
+
 def load_messages(cur, conn, messages_file: str) -> None:
     """Load messages from JSON into the Messages table."""
     with open(messages_file, "r", encoding="utf-8") as f:
@@ -272,6 +301,7 @@ if __name__ == "__main__":
         load_conversations(cur, conn, CONVERSATIONS_FILE)
         load_messages(cur, conn, MESSAGES_FILE)
         create_auth_table(cur, conn)
+        seed_auth_for_all_users(cur, conn)
     finally:
         cur.close()
         conn.close()

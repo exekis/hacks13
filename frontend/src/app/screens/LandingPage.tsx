@@ -448,8 +448,8 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
           <div className="grid md:grid-cols-3 gap-8">
             {[
               { step: '01', title: 'Create Your Profile', desc: 'Share your interests, travel style, and what kind of connections you\'re looking for.' },
-              { step: '02', title: 'Discover People', desc: 'Our smart matching finds travelers and students who share your vibe and interests.' },
-              { step: '03', title: 'Connect & Meet', desc: 'Chat, plan meetups, and turn online connections into real-world friendships.' },
+              { step: '02', title: 'Discover People', desc: 'Our recommendation algorithm finds travelers and students who share your background and interests.' },
+              { step: '03', title: 'Discover Yourself', desc: 'Connect, explore, and discover who you are abroad with support from our community.' },
             ].map((item, index) => (
               <motion.div
                 key={item.step}

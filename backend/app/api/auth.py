@@ -124,10 +124,10 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
         )
     
     user_id = user_record[0]
-
     # Get password hash
     cur.execute("SELECT password_hash FROM Auth WHERE userID = %s", (user_id,))
     auth_record = cur.fetchone()
+
     if not auth_record:
         # This case should ideally not happen if data is consistent
         raise HTTPException(

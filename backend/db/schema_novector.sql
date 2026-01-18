@@ -1,4 +1,9 @@
 -- schema without vector extension for systems that don't have pgvector installed
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS posts CASCADE;
+DROP TABLE IF EXISTS conversations CASCADE;
+DROP TABLE IF EXISTS auth CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE TABLE IF NOT EXISTS Users (
     userID INT PRIMARY KEY,
@@ -40,10 +45,14 @@ CREATE TABLE IF NOT EXISTS Users (
 CREATE TABLE IF NOT EXISTS Posts (
     PostID SERIAL PRIMARY KEY,
     user_id INT REFERENCES Users(userID),
-    location_str VARCHAR(255),
-    location_coords POINT,
+    location_str TEXT,
+    post_content TEXT,
+    is_event BOOLEAN DEFAULT FALSE,
     time_posted TIMESTAMPTZ DEFAULT NOW(),
-    post_content TEXT
+    rsvps INT[],
+    capacity INT,
+    start_time TIMESTAMPTZ,
+    end_time TIMESTAMPTZ
 );
 
 CREATE TABLE IF NOT EXISTS Conversations (
