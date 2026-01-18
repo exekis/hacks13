@@ -233,15 +233,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
                 <ArrowRight size={20} />
               </motion.div>
             </motion.button>
-
-            <motion.button
-              className="px-8 py-4 bg-white text-black rounded-xl border-2 border-black font-semibold text-lg flex items-center gap-3 shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-[2px_2px_0px_0px_rgba(0,0,0,1)] hover:translate-x-[2px] hover:translate-y-[2px] transition-all"
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <Heart className="text-[#f55c7a]" size={20} />
-              See How It Works
-            </motion.button>
           </motion.div>
 
           {/* floating cards preview */}
