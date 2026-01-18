@@ -53,6 +53,9 @@ export interface UserProfile {
     verifiedOnly: boolean;
     culturalSimilarity: number; // 0-100
   };
+  
+  // profile completion status from backend
+  profileComplete?: boolean;
 }
 
 export const defaultProfile: Partial<UserProfile> = {

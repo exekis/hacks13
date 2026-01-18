@@ -9,7 +9,7 @@ const API_URL = import.meta.env.VITE_API_URL ||
  * @param password The user's password.
  * @returns A promise that resolves to an object containing the access token and token type.
  */
-export const signup = async (email: string, password: string): Promise<{ access_token: string; token_type: string; }> => {
+export const signup = async (email: string, password: string): Promise<{ access_token: string; token_type: string; user_id: number }> => {
   const response = await fetch(`${API_URL}/signup`, {
     method: 'POST',
     headers: {
@@ -31,7 +31,7 @@ export const signup = async (email: string, password: string): Promise<{ access_
  * @param password The user's password.
  * @returns A promise that resolves to an object containing the access token and token type.
  */
-export const login = async (email: string, password: string): Promise<{ access_token: string; token_type: string; }> => {
+export const login = async (email: string, password: string): Promise<{ access_token: string; token_type: string; user_id: number }> => {
   const formData = new URLSearchParams();
   formData.append('username', email);
   formData.append('password', password);
