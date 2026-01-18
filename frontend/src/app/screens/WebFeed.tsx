@@ -64,9 +64,14 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
         fetchPostRecommendations(currentUserId, 20)
       ]);
 
+      console.log('[WebFeed] received peopleRecs:', peopleRecs.length);
+      console.log('[WebFeed] received postRecs:', postRecs.length);
+
       // transform backend data to ui-compatible format
       const transformedPeople = peopleRecs.map(backendPersonToMockUser);
       const transformedPosts = postRecs.map(backendPostToMockPost);
+
+      console.log('[WebFeed] transformed posts:', transformedPosts.length);
 
       setPeopleItems(transformedPeople as User[]);
       setPostItems(transformedPosts as (Post & { authorName?: string })[]);

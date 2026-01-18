@@ -107,6 +107,8 @@ export async function fetchPostRecommendations(
     params.append('debug', 'true');
   }
   
+  console.log('[recommendations] fetching posts from:', `${API_BASE_URL}/api/recommendations/posts?${params}`);
+  
   const response = await fetch(
     `${API_BASE_URL}/api/recommendations/posts?${params}`
   );
@@ -115,7 +117,9 @@ export async function fetchPostRecommendations(
     throw new Error(`Failed to fetch post recommendations: ${response.statusText}`);
   }
   
-  return response.json();
+  const data = await response.json();
+  console.log('[recommendations] posts response:', data.length, 'items');
+  return data;
 }
 
 /**
