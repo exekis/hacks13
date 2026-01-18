@@ -95,7 +95,8 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             cur.execute(sql_get_recs, (user_id,))
             row = cur.fetchone()
             if not row:
-                return []
+                # fallback for new users
+                return get_fallback_posts(conn, limit)
 
             emb_recs = row[0] or []
             dis_recs = row[1] or []
@@ -104,7 +105,8 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             dis_ids = extract_post_ids(dis_recs)
 
             if not emb_ids and not dis_ids:
-                return []
+                # fallback for users with no recs yet
+                return get_fallback_posts(conn, limit)
 
             emb_set = set(emb_ids)
 
@@ -113,7 +115,7 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             combined_ids = unique_preserve_order(both_in_dis_order + dis_ids + emb_ids)
 
             if not combined_ids:
-                return []
+                return get_fallback_posts(conn, limit)
 
             combined_ids = combined_ids[:limit]
 
@@ -182,7 +184,8 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             row = cur.fetchone()
 
             if not row or not row[0]:
-                return []
+                # fallback: return some random users for new users with no recs
+                return get_fallback_people(conn, user_id, limit)
 
             recs = row[0]
 
@@ -193,7 +196,7 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
                     rec_user_ids.append(int(d["userid"]))
 
             if not rec_user_ids:
-                return []
+                return get_fallback_people(conn, user_id, limit)
 
             rec_user_ids = rec_user_ids[:limit]
 
@@ -219,6 +222,72 @@ def recommend_people(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
             ]
     finally:
         conn.close()
+
+
+def get_fallback_people(conn, exclude_user_id: int, limit: int = 20) -> List[Dict[str, Any]]:
+    """return random users for new users with no recommendations"""
+    sql = """
+        SELECT
+            userid, name, pronouns, currentCity, travelingTo,
+            age, bio, languages, lookingFor, culturalIdentity,
+            isStudent, university
+        FROM users
+        WHERE userid != %s AND name IS NOT NULL AND bio IS NOT NULL
+        ORDER BY RANDOM()
+        LIMIT %s;
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql, (exclude_user_id, limit))
+        rows = cur.fetchall()
+        return [
+            {
+                "userid": r[0],
+                "name": r[1] or f"User {r[0]}",
+                "pronouns": r[2],
+                "currentCity": r[3],
+                "travelingTo": r[4],
+                "age": r[5],
+                "bio": r[6],
+                "languages": r[7] or [],
+                "lookingFor": r[8] or [],
+                "culturalIdentity": r[9] or [],
+                "isStudent": r[10],
+                "university": r[11],
+            }
+            for r in rows
+        ]
+
+
+def get_fallback_posts(conn, limit: int = 20) -> List[Dict[str, Any]]:
+    """return recent posts for new users with no recommendations"""
+    sql = """
+        SELECT
+            p.postid,
+            p.time_posted,
+            p.post_content,
+            p.user_id,
+            u.name AS author_name,
+            u.currentCity AS author_location
+        FROM posts p
+        LEFT JOIN users u ON u.userid = p.user_id
+        WHERE p.post_content IS NOT NULL
+        ORDER BY p.time_posted DESC NULLS LAST
+        LIMIT %s;
+    """
+    with conn.cursor() as cur:
+        cur.execute(sql, (limit,))
+        rows = cur.fetchall()
+        return [
+            {
+                "postid": r[0],
+                "time_posted": r[1].isoformat() if r[1] else None,
+                "post_content": r[2],
+                "author_id": r[3],
+                "author_name": r[4] or (f"User {r[3]}" if r[3] is not None else "Unknown"),
+                "author_location": r[5],
+            }
+            for r in rows
+        ]
 
 
 def recommend_mixed_feed(user_id: int, limit: int = 50, seed: int | None = None) -> List[Dict[str, Any]]:
