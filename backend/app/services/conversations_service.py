@@ -21,7 +21,7 @@ def get_conversations(user_id: int) -> List[Dict[str, Any]]:
             m.timestamp AS last_message_time,
             c.last_messaged
         FROM Conversations c
-        JOIN Users u
+        LEFT JOIN Users u
           ON u.userID = CASE WHEN c.user_a = %s THEN c.user_b ELSE c.user_a END
         LEFT JOIN LATERAL (
             SELECT message_content, timestamp
@@ -198,7 +198,7 @@ def open_conversation(
                 return {
                     "conversationID": None,
                     "friend_user_id": friend_user_id,
-                    "friend_name": f["name"] if f else None,
+                    "friend_name": f["name"] if f else "Traveler",
                     "messages": [],
                 }
 
@@ -210,7 +210,7 @@ def open_conversation(
             # get friend name
             cur.execute(sql_get_friend_name, (friend_user_id,))
             friend_row = cur.fetchone()
-            friend_name = friend_row["name"] if friend_row else None
+            friend_name = friend_row["name"] if friend_row else "Traveler"
 
             # get messages from ALL conversations between this pair
             cur.execute(sql_get_messages_for_convos, (convo_ids,))

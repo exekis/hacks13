@@ -7,6 +7,8 @@ import { Avatar } from '@/app/components/DesignSystem';
 
 interface WebMessagesProps {
   selectedUserId?: string;
+  selectedUserName?: string;  // optional name of the selected user
+  selectedUserAvatar?: string;  // optional avatar url of the selected user
   onBack?: () => void;
   currentUserId?: string;
 }
@@ -18,11 +20,22 @@ interface UiMessage {
   timestamp: string;
 }
 
-export function WebMessages({ selectedUserId, onBack, currentUserId }: WebMessagesProps) {
+// info about the friend in the currently selected chat
+interface ChatFriendInfo {
+  userId: string;
+  name: string;
+  avatar?: string;
+}
+
+export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvatar, onBack, currentUserId }: WebMessagesProps) {
   const [messageText, setMessageText] = useState('');
   const [selectedChat, setSelectedChat] = useState<string | undefined>(selectedUserId);
   const [searchQuery, setSearchQuery] = useState('');
   const [messages, setMessages] = useState<UiMessage[]>([]);
+  const [currentChatFriend, setCurrentChatFriend] = useState<ChatFriendInfo | null>(
+    // initialize from props if provided
+    selectedUserId && selectedUserName ? { userId: selectedUserId, name: selectedUserName, avatar: selectedUserAvatar } : null
+  );
   const [conversations, setConversations] = useState<ConversationPreview[]>([]);
   const [loading, setLoading] = useState(false);
   const [conversationsLoading, setConversationsLoading] = useState(true);
@@ -66,6 +79,14 @@ export function WebMessages({ selectedUserId, onBack, currentUserId }: WebMessag
       try {
         const friendId = parseInt(selectedChat, 10);
         const data = await fetchConversation(userIdInt, friendId);
+        
+        // store friend info from the conversation response
+        if (data.friend_name) {
+          setCurrentChatFriend({
+            userId: selectedChat,
+            name: data.friend_name,
+          });
+        }
         
         // transform api messages to ui messages
         const uiMessages: UiMessage[] = data.messages.map(m => ({
@@ -218,10 +239,16 @@ export function WebMessages({ selectedUserId, onBack, currentUserId }: WebMessag
         <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 flex flex-col`}>
           {selectedChat ? (
             (() => {
-              // get friend info for chat header
+              // get friend info for chat header - check multiple sources
               const conv = conversations.find(c => c.friend_user_id.toString() === selectedChat);
               const mockUser = mockUsers.find(u => u.id === selectedChat);
-              const chatName = conv?.friend_name || mockUser?.name || 'Traveler';
+              const currentFriend = currentChatFriend?.userId === selectedChat ? currentChatFriend : null;
+              // prioritize: conversation data > current chat friend info > mock user > fallback
+              const chatName = conv?.friend_name || 
+                currentFriend?.name || 
+                mockUser?.name || 
+                'Traveler';
+              const chatAvatar = currentFriend?.avatar || mockUser?.avatar;
               
               return (
             <>
@@ -248,7 +275,7 @@ export function WebMessages({ selectedUserId, onBack, currentUserId }: WebMessag
                     whileHover={{ scale: 1.1 }}
                   >
                     <Avatar 
-                      src={mockUser?.avatar}
+                      src={chatAvatar}
                       name={chatName}
                       size="sm"
                       className="border border-black"
