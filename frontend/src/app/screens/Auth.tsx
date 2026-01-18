@@ -54,7 +54,8 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
       storeToken(access_token);
       onSignUp(access_token, String(user_id));
     } catch (err: unknown) {
-      setError('Failed to sign up. Please try again.');
+      const message = err instanceof Error ? err.message : 'Failed to sign up. Please try again.';
+      setError(message);
     } finally {
       setLoading(false);
     }

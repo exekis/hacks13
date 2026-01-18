@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { X, Image as ImageIcon, Calendar, Send, MapPin } from 'lucide-react';
+import { motion, AnimatePresence } from 'motion/react';
+import { X, Image as ImageIcon, Calendar, Send, Sparkles, MapPin, Loader2 } from 'lucide-react';
 import { getUserId, API_URL } from '@/api/auth';
 
 interface WebCreatePostProps {
@@ -15,13 +15,23 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
   const [timeTo, setTimeTo] = useState('');
   const [capacity, setCapacity] = useState<number | ''>('');
   const [location, setLocation] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   const handleSubmit = async () => {
     const userId = getUserId();
     if (!userId) {
-      // Handle case where user is not logged in
+      setError("You must be logged in to create a post");
       return;
     }
+
+    if (!content.trim()) {
+      setError('Please enter some content for your post');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
 
     const postData = {
       user_id: parseInt(userId, 10),
@@ -44,10 +54,13 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
       if (response.ok) {
         onBack();
       } else {
-        // Handle error
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.detail || 'Failed to create post');
       }
     } catch (error) {
-      // Handle error
+      setError(error instanceof Error ? error.message : 'Failed to create post');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -240,7 +253,7 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
             </motion.button>
             <motion.button
               onClick={handleSubmit}
-              disabled={!content.trim()}
+              disabled={isSubmitting || !content.trim()}
               className={`flex-1 px-6 py-3 border border-black rounded-xl transition-all flex items-center justify-center gap-2 ${                content.trim()
                   ? 'bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white shadow-lg'
                   : 'bg-[#666666] text-white cursor-not-allowed'
@@ -248,8 +261,14 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
               whileHover={content.trim() ? { scale: 1.02, boxShadow: '0 8px 20px rgba(245, 92, 122, 0.4)' } : {}}
               whileTap={content.trim() ? { scale: 0.98 } : {}}
             >
-              <Send size={18} />
-              Post
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Send size={18} />
+                  Post
+                </>
+              )}
             </motion.button>
           </div>
         </motion.div>

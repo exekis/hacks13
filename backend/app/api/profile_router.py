@@ -11,7 +11,7 @@ from ..schemas.post import CreatePostIn, PostOut
 
 from .auth import oauth2_scheme, SECRET_KEY, ALGORITHM, get_db_connection, TokenData
 
-router = APIRouter()
+router = APIRouter(prefix="/profile", tags=["profile"])
 
 class AgePreference(BaseModel):
     enabled: bool
@@ -156,12 +156,34 @@ async def create_post(payload: CreatePostIn):
     if not author:
         raise HTTPException(status_code=404, detail="author not found")
 
+    # get next post id since postid doesn't auto-increment
+    cur.execute("SELECT COALESCE(MAX(PostID), 0) + 1 FROM Posts")
+    next_post_id = cur.fetchone()[0]
+
     cur.execute(
-        "INSERT INTO Posts (user_id, content, is_event) VALUES (%s, %s, %s) RETURNING PostID, user_id, content, is_event",
-        (payload.author_id, payload.content, payload.is_event)
+        "INSERT INTO Posts (PostID, user_id, post_content) VALUES (%s, %s, %s) RETURNING PostID, user_id, post_content",
+        (next_post_id, payload.author_id, payload.content)
     )
     post = cur.fetchone()
     conn.commit()
     cur.close()
     conn.close()
-    return PostOut(id=str(post[0]), author_id=str(post[1]), content=post[2], is_event=post[3])
+    return PostOut(id=str(post[0]), author_id=str(post[1]), content=post[2] or "", is_event=payload.is_event)
+
+
+@router.get("/posts/{user_id}", response_model=list[PostOut])
+async def get_user_posts(user_id: int):
+    """get all posts by a specific user"""
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute(
+        "SELECT PostID, user_id, post_content FROM Posts WHERE user_id = %s ORDER BY time_posted DESC",
+        (user_id,)
+    )
+    posts = cur.fetchall()
+    cur.close()
+    conn.close()
+    return [
+        PostOut(id=str(p[0]), author_id=str(p[1]), content=p[2] or "", is_event=False)
+        for p in posts
+    ]
