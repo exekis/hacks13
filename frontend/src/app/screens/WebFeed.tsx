@@ -14,14 +14,14 @@ import {
 
 interface WebFeedProps {
   onViewProfile: (userId: string) => void;
-  onMessage: (userId: string) => void;
+  // onMessage: (userId: string) => void;
   onRSVP: (userId: string) => void;
   friendRequests: Set<string>;
   onAddFriend: (userId: string) => void;
   currentUserId?: string;
 }
 
-export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAddFriend, currentUserId = '482193' }: WebFeedProps) {
+export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, currentUserId = '482193' }: WebFeedProps) {
   const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
   
   // state for api-powered recommendations
@@ -376,7 +376,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                       <motion.div key={post.id} variants={itemVariants}>
                         <WebPostCard
                           post={post}
-                          onMessage={onMessage}
+                          onRSVP={onRSVP}
                           onViewProfile={onViewProfile}
                         />
                       </motion.div>
@@ -410,7 +410,6 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                             <WebPostCard
                               post={item.data as Post}
                               onRSVP={onRSVP}
-                              onMessage={onMessage}
                               onViewProfile={onViewProfile}
                             />
                           </motion.div>

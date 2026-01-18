@@ -44,6 +44,7 @@ export default function App() {
   };
 
   const handleRSVP = (userId: string) => {
+    setSelectedProfileId(userId);
     setActiveScreen('schedule');
   };
 
@@ -147,7 +148,7 @@ export default function App() {
           <WebFeed
             onViewProfile={handleViewProfile}
             onRSVP={handleRSVP}
-            onMessage={handleMessage}
+            // onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
           />
@@ -156,14 +157,12 @@ export default function App() {
         {(activeScreen === 'schedule') && (
           <Schedule
             userId={selectedProfileId}
-            userProfile={userProfile}
+            // userProfile={userProfile}
             onBack={() => {
-              setSelectedProfileId(undefined);
               setActiveScreen('feed');
             }}
-            onMessage={handleMessage}
-            onCreatePost={() => setActiveScreen('create')}
-            onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
+            onRSVP={handleRSVP}
+            // onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
           />
         )}
 
