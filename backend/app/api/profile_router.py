@@ -92,31 +92,30 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
         "isStudent": user[5],
         "university": user[6],
         "currentCity": user[7],
-        "languages": user[8],
-        "hometown": user[9],
-        "agePreference": {"enabled": True, "range": user[10]},
-        "verifiedStudentsOnly": user[11],
-        "culturalIdentity": user[12] if user[12] is not None else [],
-        "ethnicity": [user[13]] if user[13] is not None else [],
-        "religion": [user[14]] if user[14] is not None else [],
-        "culturalSimilarityImportance": user[15],
-        "culturalComfortLevel": user[16],
-        "languageMatchImportant": user[17],
-        "purposeOfStay": user[18],
-        "lookingFor": user[19],
-        "socialVibe": user[20],
-        "whocanseeposts": user[21],
-        "hideLocationUntilFriends": user[22],
-        "meetupPreference": user[23],
-        "boundaries": user[24],
-        "bio": user[25],
-        "AboutMe": user[26],
-        "Friends": user[27],
-        "recs": user[28],
-        "event_recs": user[29],
-        "travelingTo": None,
+        "travelingTo": user[8],
+        "languages": user[9],
+        "hometown": user[10],
+        "agePreference": {"enabled": True, "range": user[11]},
+        "verifiedStudentsOnly": user[12],
+        "culturalIdentity": user[13],
+        "ethnicity": [user[14]],
+        "religion": [user[15]],
+        "culturalSimilarityImportance": user[16],
+        "culturalComfortLevel": user[17],
+        "languageMatchImportant": user[18],
+        "purposeOfStay": user[19],
+        "lookingFor": user[20],
+        "socialVibe": user[21],
+        "whocanseeposts": user[22],
+        "hideLocationUntilFriends": user[23],
+        "meetupPreference": user[24],
+        "boundaries": user[25],
+        "bio": user[26],
+        "AboutMe": user[27],
+        "Friends": user[28],
+        "recs": user[30],
+        "event_recs": user[31],
         "availability": [],
-
         "interests": [],
         "badges": [],
         "matchFilters": {
@@ -133,6 +132,60 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
 @router.get("/users/me", response_model=UserProfile)
 async def read_users_me(current_user: UserProfile = Depends(get_current_user)):
     return current_user
+
+@router.get("/users/{user_id}", response_model=UserProfile)
+async def read_user_profile(user_id: int):
+    conn = get_db_connection()
+    cur = conn.cursor()
+    cur.execute("SELECT * FROM Users WHERE userID = %s", (user_id,))
+    user = cur.fetchone()
+    cur.close()
+    conn.close()
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    user_dict = {
+        "fullName": user[1],
+        "age": user[2],
+        "pronouns": user[4],
+        "isStudent": user[5],
+        "university": user[6],
+        "currentCity": user[7],
+        "travelingTo": user[8],
+        "languages": user[9],
+        "hometown": user[10],
+        "agePreference": {"enabled": True, "range": user[11]},
+        "verifiedStudentsOnly": user[12],
+        "culturalIdentity": user[13],
+        "ethnicity": [user[14]],
+        "religion": [user[15]],
+        "culturalSimilarityImportance": user[16],
+        "culturalComfortLevel": user[17],
+        "languageMatchImportant": user[18],
+        "purposeOfStay": user[19],
+        "lookingFor": user[20],
+        "socialVibe": user[21],
+        "whocanseeposts": user[22],
+        "hideLocationUntilFriends": user[23],
+        "meetupPreference": user[24],
+        "boundaries": user[25],
+        "bio": user[26],
+        "AboutMe": user[27],
+        "Friends": user[28],
+        "recs": user[30],
+        "event_recs": user[31],
+        "availability": [],
+        "interests": [],
+        "badges": [],
+        "matchFilters": {
+            "ageRange": [18, 30],
+            "sharedGoals": [],
+            "languages": [],
+            "verifiedOnly": False,
+            "culturalSimilarity": 50
+        }
+    }
+    return UserProfile(**user_dict)
 
 @router.get("/info/", response_model=ProfileOut)
 async def profile_info(user_id: int):

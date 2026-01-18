@@ -181,12 +181,12 @@ export default function App() {
               setActiveScreen('feed');
             }}
             onRSVP={handleRSVP}
-            // onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
+          // onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
           />
         )}
 
         {activeScreen === 'create' && (
-          <WebCreatePost onBack={() => setActiveScreen('feed')} />
+          <WebCreatePost onBack={() => setActiveScreen('schedule')} />
         )}
 
         {activeScreen === 'messages' && (

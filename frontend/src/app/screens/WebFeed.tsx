@@ -1,7 +1,7 @@
 
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { mockUsers, mockPosts, User, Post } from '@/app/data/mockData';
+import { User, Post } from '@/app/data/mockData';
 import { WebPersonCard } from '@/app/components/WebPersonCard';
 import { WebPostCard } from '@/app/components/WebPostCard';
 import { Users, FileText, Sparkles, TrendingUp, Globe, Loader2, AlertCircle, RefreshCw } from 'lucide-react';
@@ -23,24 +23,20 @@ interface WebFeedProps {
 }
 
 export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAddFriend, currentUserId }: WebFeedProps) {
-  // use provided userid or fallback to localstorage
   const effectiveUserId = currentUserId || localStorage.getItem('user_id') || '482193';
   
   const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
   
-  // state for api-powered recommendations
   const [peopleItems, setPeopleItems] = useState<User[]>([]);
   const [postItems, setPostItems] = useState<(Post & { authorName?: string })[]>([]);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [usingMockData, setUsingMockData] = useState(false);
   const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
   const [isRefreshing, setIsRefreshing] = useState(false);
   const lastRefreshTime = useRef<Date | null>(null);
 
-  // manual refresh function - only called when user clicks refresh button
   const handleRefreshFeed = useCallback(async () => {
-    // prevent multiple simultaneous refreshes
     if (isRefreshing) return;
     
     setIsRefreshing(true);
@@ -48,61 +44,53 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
     setError(null);
     
     try {
-      // check if api is available
       const apiHealthy = await checkApiHealth();
       
       if (!apiHealthy) {
-        // fallback to mock data if api is not available
         console.log('API not available, using mock data');
         setUsingMockData(true);
-        setPeopleItems(mockUsers);
-        setPostItems(mockPosts);
+        setPeopleItems([]);
+        setPostItems([]);
         setHasLoadedOnce(true);
         setError('Backend unavailable - showing demo data');
         return;
       }
 
-      // fetch real recommendations from the backend
       const [peopleRecs, postRecs] = await Promise.all([
         fetchPeopleRecommendations(effectiveUserId, 20),
         fetchPostRecommendations(effectiveUserId, 20)
       ]);
 
-      console.log('[WebFeed] received peopleRecs:', peopleRecs.length);
-      console.log('[WebFeed] received postRecs:', postRecs.length);
-
-      // transform backend data to ui-compatible format
       const transformedPeople = peopleRecs.map(backendPersonToMockUser);
       const transformedPosts = postRecs.map(backendPostToMockPost);
-
-      console.log('[WebFeed] transformed posts:', transformedPosts.length);
 
       setPeopleItems(transformedPeople as User[]);
       setPostItems(transformedPosts as (Post & { authorName?: string })[]);
       setUsingMockData(false);
       setHasLoadedOnce(true);
       lastRefreshTime.current = new Date();
-    } catch (err) {
+    } catch (err) { 
       console.error('Failed to load recommendations:', err);
-      // only fallback to mock data if we have no existing data
       if (peopleItems.length === 0 && postItems.length === 0) {
         setUsingMockData(true);
-        setPeopleItems(mockUsers);
-        setPostItems(mockPosts);
+        setPeopleItems([]);
+        setPostItems([]);
       }
       setError('Failed to refresh - keeping previous feed');
     } finally {
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [effectiveUserId, isRefreshing, peopleItems.length, postItems.length]);
+  }, [effectiveUserId, isRefreshing]);
 
-  // combine people and posts for all tab
+  useEffect(() => {
+    handleRefreshFeed();
+  }, []);
+
   const allItems = hasLoadedOnce 
     ? [...peopleItems.map(u => ({type: 'user' as const, data: u})), 
        ...postItems.map(p => ({type: 'post' as const, data: p}))]
     : [];
-  // shuffle for variety
   if (allItems.length > 0) {
     allItems.sort(() => Math.random() - 0.5);
   }
@@ -118,7 +106,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
     },
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
       opacity: 1, 
