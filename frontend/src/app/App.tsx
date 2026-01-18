@@ -8,6 +8,7 @@ import { WebMessages } from '@/app/screens/WebMessages';
 import { WebCreatePost } from '@/app/screens/WebCreatePost';
 import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
+import { Schedule } from '@/app/screens/Schedule';
 import { Auth } from '@/app/screens/Auth';
 
 type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings' | 'schedule';
@@ -43,6 +44,7 @@ export default function App() {
   };
 
   const handleRSVP = (userId: string) => {
+    setSelectedProfileId(userId);
     setActiveScreen('schedule');
   };
 
@@ -151,10 +153,22 @@ export default function App() {
           <WebFeed
             onViewProfile={handleViewProfile}
             onRSVP={handleRSVP}
-            onMessage={handleMessage}
+            // onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
             currentUserId={currentUserId || undefined}
+          />
+        )}
+
+        {(activeScreen === 'schedule') && (
+          <Schedule
+            userId={selectedProfileId}
+            // userProfile={userProfile}
+            onBack={() => {
+              setActiveScreen('feed');
+            }}
+            onRSVP={handleRSVP}
+            // onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
           />
         )}
 

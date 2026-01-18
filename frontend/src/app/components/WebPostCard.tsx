@@ -9,10 +9,9 @@ interface WebPostCardProps {
   post: Post & { authorName?: string; authorLocation?: string; authorAvatar?: string };
   onRSVP?: (userId: string) => void;
   onViewProfile?: (userId: string) => void;
-  onMessage?: (userId: string) => void;
 }
 
-export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   
@@ -94,10 +93,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostC
             animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
             transition={{ duration: 0.3 }}
           >
-            <Heart 
-              size={20} 
-              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
-            />
+  
           </motion.div>
         </motion.button>
       </div>
@@ -173,7 +169,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostC
         </motion.div>
         
         <motion.button
-          onClick={() => onMessage ? onMessage(post.userId) : onRSVP?.(post.userId)}
+          onClick={() => onRSVP?.(post.userId)}
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
           whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
           whileTap={{ scale: 0.98 }}
