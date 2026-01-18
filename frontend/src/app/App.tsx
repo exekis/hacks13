@@ -16,11 +16,17 @@ type AppScreen = 'landing' | 'onboarding' | 'main' | 'auth';
 export default function App() {
   const [appScreen, setAppScreen] = useState<AppScreen>('landing');
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [token, setToken] = useState<string | null>(null);
   const [activeScreen, setActiveScreen] = useState<MainScreen>('feed');
   const [friendRequests, setFriendRequests] = useState<Set<string>>(new Set());
   const [selectedProfileId, setSelectedProfileId] = useState<string | undefined>();
   const [selectedMessageUserId, setSelectedMessageUserId] = useState<string | undefined>();
+  const [currentUserId, setCurrentUserId] = useState<string | null>(
+    localStorage.getItem("user_id")
+  );
+  const [token, setToken] = useState<string | null>(
+    localStorage.getItem("access_token")
+  );
+
 
   const handleAddFriend = (userId: string) => {
     setFriendRequests(prev => new Set([...prev, userId]));
@@ -89,14 +95,26 @@ export default function App() {
   if (appScreen === 'auth') {
     return <Auth
       // On successful sign-in, set the user profile and transition to the main app
-      onSignIn={(profile: UserProfile) => {
-        setUserProfile(profile);
-        setAppScreen('main');
-      }}
-      // On sign-up, transition the user to the onboarding/profile setup screen
-      onSignUp={(authToken: string) => {
+      onSignIn={(profile: UserProfile, authToken: string, userId: string) => {
+        localStorage.setItem("access_token", authToken);
+        localStorage.setItem("user_id", userId);
+
         setToken(authToken);
-        setAppScreen('onboarding');
+        setCurrentUserId(userId);
+
+        setUserProfile(profile);
+        setAppScreen("main");
+      }}
+
+      // On sign-up, transition the user to the onboarding/profile setup screen
+      onSignUp={(authToken: string, userId: string) => {
+        localStorage.setItem("access_token", authToken);
+        localStorage.setItem("user_id", userId);
+
+        setToken(authToken);
+        setCurrentUserId(userId);
+
+        setAppScreen("onboarding");
       }} />;
   }
 
@@ -141,6 +159,7 @@ export default function App() {
         {activeScreen === 'messages' && (
           <WebMessages
             selectedUserId={selectedMessageUserId}
+            currentUserId={currentUserId || "100000"}
             onBack={() => {
               setSelectedMessageUserId(undefined);
             }}

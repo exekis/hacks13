@@ -5,9 +5,10 @@ import { UserProfile } from '@/app/types/profile';
 import { login, signup, getMyProfile, storeToken } from '@/api/auth';
 
 interface AuthProps {
-  onSignIn: (profile: UserProfile) => void;
-  onSignUp: (token: string) => void;
+  onSignIn: (profile: UserProfile, token: string, userId: string) => void;
+  onSignUp: (token: string, userId: string) => void;
 }
+
 
 export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
   const [email, setEmail] = useState('');
@@ -19,16 +20,23 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
     setLoading(true);
     setError(null);
     try {
-      const { access_token } = await login(email, password);
+      const { access_token, user_id } = await login(email, password);
+
+      // easiest persistence (no security concerns)
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("user_id", String(user_id));
+
       storeToken(access_token);
+
       const profile = await getMyProfile();
-      onSignIn(profile);
+      onSignIn(profile, access_token, String(user_id));
     } catch (err: unknown) {
       setError('Failed to sign in. Please check your credentials.');
     } finally {
       setLoading(false);
     }
   };
+
 
   const handleSignUp = async () => {
     setError(null);
@@ -38,15 +46,20 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
     }
     setLoading(true);
     try {
-      const { access_token } = await signup(email, password);
+      const { access_token, user_id } = await signup(email, password);
+
+      localStorage.setItem("access_token", access_token);
+      localStorage.setItem("user_id", String(user_id));
+
       storeToken(access_token);
-      onSignUp(access_token);
+      onSignUp(access_token, String(user_id));
     } catch (err: unknown) {
       setError('Failed to sign up. Please try again.');
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen bg-[#FFEBDA] flex items-center justify-center">
