@@ -6,7 +6,7 @@ import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 import { Avatar } from '@/app/components/DesignSystem';
 
 interface WebPostCardProps {
-  post: Post & { authorName?: string; authorLocation?: string };
+  post: Post & { authorName?: string; authorLocation?: string; authorAvatar?: string };
   onRSVP?: (userId: string) => void;
   onViewProfile?: (userId: string) => void;
   onMessage?: (userId: string) => void;
@@ -20,6 +20,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostC
   const mockUser = mockUsers.find(u => u.id === post.userId);
   const displayName = mockUser?.name || post.authorName || `User ${post.userId}`;
   const displayLocation = mockUser?.location || post.authorLocation || post.location;
+  const displayAvatar = mockUser?.avatar || post.authorAvatar;
 
   return (
     <motion.div 
@@ -48,7 +49,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostC
           whileTap={{ scale: 0.95 }}
         >
           <Avatar 
-            src={mockUser?.avatar} 
+            src={displayAvatar} 
             name={displayName}
             size="md"
             className="border border-black"
