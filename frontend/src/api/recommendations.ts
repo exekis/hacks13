@@ -314,7 +314,7 @@ export function backendPostToMockPost(rec: BackendPostRecommendation) {
     
     // author information from backend
     userId: rec.author_id?.toString() || '0',
-    authorName: rec.author_name || `User ${rec.author_id}`,
+    authorName: rec.author_name || 'Traveler',
     authorLocation: rec.author_location || undefined,
     // generate avatar url based on author_id
     authorAvatar: rec.author_id 

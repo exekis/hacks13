@@ -49,8 +49,16 @@ export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvat
   useEffect(() => {
     if (selectedUserId) {
       setSelectedChat(selectedUserId);
+      // also update current chat friend info if provided
+      if (selectedUserName) {
+        setCurrentChatFriend({
+          userId: selectedUserId,
+          name: selectedUserName,
+          avatar: selectedUserAvatar,
+        });
+      }
     }
-  }, [selectedUserId]);
+  }, [selectedUserId, selectedUserName, selectedUserAvatar]);
 
   // fetch conversations list
   useEffect(() => {
@@ -115,7 +123,9 @@ export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvat
     if (messageText.trim() && selectedChat) {
       try {
         const friendId = parseInt(selectedChat, 10);
+        console.log('[WebMessages] sending message from', userIdInt, 'to', friendId);
         const resp = await sendMessage(userIdInt, friendId, messageText);
+        console.log('[WebMessages] message sent successfully:', resp);
         
         const newMessage: UiMessage = {
           id: resp.messageid.toString(),
@@ -127,8 +137,10 @@ export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvat
         setMessages(prev => [...prev, newMessage]);
         setMessageText('');
         
-        // refresh conversations list to update last message snippet
+        // refresh conversations list to update last message snippet and add new conversation
+        console.log('[WebMessages] refreshing conversations for user', userIdInt);
         const updatedConvs = await fetchConversations(userIdInt);
+        console.log('[WebMessages] got conversations:', updatedConvs);
         setConversations(updatedConvs);
 
       } catch (err) {
