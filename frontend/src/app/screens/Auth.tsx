@@ -31,8 +31,12 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
   };
 
   const handleSignUp = async () => {
-    setLoading(true);
     setError(null);
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter a username and password.');
+      return;
+    }
+    setLoading(true);
     try {
       const { access_token } = await signup(email, password);
       storeToken(access_token);
@@ -70,7 +74,7 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder="•••"
               value={password}
               onChange={(e: React.ChangeEvent<HTMLInputElement>) => setPassword(e.target.value)}
               className="mt-1"
