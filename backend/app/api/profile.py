@@ -11,50 +11,52 @@ from .auth import oauth2_scheme, SECRET_KEY, ALGORITHM, get_db_connection, Token
 router = APIRouter()
 
 class AgePreference(BaseModel):
-    enabled: bool
-    range: int
+    enabled: bool = True
+    range: int = 25
 
 class MatchFilters(BaseModel):
-    ageRange: List[int]
-    sharedGoals: List[str]
-    languages: List[str]
-    verifiedOnly: bool
-    culturalSimilarity: int
+    ageRange: List[int] = [18, 99]
+    sharedGoals: List[str] = []
+    languages: List[str] = []
+    verifiedOnly: bool = False
+    culturalSimilarity: int = 50
 
 class UserProfile(BaseModel):
-    fullName: str
-    age: int
+    fullName: Optional[str] = None
+    age: Optional[int] = None
     pronouns: Optional[str] = None
-    isStudent: bool
+    isStudent: Optional[bool] = None
     university: Optional[str] = None
-    currentCity: str
+    currentCity: Optional[str] = None
     travelingTo: Optional[str] = None
-    languages: List[str]
+    languages: List[str] = []
     hometown: Optional[str] = None
-    agePreference: AgePreference
-    verifiedStudentsOnly: bool
-    culturalIdentity: Optional[List[str]] = None
-    ethnicity: Optional[List[str]] = None
-    religion: Optional[List[str]] = None
-    culturalSimilarityImportance: int
-    culturalComfortLevel: str
-    languageMatchImportant: bool
+    agePreference: AgePreference = AgePreference()
+    verifiedStudentsOnly: bool = False
+    culturalIdentity: List[str] = []
+    ethnicity: List[str] = []
+    religion: List[str] = []
+    culturalSimilarityImportance: int = 50
+    culturalComfortLevel: str = "open"
+    languageMatchImportant: bool = False
     purposeOfStay: Optional[str] = None
-    lookingFor: List[str]
-    socialVibe: List[str]
-    availability: List[str]
-    whocanseeposts: str
-    hideLocationUntilFriends: bool
-    meetupPreference: str
+    lookingFor: List[str] = []
+    socialVibe: List[str] = []
+    availability: List[str] = []
+    whoCanSeePosts: str = "everyone"
+    hideLocationUntilFriends: bool = True
+    meetupPreference: str = "public-first"
     boundaries: Optional[str] = None
-    bio: str
-    interests: List[str]
-    badges: List[str]
-    matchFilters: MatchFilters
+    bio: str = ""
+    interests: List[str] = []
+    badges: List[str] = []
+    matchFilters: MatchFilters = MatchFilters()
     AboutMe: Optional[str] = None
-    Friends: Optional[List[int]] = None
-    recs: Optional[List[dict]] = None
-    event_recs: Optional[List[dict]] = None
+    Friends: List[int] = []
+    recs: List[dict] = []
+    event_recs: List[dict] = []
+    # flag to indicate if profile setup is complete
+    profileComplete: bool = False
 
 async def get_current_user(token: str = Depends(oauth2_scheme)):
     credentials_exception = HTTPException(
@@ -81,47 +83,55 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     if user is None:
         raise credentials_exception
     
-    # construct userprofile from database row
+    # check if profile setup is complete (has required fields filled)
+    profile_complete = bool(
+        user.get("name") and 
+        user.get("currentcity") and 
+        user.get("bio")
+    )
+    
+    # construct userprofile from database row with safe defaults
     user_dict = {
-        "fullName": user.get("name", "Unknown"),
-        "age": user.get("age", 18),
+        "fullName": user.get("name") or "",
+        "age": user.get("age") or 18,
         "pronouns": user.get("pronouns"),
-        "isStudent": user.get("isstudent", False),
+        "isStudent": user.get("isstudent") if user.get("isstudent") is not None else False,
         "university": user.get("university"),
-        "currentCity": user.get("currentcity", ""),
+        "currentCity": user.get("currentcity") or "",
         "travelingTo": user.get("travelingto"),
-        "languages": user.get("languages", []),
+        "languages": user.get("languages") or [],
         "hometown": user.get("hometown"),
-        "agePreference": {"enabled": True, "range": user.get("agepreference", 25)},
-        "verifiedStudentsOnly": user.get("verifiedstudentsonly", False),
-        "culturalIdentity": user.get("culturalidentity", []),
+        "agePreference": {"enabled": True, "range": user.get("agepreference") or 25},
+        "verifiedStudentsOnly": user.get("verifiedstudentsonly") if user.get("verifiedstudentsonly") is not None else False,
+        "culturalIdentity": user.get("culturalidentity") or [],
         "ethnicity": [user.get("ethnicity")] if user.get("ethnicity") else [],
         "religion": [user.get("religion")] if user.get("religion") else [],
-        "culturalSimilarityImportance": user.get("culturalsimilarityimportance", 50),
-        "culturalComfortLevel": user.get("culturalcomfortlevel", ""),
-        "languageMatchImportant": user.get("languagematchimportant", False),
-        "purposeOfStay": user.get("purposeofstay", ""),
-        "lookingFor": user.get("lookingfor", []),
-        "socialVibe": user.get("socialvibe", []),
-        "whocanseeposts": user.get("whocanseeposts", ""),
-        "hideLocationUntilFriends": user.get("hidelocationuntilfriends", False),
-        "meetupPreference": user.get("meetuppreference", ""),
-        "boundaries": user.get("boundaries", ""),
-        "bio": user.get("bio", ""),
-        "AboutMe": user.get("aboutme", ""),
-        "Friends": user.get("friends", []),
+        "culturalSimilarityImportance": user.get("culturalsimilarityimportance") or 50,
+        "culturalComfortLevel": user.get("culturalcomfortlevel") or "open",
+        "languageMatchImportant": user.get("languagematchimportant") if user.get("languagematchimportant") is not None else False,
+        "purposeOfStay": user.get("purposeofstay") or "",
+        "lookingFor": user.get("lookingfor") or [],
+        "socialVibe": user.get("socialvibe") or [],
+        "whoCanSeePosts": user.get("whocanseeposts") or "everyone",
+        "hideLocationUntilFriends": user.get("hidelocationuntilfriends") if user.get("hidelocationuntilfriends") is not None else True,
+        "meetupPreference": user.get("meetuppreference") or "public-first",
+        "boundaries": user.get("boundaries") or "",
+        "bio": user.get("bio") or "",
+        "AboutMe": user.get("aboutme") or "",
+        "Friends": user.get("friends") or [],
         "recs": [],
         "event_recs": [],
         "availability": [],
         "interests": [],
         "badges": [],
         "matchFilters": {
-            "ageRange": [18, 30],
+            "ageRange": [18, 99],
             "sharedGoals": [],
-            "languages": user.get("languages", []),
-            "verifiedOnly": user.get("verifiedstudentsonly", False),
-            "culturalSimilarity": user.get("culturalsimilarityimportance", 50)
-        }
+            "languages": user.get("languages") or [],
+            "verifiedOnly": user.get("verifiedstudentsonly") if user.get("verifiedstudentsonly") is not None else False,
+            "culturalSimilarity": user.get("culturalsimilarityimportance") or 50
+        },
+        "profileComplete": profile_complete,
     }
     return UserProfile(**user_dict)
 

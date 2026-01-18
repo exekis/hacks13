@@ -94,16 +94,21 @@ export default function App() {
   // Render the authentication page for users who need to sign in or sign up
   if (appScreen === 'auth') {
     return <Auth
-      // On successful sign-in, set the user profile and transition to the main app
+      // On successful sign-in, set the user profile and transition based on profile completeness
       onSignIn={(profile: UserProfile, authToken: string, userId: string) => {
         localStorage.setItem("access_token", authToken);
         localStorage.setItem("user_id", userId);
 
         setToken(authToken);
         setCurrentUserId(userId);
-
         setUserProfile(profile);
-        setAppScreen("main");
+
+        // check if profile is complete, if not go to onboarding
+        if (profile.profileComplete) {
+          setAppScreen("main");
+        } else {
+          setAppScreen("onboarding");
+        }
       }}
 
       // On sign-up, transition the user to the onboarding/profile setup screen
@@ -149,6 +154,7 @@ export default function App() {
             onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
+            currentUserId={currentUserId || undefined}
           />
         )}
 

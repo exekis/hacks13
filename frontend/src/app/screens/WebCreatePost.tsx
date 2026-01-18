@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Image as ImageIcon, Calendar, Send, Sparkles, MapPin } from 'lucide-react';
+import { X, Image as ImageIcon, Calendar, Send, Sparkles, MapPin, Loader2 } from 'lucide-react';
+import { createPost } from '@/api/posts';
 
 interface WebCreatePostProps {
   onBack: () => void;
@@ -14,10 +15,36 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
   const [timeFrom, setTimeFrom] = useState('');
   const [timeTo, setTimeTo] = useState('');
   const [capacity, setCapacity] = useState<number | ''>('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    // in a real app, this would create the post
-    onBack();
+  const handleSubmit = async () => {
+    if (!content.trim()) {
+      setError('Please enter some content for your post');
+      return;
+    }
+
+    const userId = localStorage.getItem('user_id');
+    if (!userId) {
+      setError('You must be logged in to create a post');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    try {
+      await createPost({
+        author_id: parseInt(userId, 10),
+        content: content.trim(),
+        is_event: hasDateRange,
+      });
+      onBack();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to create post');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const containerVariants = {

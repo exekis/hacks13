@@ -2,7 +2,7 @@ from pydantic import BaseModel
 from typing import Optional
 
 class CreatePostIn(BaseModel):
-    author_id: str # str to match recs
+    author_id: int  # int to match database
     content: str
     is_event: bool = False
 
