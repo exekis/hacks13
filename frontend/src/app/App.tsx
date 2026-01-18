@@ -179,7 +179,7 @@ export default function App() {
         {activeScreen === 'messages' && (
           <WebMessages
             selectedUserId={selectedMessageUserId}
-            currentUserId={currentUserId || "100000"}
+            currentUserId={currentUserId || undefined}
             onBack={() => {
               setSelectedMessageUserId(undefined);
             }}

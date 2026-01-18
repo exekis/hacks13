@@ -17,7 +17,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   
   // try to find user in mock data, fall back to post author info
   const mockUser = mockUsers.find(u => u.id === post.userId);
-  const displayName = mockUser?.name || post.authorName || `User ${post.userId}`;
+  const displayName = post.authorName || mockUser?.name || 'Traveler';
   const displayLocation = mockUser?.location || post.authorLocation || post.location;
   const displayAvatar = mockUser?.avatar || post.authorAvatar;
 

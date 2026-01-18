@@ -1,8 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { mockUsers } from '@/app/data/mockData';
-import { User, Send, ArrowLeft, MessageCircle, Sparkles, Search, Loader2 } from 'lucide-react';
+import { Send, ArrowLeft, MessageCircle, Search, Loader2 } from 'lucide-react';
 import { fetchConversations, fetchConversation, sendMessage, ConversationPreview, Message as ApiMessage } from '@/api/conversations';
+import { Avatar } from '@/app/components/DesignSystem';
 
 interface WebMessagesProps {
   selectedUserId?: string;
@@ -17,7 +18,7 @@ interface UiMessage {
   timestamp: string;
 }
 
-export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }: WebMessagesProps) {
+export function WebMessages({ selectedUserId, onBack, currentUserId }: WebMessagesProps) {
   const [messageText, setMessageText] = useState('');
   const [selectedChat, setSelectedChat] = useState<string | undefined>(selectedUserId);
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,7 +28,9 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
   const [conversationsLoading, setConversationsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  const userIdInt = parseInt(currentUserId, 10);
+  // get user id from prop or localStorage
+  const effectiveUserId = currentUserId || localStorage.getItem('user_id') || '100000';
+  const userIdInt = parseInt(effectiveUserId, 10);
 
   // sync selectedChat with selectedUserId prop when it changes
   useEffect(() => {
@@ -114,7 +117,8 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
   };
 
   const filteredConversations = conversations.filter(conv => {
-    return conv.friend_name.toLowerCase().includes(searchQuery.toLowerCase());
+    const displayName = conv.friend_name || 'Traveler';
+    return displayName.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
@@ -155,7 +159,9 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
             <AnimatePresence>
               {filteredConversations.map((conv, index) => {
                 const isSelected = selectedChat === conv.friend_user_id.toString();
-                // Try to find mock user for avatar if possible, else generic
+                // get display name with fallback
+                const displayName = conv.friend_name || 'Traveler';
+                // try to find mock user for avatar if possible
                 const mockUser = mockUsers.find(u => u.id === conv.friend_user_id.toString());
                 
                 return (
@@ -172,19 +178,18 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
                   >
                     <div className="flex items-start gap-3">
                       <motion.div 
-                        className="relative w-12 h-12 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center flex-shrink-0"
                         whileHover={{ scale: 1.05 }}
                       >
-                         {/* TODO: If we had real avatars, use them. For now use mock or generic */}
-                        {mockUser?.avatar ? (
-                             <span className="text-2xl">{mockUser.avatar}</span>
-                        ) : (
-                            <User size={24} className="text-black" />
-                        )}
+                        <Avatar 
+                          src={mockUser?.avatar}
+                          name={displayName}
+                          size="md"
+                          className="border border-black"
+                        />
                       </motion.div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold truncate">{conv.friend_name}</h4>
+                          <h4 className="font-semibold truncate">{displayName}</h4>
                           <span className="text-xs text-[#666666] ml-2">
                             {conv.last_message_time ? new Date(conv.last_message_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
                           </span>
@@ -212,6 +217,13 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
         {/* chat area */}
         <div className={`${selectedChat ? 'block' : 'hidden md:block'} flex-1 flex flex-col`}>
           {selectedChat ? (
+            (() => {
+              // get friend info for chat header
+              const conv = conversations.find(c => c.friend_user_id.toString() === selectedChat);
+              const mockUser = mockUsers.find(u => u.id === selectedChat);
+              const chatName = conv?.friend_name || mockUser?.name || 'Traveler';
+              
+              return (
             <>
               {/* chat header */}
               <motion.div 
@@ -233,16 +245,18 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
                     <ArrowLeft size={20} />
                   </motion.button>
                   <motion.div 
-                    className="relative w-10 h-10 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center"
                     whileHover={{ scale: 1.1 }}
                   >
-                    <User size={20} className="text-black" />
+                    <Avatar 
+                      src={mockUser?.avatar}
+                      name={chatName}
+                      size="sm"
+                      className="border border-black"
+                    />
                   </motion.div>
                   <div>
-                    {/* Resolve friend name from conversation list or mock users */}
                     <h3 className="font-semibold" style={{ fontFamily: 'Castoro, serif' }}>
-                      {conversations.find(c => c.friend_user_id.toString() === selectedChat)?.friend_name || 
-                       mockUsers.find(u => u.id === selectedChat)?.name || 'User'}
+                      {chatName}
                     </h3>
                   </div>
                 </div>
@@ -312,6 +326,8 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }
                 </div>
               </motion.div>
             </>
+              );
+            })()
           ) : (
             <motion.div 
               className="flex-1 flex items-center justify-center"

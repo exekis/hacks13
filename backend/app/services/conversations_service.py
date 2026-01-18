@@ -16,7 +16,7 @@ def get_conversations(user_id: int) -> List[Dict[str, Any]]:
         SELECT
             c.conversationID,
             CASE WHEN c.user_a = %s THEN c.user_b ELSE c.user_a END AS friend_user_id,
-            u.name AS friend_name,
+            COALESCE(u.name, SPLIT_PART(u.email, '@', 1), 'Traveler') AS friend_name,
             m.message_content AS last_message,
             m.timestamp AS last_message_time,
             c.last_messaged
@@ -160,7 +160,7 @@ def open_conversation(
     """
 
     sql_get_friend_name = """
-        SELECT name
+        SELECT COALESCE(name, SPLIT_PART(email, '@', 1), 'Traveler') AS name
         FROM Users
         WHERE userID = %s;
     """

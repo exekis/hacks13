@@ -34,7 +34,7 @@ export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePos
         const transformed: Post[] = posts.map(p => ({
           id: p.id,
           userId: p.author_id,
-          userName: userProfile?.fullName || 'You',
+          authorName: userProfile?.fullName || 'You',
           content: p.content,
           timestamp: 'Just now',
           likes: 0,
