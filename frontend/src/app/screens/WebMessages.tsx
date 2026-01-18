@@ -1,67 +1,118 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { mockUsers } from '@/app/data/mockData';
-import { User, Send, ArrowLeft, MessageCircle, Sparkles, Search } from 'lucide-react';
+import { User, Send, ArrowLeft, MessageCircle, Sparkles, Search, Loader2 } from 'lucide-react';
+import { fetchConversations, fetchConversation, sendMessage, ConversationPreview, Message as ApiMessage } from '@/api/conversations';
 
 interface WebMessagesProps {
   selectedUserId?: string;
   onBack?: () => void;
+  currentUserId?: string;
 }
 
-interface Message {
+interface UiMessage {
   id: string;
   text: string;
   sent: boolean;
   timestamp: string;
 }
 
-export function WebMessages({ selectedUserId, onBack }: WebMessagesProps) {
+export function WebMessages({ selectedUserId, onBack, currentUserId = '482193' }: WebMessagesProps) {
   const [messageText, setMessageText] = useState('');
   const [selectedChat, setSelectedChat] = useState<string | undefined>(selectedUserId);
   const [searchQuery, setSearchQuery] = useState('');
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<UiMessage[]>([]);
+  const [conversations, setConversations] = useState<ConversationPreview[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [conversationsLoading, setConversationsLoading] = useState(true);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   
-  // mock conversations
-  const conversations = mockUsers.slice(0, 5).map(user => ({
-    userId: user.id,
-    lastMessage: 'Hey! Looking forward to meeting up',
-    timestamp: '2h ago',
-    unread: user.id === '2',
-  }));
+  const userIdInt = parseInt(currentUserId, 10);
 
-  // mock messages for selected chat
-  const initialMessages: Message[] = selectedChat ? [
-    { id: '1', text: 'Hey! I saw your post about exploring Toronto', sent: false, timestamp: '10:30 AM' },
-    { id: '2', text: 'Hi! Yes, I\'m planning to visit next week', sent: true, timestamp: '10:32 AM' },
-    { id: '3', text: 'That sounds great! I know some amazing spots', sent: false, timestamp: '10:35 AM' },
-    { id: '4', text: 'Would love to hear your recommendations!', sent: true, timestamp: '10:36 AM' },
-  ] : [];
-
+  // sync selectedChat with selectedUserId prop when it changes
   useEffect(() => {
-    setMessages(initialMessages);
-  }, [selectedChat]);
+    if (selectedUserId) {
+      setSelectedChat(selectedUserId);
+    }
+  }, [selectedUserId]);
+
+  // fetch conversations list
+  useEffect(() => {
+    async function loadConversations() {
+      setConversationsLoading(true);
+      try {
+        const data = await fetchConversations(userIdInt);
+        setConversations(data);
+      } catch (err) {
+        console.error('Failed to load conversations', err);
+      } finally {
+        setConversationsLoading(false);
+      }
+    }
+    loadConversations();
+  }, [userIdInt]);
+
+  // fetch messages when chat is selected
+  useEffect(() => {
+    async function loadMessages() {
+      if (!selectedChat) return;
+
+      setLoading(true);
+      try {
+        const friendId = parseInt(selectedChat, 10);
+        const data = await fetchConversation(userIdInt, friendId);
+        
+        // transform api messages to ui messages
+        const uiMessages: UiMessage[] = data.messages.map(m => ({
+          id: m.messageid.toString(),
+          text: m.message_content,
+          sent: m.senderid === userIdInt, // if senderid matches current user, it's sent by us
+          timestamp: new Date(m.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+        }));
+        
+        setMessages(uiMessages);
+      } catch (err) {
+        console.error('Failed to load messages', err);
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadMessages();
+  }, [selectedChat, userIdInt]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
+  }, [messages, loading]);
 
-  const handleSendMessage = () => {
-    if (messageText.trim()) {
-      const newMessage: Message = {
-        id: Date.now().toString(),
-        text: messageText,
-        sent: true,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      };
-      setMessages(prev => [...prev, newMessage]);
-      setMessageText('');
+  const handleSendMessage = async () => {
+    if (messageText.trim() && selectedChat) {
+      try {
+        const friendId = parseInt(selectedChat, 10);
+        const resp = await sendMessage(userIdInt, friendId, messageText);
+        
+        const newMessage: UiMessage = {
+          id: resp.messageid.toString(),
+          text: resp.message_content,
+          sent: true,
+          timestamp: new Date(resp.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+        };
+        
+        setMessages(prev => [...prev, newMessage]);
+        setMessageText('');
+        
+        // refresh conversations list to update last message snippet
+        const updatedConvs = await fetchConversations(userIdInt);
+        setConversations(updatedConvs);
+
+      } catch (err) {
+        console.error('Failed to send message', err);
+      }
     }
   };
 
   const filteredConversations = conversations.filter(conv => {
-    const user = mockUsers.find(u => u.id === conv.userId);
-    return user?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    return conv.friend_name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   return (
@@ -101,15 +152,16 @@ export function WebMessages({ selectedUserId, onBack }: WebMessagesProps) {
           <div className="overflow-y-auto h-[calc(100vh-140px)]">
             <AnimatePresence>
               {filteredConversations.map((conv, index) => {
-                const user = mockUsers.find(u => u.id === conv.userId);
-                if (!user) return null;
+                const isSelected = selectedChat === conv.friend_user_id.toString();
+                // Try to find mock user for avatar if possible, else generic
+                const mockUser = mockUsers.find(u => u.id === conv.friend_user_id.toString());
                 
                 return (
                   <motion.button
-                    key={conv.userId}
-                    onClick={() => setSelectedChat(conv.userId)}
+                    key={conv.conversationid}
+                    onClick={() => setSelectedChat(conv.friend_user_id.toString())}
                     className={`w-full p-4 border-b border-black/10 transition-all text-left ${
-                      selectedChat === conv.userId ? 'bg-gradient-to-r from-[#f6bc66]/20 to-[#f6ac69]/10' : 'hover:bg-[#FFEBDA]/50'
+                      isSelected ? 'bg-gradient-to-r from-[#f6bc66]/20 to-[#f6ac69]/10' : 'hover:bg-[#FFEBDA]/50'
                     }`}
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
@@ -121,27 +173,37 @@ export function WebMessages({ selectedUserId, onBack }: WebMessagesProps) {
                         className="relative w-12 h-12 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center flex-shrink-0"
                         whileHover={{ scale: 1.05 }}
                       >
-                        <User size={24} className="text-black" />
-                        {conv.unread && (
-                          <motion.div 
-                            className="absolute -top-0.5 -right-0.5 w-3 h-3 bg-[#f55c7a] border border-white rounded-full"
-                            animate={{ scale: [1, 1.2, 1] }}
-                            transition={{ duration: 1.5, repeat: Infinity }}
-                          />
+                         {/* TODO: If we had real avatars, use them. For now use mock or generic */}
+                        {mockUser?.avatar ? (
+                             <span className="text-2xl">{mockUser.avatar}</span>
+                        ) : (
+                            <User size={24} className="text-black" />
                         )}
                       </motion.div>
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center justify-between mb-1">
-                          <h4 className="font-semibold truncate">{user.name}</h4>
-                          <span className="text-xs text-[#666666] ml-2">{conv.timestamp}</span>
+                          <h4 className="font-semibold truncate">{conv.friend_name}</h4>
+                          <span className="text-xs text-[#666666] ml-2">
+                            {conv.last_message_time ? new Date(conv.last_message_time).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}
+                          </span>
                         </div>
-                        <p className="text-sm text-[#666666] truncate">{conv.lastMessage}</p>
+                        <p className="text-sm text-[#666666] truncate">{conv.last_message || 'Start a conversation'}</p>
                       </div>
                     </div>
                   </motion.button>
                 );
               })}
             </AnimatePresence>
+            {conversationsLoading && (
+              <div className="p-8 flex justify-center">
+                <Loader2 className="animate-spin text-[#f55c7a]" size={24} />
+              </div>
+            )}
+            {!conversationsLoading && filteredConversations.length === 0 && (
+                <div className="p-4 text-center text-gray-500 text-sm">
+                    No conversations found.
+                </div>
+            )}
           </div>
         </motion.div>
 
@@ -175,8 +237,10 @@ export function WebMessages({ selectedUserId, onBack }: WebMessagesProps) {
                     <User size={20} className="text-black" />
                   </motion.div>
                   <div>
+                    {/* Resolve friend name from conversation list or mock users */}
                     <h3 className="font-semibold" style={{ fontFamily: 'Castoro, serif' }}>
-                      {mockUsers.find(u => u.id === selectedChat)?.name}
+                      {conversations.find(c => c.friend_user_id.toString() === selectedChat)?.friend_name || 
+                       mockUsers.find(u => u.id === selectedChat)?.name || 'User'}
                     </h3>
                     <div className="flex items-center gap-1.5">
                       <motion.div 
@@ -192,6 +256,12 @@ export function WebMessages({ selectedUserId, onBack }: WebMessagesProps) {
 
               {/* messages */}
               <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                {loading ? (
+                    <div className="flex justify-center items-center h-full">
+                        <Loader2 className="animate-spin text-[#f55c7a]" size={32} />
+                    </div>
+                ) : (
+                <>
                 <AnimatePresence>
                   {messages.map((msg, index) => (
                     <motion.div
@@ -218,6 +288,8 @@ export function WebMessages({ selectedUserId, onBack }: WebMessagesProps) {
                   ))}
                 </AnimatePresence>
                 <div ref={messagesEndRef} />
+                </>
+                )}
               </div>
 
               {/* message input */}
