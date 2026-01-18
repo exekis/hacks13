@@ -5,19 +5,20 @@ import { User, Bell, MapPin, Calendar, Users, Heart } from 'lucide-react';
 import { ImageWithFallback } from '@/app/components/figma/ImageWithFallback';
 
 interface WebPostCardProps {
-  post: Post;
+  post: Post & { authorName?: string; authorLocation?: string };
   onRSVP?: (userId: string) => void;
   onViewProfile?: (userId: string) => void;
+  onMessage?: (userId: string) => void;
 }
 
-export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
-  const user = mockUsers.find(u => u.id === post.userId);
-
-  if (!user) {
-    return null;
-  }
+  
+  // try to find user in mock data, fall back to post author info
+  const mockUser = mockUsers.find(u => u.id === post.userId);
+  const displayName = mockUser?.name || post.authorName || `User ${post.userId}`;
+  const displayLocation = mockUser?.location || post.authorLocation || post.location;
 
   return (
     <motion.div 
@@ -41,7 +42,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
       <div className="flex items-start gap-3 mb-4">
         <motion.div 
           className="w-12 h-12 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center flex-shrink-0 cursor-pointer"
-          onClick={() => onViewProfile?.(user.id)}
+          onClick={() => onViewProfile?.(post.userId)}
           whileHover={{ scale: 1.1 }}
           whileTap={{ scale: 0.95 }}
         >
@@ -50,10 +51,10 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
         <div className="flex-1 min-w-0">
           <motion.h4 
             className="text-base mb-0.5 cursor-pointer hover:text-[#f55c7a] transition-colors"
-            onClick={() => onViewProfile?.(user.id)}
+            onClick={() => onViewProfile?.(post.userId)}
             style={{ fontFamily: 'Castoro, serif' }}
           >
-            {user.name}
+            {displayName}
           </motion.h4>
           <motion.div 
             className="flex items-center gap-1 text-xs text-[#666666]"
@@ -61,17 +62,19 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.1 }}
           >
-            
+            {displayLocation && <span>{displayLocation}</span>}
           </motion.div>
         </div>
 
-        <div className="flex gap-2">
-            <span style={{ fontFamily: 'Castoro, serif' }}>{post.capacity}</span>
-            <Users 
-              size={20} 
-              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
-            />
-        </div>
+        {post.capacity && (
+          <div className="flex gap-2">
+              <span style={{ fontFamily: 'Castoro, serif' }}>{post.capacity}</span>
+              <Users 
+                size={20} 
+                className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
+              />
+          </div>
+        )}
         
         {/* like button */}
         <motion.button
@@ -159,11 +162,11 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
           transition={{ delay: 0.25 }}
         >
           <MapPin size={12} className="text-[#f55c7a]" />
-          <span>{post.location}</span>
+          <span>{displayLocation || post.location}</span>
         </motion.div>
         
         <motion.button
-          onClick={() => onRSVP && onRSVP(user.id)}
+          onClick={() => onMessage ? onMessage(post.userId) : onRSVP?.(post.userId)}
           className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
           whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
           whileTap={{ scale: 0.98 }}
