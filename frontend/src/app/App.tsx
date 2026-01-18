@@ -156,7 +156,7 @@ export default function App() {
           <WebFeed
             onViewProfile={handleViewProfile}
             onRSVP={handleRSVP}
-            // onMessage={handleMessage}
+            onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
             currentUserId={currentUserId || undefined}
