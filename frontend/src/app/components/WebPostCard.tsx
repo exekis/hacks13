@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Post, mockUsers } from '@/app/data/mockData';
@@ -9,12 +10,19 @@ interface WebPostCardProps {
   post: Post & { authorName?: string; authorLocation?: string; authorAvatar?: string };
   onRSVP?: (postId: string) => void;
   onViewProfile?: (userId: string) => void;
-  onMessage?: (userId: string, userName?: string, userAvatar?: string) => void;
 }
 
-export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
+  const [isRsvpd, setIsRsvpd] = useState(false);
+
+  const handleRsvp = () => {
+    if (onRSVP) {
+      onRSVP(post.id);
+      setIsRsvpd(true);
+    }
+  };
   
   // try to find user in mock data, fall back to post author info
   const mockUser = mockUsers.find(u => u.id === post.userId);
@@ -172,15 +180,17 @@ export function WebPostCard({ post, onRSVP, onViewProfile, onMessage }: WebPostC
           <span>{displayLocation || post.location}</span>
         </motion.div>
         
-        <motion.button
-          onClick={() => onMessage ? onMessage(post.userId, displayName, displayAvatar) : onRSVP?.(post.userId)}
-          className="flex items-center gap-2 px-4 py-2.5 bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white border border-black rounded-xl shadow-sm"
-          whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
-          whileTap={{ scale: 0.98 }}
-        >
-          <Bell size={16} />
-          <span className="text-sm font-medium">RSVP</span>
-        </motion.button>
+        {onRSVP && (
+          <motion.button
+            onClick={handleRsvp}
+            className={`flex items-center gap-2 px-4 py-2.5 text-white border border-black rounded-xl shadow-sm ${isRsvpd ? 'bg-green-500' : 'bg-gradient-to-r from-[#f55c7a] to-[#f68c70]'}`}
+            whileHover={{ scale: 1.02, boxShadow: '0 4px 12px rgba(245, 92, 122, 0.4)' }}
+            whileTap={{ scale: 0.98 }}
+          >
+            <Bell size={16} />
+            <span className="text-sm font-medium">{isRsvpd ? 'RSVPd' : 'RSVP'}</span>
+          </motion.button>
+        )}
         
       </div>
     </motion.div>

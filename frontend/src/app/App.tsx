@@ -54,7 +54,7 @@ export default function App() {
     }
     try {
       await rsvpToPost(postId, currentUserId, token);
-      alert("RSVP successful!");
+      // alert("RSVP successful!");
     } catch (error) {
       console.error("Failed to RSVP", error);
       alert("Failed to RSVP. Please try again.");

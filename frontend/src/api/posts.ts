@@ -1,3 +1,4 @@
+
 /**
  * posts api client
  */
@@ -70,7 +71,7 @@ export async function rsvpToPost(postId: string, userId: string, token: string):
       'Content-Type': 'application/json',
       'Authorization': `Bearer ${token}`
     },
-    body: JSON.stringify({ userId })
+    body: JSON.stringify({ userId: parseInt(userId, 10) })
   });
 
   if (!response.ok) {

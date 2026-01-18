@@ -1,3 +1,4 @@
+
 import React, { useState, useCallback, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { mockUsers, mockPosts, User, Post } from '@/app/data/mockData';
@@ -199,8 +200,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
           <motion.button
             onClick={handleRefreshFeed}
             disabled={isRefreshing}
-            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all border-2 ${
-              isRefreshing
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all border-2 ${isRefreshing
                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                 : 'bg-white text-[#f55c7a] border-[#f55c7a] hover:bg-[#f55c7a] hover:text-white'
             }`}
@@ -238,8 +238,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
         >
           <motion.button
             onClick={() => setActiveTab('all')}
-            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${
-              activeTab === 'all'
+            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${activeTab === 'all'
                 ? 'text-white'
                 : 'bg-white text-black hover:shadow-lg'
             }`}
@@ -258,8 +257,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
           </motion.button>
           <motion.button
             onClick={() => setActiveTab('people')}
-            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${
-              activeTab === 'people'
+            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${activeTab === 'people'
                 ? 'text-white'
                 : 'bg-white text-black hover:shadow-lg'
             }`}
@@ -278,8 +276,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
           </motion.button>
           <motion.button
             onClick={() => setActiveTab('posts')}
-            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${
-              activeTab === 'posts'
+            className={`relative flex items-center gap-2 px-6 py-3 border border-black rounded-xl transition-all duration-300 overflow-hidden ${activeTab === 'posts'
                 ? 'text-white'
                 : 'bg-white text-black hover:shadow-lg'
             }`}
@@ -381,7 +378,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                       <motion.div key={post.id} variants={itemVariants}>
                         <WebPostCard
                           post={post}
-                          onMessage={onMessage}
+                          onRSVP={onRSVP}
                           onViewProfile={onViewProfile}
                         />
                       </motion.div>
@@ -416,7 +413,6 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                             <WebPostCard
                               post={item.data as Post}
                               onRSVP={onRSVP}
-                              onMessage={onMessage}
                               onViewProfile={onViewProfile}
                             />
                           </motion.div>

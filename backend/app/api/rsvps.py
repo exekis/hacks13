@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Response
 import psycopg2
 import os
 from pydantic import BaseModel
@@ -52,7 +52,7 @@ def rsvp_to_post(post_id: int, rsvp_request: RsvpRequest):
         else:
             logger.info(f"Post {post_id} already in RSVP list")
         
-        return {"message": "RSVP successful"}
+        return Response(status_code=status.HTTP_204_NO_CONTENT)
     except Exception as e:
         logger.error(f"An error occurred while RSVPing: {e}")
         if conn:
