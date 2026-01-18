@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
 import { mockUsers, mockPosts, Post } from '@/app/data/mockData';
@@ -138,8 +139,8 @@ return (
             <motion.div key={post.id} variants={itemVariants}>
                 <WebPostCard
                 post={post}
-                onRSVP={handleRsvp}
                 onViewProfile={() => {}}
+				showRsvpButton = {false}
                 />
             </motion.div>
             ))
@@ -173,8 +174,8 @@ return (
             <motion.div key={post.id} variants={itemVariants}>
                 <WebPostCard
                 post={post}
-                onRSVP={handleRsvp}
                 onViewProfile={() => {}}
+				showRsvpButton = {false}
                 />
             </motion.div>
             ))

@@ -10,9 +10,10 @@ interface WebPostCardProps {
   post: Post & { authorName?: string; authorLocation?: string; authorAvatar?: string };
   onRSVP?: (postId: string) => void;
   onViewProfile?: (userId: string) => void;
+  showRsvpButton?: boolean;
 }
 
-export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
+export function WebPostCard({ post, onRSVP, onViewProfile, showRsvpButton = true }: WebPostCardProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [isLiked, setIsLiked] = useState(false);
   const [isRsvpd, setIsRsvpd] = useState(false);
@@ -180,7 +181,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
           <span>{displayLocation || post.location}</span>
         </motion.div>
         
-        {onRSVP && (
+        {showRsvpButton && onRSVP && (
           <motion.button
             onClick={handleRsvp}
             className={`flex items-center gap-2 px-4 py-2.5 text-white border border-black rounded-xl shadow-sm ${isRsvpd ? 'bg-green-500' : 'bg-gradient-to-r from-[#f55c7a] to-[#f68c70]'}`}
