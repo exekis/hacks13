@@ -19,7 +19,8 @@ export const signup = async (email: string, password: string): Promise<{ access_
   });
 
   if (!response.ok) {
-    throw new Error('Signup failed');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Signup failed');
   }
 
   return response.json();

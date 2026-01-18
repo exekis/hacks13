@@ -21,7 +21,10 @@ interface WebFeedProps {
   currentUserId?: string;
 }
 
-export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAddFriend, currentUserId = '482193' }: WebFeedProps) {
+export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAddFriend, currentUserId }: WebFeedProps) {
+  // use provided userid or fallback to localstorage
+  const effectiveUserId = currentUserId || localStorage.getItem('user_id') || '482193';
+  
   const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
   
   // state for api-powered recommendations
@@ -60,8 +63,8 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
 
       // fetch real recommendations from the backend
       const [peopleRecs, postRecs] = await Promise.all([
-        fetchPeopleRecommendations(currentUserId, 20),
-        fetchPostRecommendations(currentUserId, 20)
+        fetchPeopleRecommendations(effectiveUserId, 20),
+        fetchPostRecommendations(effectiveUserId, 20)
       ]);
 
       console.log('[WebFeed] received peopleRecs:', peopleRecs.length);
@@ -91,7 +94,7 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [currentUserId, isRefreshing, peopleItems.length, postItems.length]);
+  }, [effectiveUserId, isRefreshing, peopleItems.length, postItems.length]);
 
   // combine people and posts for all tab
   const allItems = hasLoadedOnce 
