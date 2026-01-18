@@ -10,12 +10,12 @@ interface WebProfileProps {
   userId?: string;
   userProfile: UserProfile;
   onBack: () => void;
-  onMessage?: (userId: string) => void;
+  onRSVP?: (userId: string) => void;
   onCreatePost?: () => void;
   onUpdateProfile?: (updates: Partial<UserProfile>) => void;
 }
 
-export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePost, onUpdateProfile }: WebProfileProps) {
+export function WebProfile({ userId, userProfile, onBack, onRSVP, onCreatePost, onUpdateProfile }: WebProfileProps) {
   const [isEditingAge, setIsEditingAge] = useState(false);
   const [ownPosts, setOwnPosts] = useState<Post[]>([]);
   
@@ -30,16 +30,18 @@ export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePos
   useEffect(() => {
     if (isOwnProfile && currentUserId) {
       fetchUserPosts(currentUserId).then((posts: PostResponse[]) => {
+        
         // transform to mock post format for webpostcard
         const transformed: Post[] = posts.map(p => ({
           id: p.id,
-          userId: p.author_id,
-          authorName: userProfile?.fullName || 'You',
-          content: p.content,
-          timestamp: 'Just now',
-          likes: 0,
-          comments: 0,
-          isEvent: p.is_event,
+            userId: p.user_id,
+            content: p.post_content,
+            
+            location: p.location_str,
+            timestamp: new Date(p.time_posted).toLocaleString(),
+            capacity: p.capacity,
+            authorName: p.author_name,
+            authorLocation: p.author_location
         }));
         setOwnPosts(transformed);
       }).catch(() => {
@@ -47,7 +49,7 @@ export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePos
       });
     }
   }, [isOwnProfile, currentUserId, userProfile?.fullName]);
-  
+          
   // for own profile use fetched posts, for others use mock
   const userPosts = isOwnProfile ? ownPosts : mockPosts.filter(p => p.userId === userId);
 
@@ -384,12 +386,12 @@ export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePos
           </motion.div>
 
           <motion.div className="space-y-4" variants={containerVariants}>
-            {userPosts.length > 0 ? (
-              userPosts.map((post, index) => (
+            {ownPosts.length > 0 ? (
+              ownPosts.map((post, index) => (
                 <motion.div key={post.id} variants={itemVariants}>
                   <WebPostCard
                     post={post}
-                    onMessage={onMessage}
+                    onRSVP={onRSVP}
                     onViewProfile={() => {}}
                   />
                 </motion.div>
@@ -627,8 +629,8 @@ export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePos
         </motion.h3>
 
         <div className="space-y-4">
-          {userPosts.length > 0 ? (
-            userPosts.map((post, index) => (
+          {ownPosts.length > 0 ? (
+            ownPosts.map((post, index) => (
               <motion.div 
                 key={post.id}
                 initial={{ opacity: 0, y: 20 }}
@@ -637,7 +639,7 @@ export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePos
               >
                 <WebPostCard
                   post={post}
-                  onMessage={onMessage}
+                  onRSVP={onRSVP}
                   onViewProfile={() => {}}
                 />
               </motion.div>

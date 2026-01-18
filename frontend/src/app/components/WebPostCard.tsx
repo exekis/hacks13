@@ -7,7 +7,7 @@ import { Avatar } from '@/app/components/DesignSystem';
 
 interface WebPostCardProps {
   post: Post & { authorName?: string; authorLocation?: string; authorAvatar?: string };
-  onRSVP?: (userId: string) => void;
+  onRSVP?: (postId: string) => void;
   onViewProfile?: (userId: string) => void;
   onMessage?: (userId: string, userName?: string, userAvatar?: string) => void;
 }
