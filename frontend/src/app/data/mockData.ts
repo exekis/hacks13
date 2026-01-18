@@ -50,7 +50,7 @@ export const mockUsers: User[] = [
   {
     id: '1',
     name: 'Priya Sharma',
-    avatar: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/women/44.jpg',
     bio: 'Looking to explore Toronto and make friends who love good food!',
     culturalBackground: ['Indian', 'South Asian'],
     languages: ['English', 'Hindi', 'Punjabi'],
@@ -66,7 +66,7 @@ export const mockUsers: User[] = [
   {
     id: '2',
     name: 'Marcus Chen',
-    avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/men/32.jpg',
     bio: 'CS student from Taiwan. Down for study sessions and late-night bubble tea runs!',
     culturalBackground: ['Taiwanese', 'East Asian'],
     languages: ['English', 'Mandarin'],
@@ -82,7 +82,7 @@ export const mockUsers: User[] = [
   {
     id: '3',
     name: 'Fatima Al-Rashid',
-    avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/women/68.jpg',
     bio: 'New to Montreal! Love coffee shops, art galleries, and deep conversations.',
     culturalBackground: ['Arab', 'Middle Eastern'],
     languages: ['English', 'Arabic', 'French'],
@@ -97,7 +97,7 @@ export const mockUsers: User[] = [
   {
     id: '4',
     name: 'Diego Santos',
-    avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/men/75.jpg',
     bio: 'Brazilian exchange student looking for gym buddies and weekend adventures!',
     culturalBackground: ['Brazilian', 'Latin American'],
     languages: ['Portuguese', 'English', 'Spanish'],
@@ -113,7 +113,7 @@ export const mockUsers: User[] = [
   {
     id: '5',
     name: 'Amara Okonkwo',
-    // no avatar - will show initials
+    avatar: 'https://randomuser.me/api/portraits/women/90.jpg',
     bio: 'Nigerian grad student. Always up for trying new restaurants and cultural events.',
     culturalBackground: ['Nigerian', 'West African'],
     languages: ['English', 'Igbo', 'Yoruba'],
@@ -128,7 +128,7 @@ export const mockUsers: User[] = [
   {
     id: '6',
     name: 'Yuki Tanaka',
-    avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/women/79.jpg',
     bio: 'Japanese exchange student. Lets grab ramen and explore hidden spots!',
     culturalBackground: ['Japanese', 'East Asian'],
     languages: ['Japanese', 'English'],
@@ -159,7 +159,7 @@ export const mockUsers: User[] = [
   {
     id: '8',
     name: 'Sofia Martinez',
-    avatar: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/women/63.jpg',
     bio: 'Mexican student passionate about dance, music, and making new connections!',
     culturalBackground: ['Mexican', 'Latin American'],
     languages: ['Spanish', 'English'],
@@ -175,7 +175,7 @@ export const mockUsers: User[] = [
   {
     id: '9',
     name: 'Hassan Javed',
-    avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/men/22.jpg',
     bio: 'Pakistani engineer. Coffee addict looking for study groups and cricket fans.',
     culturalBackground: ['Pakistani', 'South Asian'],
     languages: ['English', 'Urdu', 'Punjabi'],
@@ -190,7 +190,7 @@ export const mockUsers: User[] = [
   {
     id: '10',
     name: 'Linh Nguyen',
-    avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/women/51.jpg',
     bio: 'Vietnamese student new to Canada. Would love to find cooking partners!',
     culturalBackground: ['Vietnamese', 'Southeast Asian'],
     languages: ['Vietnamese', 'English'],
@@ -206,7 +206,7 @@ export const mockUsers: User[] = [
   {
     id: '11',
     name: 'Ibrahim Diallo',
-    // no avatar - will show initials
+    avatar: 'https://randomuser.me/api/portraits/men/81.jpg',
     bio: 'Senegalese student passionate about tech and basketball. Lets connect!',
     culturalBackground: ['Senegalese', 'West African'],
     languages: ['French', 'English', 'Wolof'],
@@ -221,7 +221,7 @@ export const mockUsers: User[] = [
   {
     id: '12',
     name: 'Zara Patel',
-    avatar: 'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=200&h=200&fit=crop&crop=face',
+    avatar: 'https://randomuser.me/api/portraits/women/26.jpg',
     bio: 'British-Indian grad student. Chai enthusiast seeking fellow bookworms and cafe hoppers.',
     culturalBackground: ['Indian', 'British', 'South Asian'],
     languages: ['English', 'Gujarati', 'Hindi'],
