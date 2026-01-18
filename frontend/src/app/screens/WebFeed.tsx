@@ -351,7 +351,8 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                 <>
                   {peopleItems.length === 0 ? (
                     <div className="text-center py-8 text-[#666666]">
-                      <p>No recommendations found. Try refreshing!</p>
+                      <p className="mb-2">No recommendations yet!</p>
+                      <p className="text-sm">Complete your profile to get personalized matches.</p>
                     </div>
                   ) : (
                     peopleItems.map((user) => (
@@ -372,7 +373,8 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                 <>
                   {postItems.length === 0 ? (
                     <div className="text-center py-8 text-[#666666]">
-                      <p>No events found. Try refreshing!</p>
+                      <p className="mb-2">No events yet!</p>
+                      <p className="text-sm">Complete your profile to see events near you.</p>
                     </div>
                   ) : (
                     postItems.map((post) => (
@@ -392,7 +394,8 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
                 <>
                   {allItems.length === 0 ? (
                     <div className="text-center py-8 text-[#666666]">
-                      <p>No content found. Try refreshing!</p>
+                      <p className="mb-2">No content yet!</p>
+                      <p className="text-sm">Complete your profile to get personalized recommendations.</p>
                     </div>
                   ) : (
                     allItems.map((item) => {

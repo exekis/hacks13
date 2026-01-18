@@ -17,12 +17,16 @@ interface WebProfileProps {
 export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePost, onUpdateProfile }: WebProfileProps) {
   const [isEditingAge, setIsEditingAge] = useState(false);
   
-  // if viewing someone else's profile, show their mock data
-  const isOwnProfile = !userId || userId === '1';
+  // get current user id from localstorage
+  const currentUserId = localStorage.getItem('user_id');
+  
+  // if viewing someone else's profile, show their data
+  const isOwnProfile = !userId || userId === currentUserId;
   const displayUser = isOwnProfile ? null : mockUsers.find(u => u.id === userId);
   
-  // get user's posts
-  const userPosts = mockPosts.filter(p => p.userId === (userId || '1'));
+  // for own profile, show empty posts (new users have no posts)
+  // for other profiles, show their mock posts (seeded users)
+  const userPosts = isOwnProfile ? [] : mockPosts.filter(p => p.userId === userId);
 
   const containerVariants = {
     hidden: { opacity: 0 },
