@@ -1,0 +1,36 @@
+
+.floating-plane {
+  position: absolute;
+  left: 4vw;
+  bottom: 6vh;
+  width: 620px;
+  max-width: 18vw;
+  opacity: 1;
+  pointer-events: none;
+  transform-origin: center;
+  animation: floatToTopRight 10s ease-in-out forwards;
+  z-index: 40;
+}
+
+/* move from bottom-left -> top-right, then fade out */
+@keyframes floatToTopRight {
+  0% {
+    transform: translate(0, 0) rotate(0deg);
+    opacity: 1;
+  }
+  70% {
+    /* near top-right but still visible */
+    transform: translate(80vw, -85vh) rotate(8deg);
+    opacity: 1;
+  }
+  100% {
+    /* finish off-screen and invisible */
+    transform: translate(120vw, -120vh) rotate(12deg) scale(0.9);
+    opacity: 0;
+  }
+}
+
+/* respect reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .floating-plane { animation: none; transform: translate(2vw, 0); }
+}

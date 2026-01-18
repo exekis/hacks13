@@ -15,6 +15,7 @@ import {
   Camera,
   Music
 } from 'lucide-react';
+import FloatingPlane from '@/app/components/FloatingPlane';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -77,13 +78,6 @@ const features = [
   },
 ];
 
-const stats = [
-  { number: '50K+', label: 'Active Users' },
-  { number: '120+', label: 'Countries' },
-  { number: '10K+', label: 'Connections Made' },
-  { number: '500+', label: 'Universities' },
-];
-
 export function LandingPage({ onGetStarted }: LandingPageProps) {
   const [currentTestimonial, setCurrentTestimonial] = useState(0);
   const [mousePosition, setMousePosition] = useState({ x: 0, y: 0 });
@@ -108,6 +102,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
   return (
     <div className="min-h-screen bg-[#FFEBDA] overflow-x-hidden">
+      <FloatingPlane />
       {/* floating background icons */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {floatingIcons.map(({ Icon, delay, x, y }, index) => (
@@ -331,31 +326,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </motion.div>
       </section>
 
-      {/* stats section */}
-      <section className="py-16 px-6 bg-black text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <motion.p
-                  className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#f55c7a] to-[#f6bc66] bg-clip-text text-transparent"
-                  style={{ fontFamily: 'Castoro, serif' }}
-                >
-                  {stat.number}
-                </motion.p>
-                <p className="text-gray-400 mt-2">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* features section */}
       <section className="py-20 px-6">
@@ -370,7 +340,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Why Travelmate?
             </h2>
             <p className="text-[#666666] text-lg max-w-2xl mx-auto">
-              Being abroad can be isolating, but also an incredible way to discover yourself. We want to make the process easier by helping you find community wherever you go.
+              Being abroad can be isolating, but also a great way to discover yourself. We want to make the process easier by helping you find community wherever you go.
             </p>
           </motion.div>
 
