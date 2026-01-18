@@ -55,7 +55,10 @@ CREATE TABLE IF NOT EXISTS Posts (
     is_event BOOLEAN DEFAULT FALSE,
     time_posted TIMESTAMPTZ DEFAULT NOW(),
     rsvps INT[],
-    post_embedding vector(384)
+    post_embedding vector(384),
+    capacity INT,
+    start_time TIMESTAMPTZ,
+    end_time TIMESTAMPTZ
 );
 
 -- Create the Conversations table

@@ -1,6 +1,8 @@
+/// <reference types="vite/client" />
+
 import { UserProfile } from "@/app/types/profile";
 
-const API_URL = import.meta.env.VITE_API_URL || 
+export const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.DEV ? "http://localhost:8000" : "/api");
 
 /**
@@ -65,6 +67,14 @@ export const storeToken = (token: string) => {
  */
 export const getToken = (): string | null => {
   return localStorage.getItem('access_token');
+};
+
+/**
+ * Retrieves the user ID from local storage.
+ * @returns The user ID, or null if it's not found.
+ */
+export const getUserId = (): string | null => {
+    return localStorage.getItem('user_id');
 };
 
 /**
