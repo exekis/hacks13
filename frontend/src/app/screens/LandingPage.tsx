@@ -55,25 +55,25 @@ const features = [
   {
     icon: Users,
     title: 'Find Your People',
-    description: 'Connect with travelers and students who share your interests and vibe.',
+    description: 'Connect with people who share similar backgrounds and interests.',
     color: '#f55c7a',
   },
   {
     icon: Globe,
-    title: 'Cultural Exchange',
-    description: 'Discover new perspectives and share your culture with others.',
+    title: 'Self Discovery',
+    description: 'Discover your identity as you navigate unfamiliar places.',
     color: '#f57c73',
   },
   {
     icon: MapPin,
-    title: 'Local Guides',
-    description: 'Get insider tips from locals and fellow travelers.',
+    title: 'Explore Your City',
+    description: 'View and attend events happening near you.',
     color: '#f68c70',
   },
   {
     icon: Coffee,
     title: 'Real Meetups',
-    description: 'From cafe dates to group adventures - make real connections.',
+    description: 'Meet up in person with new friends.',
     color: '#f6ac69',
   },
 ];

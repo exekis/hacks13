@@ -67,6 +67,7 @@ export default function App() {
     return (
       <>
         <LandingPage onGetStarted={() => setAppScreen('auth')} />
+        {/*
         <button
           onClick={() => {
             const debugProfile: UserProfile = {
@@ -102,6 +103,7 @@ export default function App() {
         >
           Dev: Skip to Feed
         </button>
+        */}
       </>
     );
   }
