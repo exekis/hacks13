@@ -21,6 +21,8 @@ oauth2_scheme = OAuth2PasswordBearer(tokenUrl="/login")
 class Token(BaseModel):
     access_token: str
     token_type: str
+    user_id: int
+
 
 class TokenData(BaseModel):
     email: str | None = None
@@ -66,39 +68,36 @@ def create_access_token(data: dict, expires_delta: timedelta | None = None):
 async def signup(user: User):
     conn = get_db_connection()
     cur = conn.cursor()
+    try:
+        # Get new userID (simple; not concurrency-safe but fine for your "easy" requirement)
+        cur.execute("SELECT COALESCE(MAX(userID), 0) FROM Users")
+        new_user_id = cur.fetchone()[0] + 1
 
-    # Check if user exists
-    cur.execute("SELECT * FROM Users WHERE Email = %s", (user.email,))
-    if cur.fetchone():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Email already registered",
+        # Create new user
+        cur.execute("INSERT INTO Users (userID, Email) VALUES (%s, %s)", (new_user_id, user.email))
+
+        # Hash the password
+        hashed_password = get_password_hash(user.password)
+
+        # Store auth info
+        cur.execute(
+            "INSERT INTO Auth (userID, password_hash) VALUES (%s, %s)",
+            (new_user_id, hashed_password),
         )
 
-    # Get new userID
-    cur.execute("SELECT MAX(userID) FROM Users")
-    max_id = cur.fetchone()[0]
-    new_user_id = (max_id or 0) + 1
+        conn.commit()
 
-    # Create new user
-    cur.execute("INSERT INTO Users (userID, Email) VALUES (%s, %s)", (new_user_id, user.email))
-    
-    # Hash the password
-    hashed_password = get_password_hash(user.password)
+        # Create access token
+        access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        access_token = create_access_token(
+            data={"sub": user.email}, expires_delta=access_token_expires
+        )
 
-    # Store auth info
-    cur.execute("INSERT INTO Auth (userID, password_hash) VALUES (%s, %s)", (new_user_id, hashed_password))
+        return {"access_token": access_token, "token_type": "bearer", "user_id": new_user_id}
+    finally:
+        cur.close()
+        conn.close()
 
-    conn.commit()
-    cur.close()
-    conn.close()
-
-    # Create access token
-    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-    access_token = create_access_token(
-        data={"sub": user.email}, expires_delta=access_token_expires
-    )
-    return {"access_token": access_token, "token_type": "bearer"}
 
 @router.post("/login", response_model=Token)
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
@@ -143,4 +142,5 @@ async def login(form_data: OAuth2PasswordRequestForm = Depends()):
     access_token = create_access_token(
         data={"sub": form_data.username}, expires_delta=access_token_expires
     )
-    return {"access_token": access_token, "token_type": "bearer"}
+    return {"access_token": access_token, "token_type": "bearer", "user_id": user_id}
+

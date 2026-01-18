@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { User as UserType } from '@/app/data/mockData';
 import { User, MapPin, Heart, CheckCircle, Sparkles } from 'lucide-react';
+import { Avatar } from '@/app/components/DesignSystem';
 
 interface WebPersonCardProps {
   user: UserType;
@@ -72,11 +73,16 @@ export function WebPersonCard({ user, onAddFriend, onViewProfile, isFriendReques
       {/* header with avatar and name */}
       <div className="flex items-start gap-4 mb-4">
         <motion.div 
-          className="relative w-16 h-16 bg-gradient-to-br from-[#f6bc66] to-[#f6ac69] border border-black rounded-full flex items-center justify-center text-3xl flex-shrink-0 overflow-hidden"
+          className="relative flex-shrink-0"
           whileHover={{ scale: 1.05 }}
           transition={{ type: 'spring', stiffness: 400 }}
         >
-          <User size={32} className="text-black" />
+          <Avatar 
+            src={user.avatar} 
+            name={user.name}
+            size="lg"
+            className="border border-black"
+          />
           {/* online indicator */}
           <motion.div 
             className="absolute bottom-0 right-0 w-4 h-4 bg-green-500 border-2 border-white rounded-full"

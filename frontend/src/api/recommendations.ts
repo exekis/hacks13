@@ -107,6 +107,8 @@ export async function fetchPostRecommendations(
     params.append('debug', 'true');
   }
   
+  console.log('[recommendations] fetching posts from:', `${API_BASE_URL}/api/recommendations/posts?${params}`);
+  
   const response = await fetch(
     `${API_BASE_URL}/api/recommendations/posts?${params}`
   );
@@ -115,7 +117,9 @@ export async function fetchPostRecommendations(
     throw new Error(`Failed to fetch post recommendations: ${response.statusText}`);
   }
   
-  return response.json();
+  const data = await response.json();
+  console.log('[recommendations] posts response:', data.length, 'items');
+  return data;
 }
 
 /**
@@ -152,10 +156,17 @@ export function backendPersonToMockUser(rec: BackendPersonRecommendation) {
   if (rec.isStudent) badges.push('Verified Student');
   if (rec.university) badges.push(rec.university);
   
+  // generate avatar url based on userid - use randomuser.me with a consistent portrait
+  // use modulo to get a portrait number between 1-99
+  const portraitNum = (rec.userid % 99) + 1;
+  // alternate between men and women based on userid
+  const gender = rec.userid % 2 === 0 ? 'women' : 'men';
+  const avatarUrl = `https://randomuser.me/api/portraits/${gender}/${portraitNum}.jpg`;
+  
   return {
     id: rec.userid.toString(),
     name: displayName,
-    avatar: 'user',
+    avatar: avatarUrl,
     bio: rec.bio || 'No bio available',
     culturalBackground: rec.culturalIdentity || [],
     languages: rec.languages || [],
@@ -173,6 +184,104 @@ export function backendPersonToMockUser(rec: BackendPersonRecommendation) {
     travelingTo: rec.travelingTo || undefined,
     university: rec.university || undefined,
   };
+}
+
+// category keywords for post image matching
+const POST_CATEGORIES = {
+  food: ['food', 'eat', 'restaurant', 'cafe', 'coffee', 'lunch', 'dinner', 'breakfast', 'brunch', 'ramen', 'sushi', 'pizza', 'bubble tea', 'boba', 'cooking', 'kitchen', 'recipe', 'snack', 'dessert', 'bakery'],
+  study: ['study', 'library', 'homework', 'exam', 'class', 'lecture', 'assignment', 'project', 'research', 'book', 'reading', 'notes', 'tutor', 'academic'],
+  explore: ['explore', 'adventure', 'travel', 'trip', 'visit', 'tour', 'sightseeing', 'downtown', 'neighborhood', 'walk', 'discover', 'new places', 'hidden gem'],
+  social: ['hangout', 'chill', 'meet', 'friends', 'party', 'game night', 'movie', 'chat', 'connect', 'social', 'gathering', 'event', 'club'],
+  sports: ['gym', 'workout', 'fitness', 'run', 'hike', 'bike', 'swim', 'basketball', 'soccer', 'tennis', 'yoga', 'sports', 'exercise', 'cricket'],
+  music: ['music', 'concert', 'live', 'band', 'dance', 'salsa', 'karaoke', 'singing', 'guitar', 'piano', 'dj'],
+  art: ['art', 'museum', 'gallery', 'painting', 'exhibition', 'creative', 'photography', 'design'],
+  nature: ['park', 'beach', 'lake', 'mountain', 'hiking', 'camping', 'outdoor', 'nature', 'garden', 'sunset', 'sunrise'],
+};
+
+// curated unsplash photo ids for each category (more reliable than random)
+const CATEGORY_IMAGES: Record<string, string[]> = {
+  food: [
+    'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1493770348161-369560ae357d?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1554118811-1e0d58224f24?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=800&h=400&fit=crop',
+  ],
+  study: [
+    'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1519389950473-47ba0277781c?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=800&h=400&fit=crop',
+  ],
+  explore: [
+    'https://images.unsplash.com/photo-1499591934245-40b55745b905?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1503220317375-aaad61436b1b?w=800&h=400&fit=crop',
+  ],
+  social: [
+    'https://images.unsplash.com/photo-1529156069898-49953e39b3ac?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1543807535-eceef0bc6599?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1511632765486-a01980e01a18?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1528605248644-14dd04022da1?w=800&h=400&fit=crop',
+  ],
+  sports: [
+    'https://images.unsplash.com/photo-1571902943202-507ec2618e8f?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1551698618-1dfe5d97d256?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1461896836934- voices-from-beyond?w=800&h=400&fit=crop',
+  ],
+  music: [
+    'https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1514320291840-2e0a9bf2a9ae?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1501612780327-45045538702b?w=800&h=400&fit=crop',
+  ],
+  art: [
+    'https://images.unsplash.com/photo-1531243269054-5ebf6f34081e?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1499781350541-7783f6c6a0c8?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1460661419201-fd4cecdf8a8b?w=800&h=400&fit=crop',
+  ],
+  nature: [
+    'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1472214103451-9374bd1c798e?w=800&h=400&fit=crop',
+  ],
+  default: [
+    'https://images.unsplash.com/photo-1522202176988-66273c2fd55f?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1517457373958-b7bdd4587205?w=800&h=400&fit=crop',
+    'https://images.unsplash.com/photo-1523240795612-9a054b0db644?w=800&h=400&fit=crop',
+  ],
+};
+
+// detect category from post content
+function detectPostCategory(content: string): string {
+  const lowerContent = content.toLowerCase();
+  
+  for (const [category, keywords] of Object.entries(POST_CATEGORIES)) {
+    for (const keyword of keywords) {
+      if (lowerContent.includes(keyword)) {
+        return category;
+      }
+    }
+  }
+  
+  return 'default';
+}
+
+// get an image url for a post based on its content and id
+function getPostImageUrl(postId: number, content: string): string | undefined {
+  // only ~60% of posts should have images
+  if (postId % 10 >= 6) {
+    return undefined;
+  }
+  
+  const category = detectPostCategory(content);
+  const images = CATEGORY_IMAGES[category] || CATEGORY_IMAGES.default;
+  
+  // use post id to pick a consistent image
+  const imageIndex = postId % images.length;
+  return images[imageIndex];
 }
 
 /**
@@ -207,9 +316,14 @@ export function backendPostToMockPost(rec: BackendPostRecommendation) {
     userId: rec.author_id?.toString() || '0',
     authorName: rec.author_name || `User ${rec.author_id}`,
     authorLocation: rec.author_location || undefined,
+    // generate avatar url based on author_id
+    authorAvatar: rec.author_id 
+      ? `https://randomuser.me/api/portraits/${rec.author_id % 2 === 0 ? 'women' : 'men'}/${(rec.author_id % 99) + 1}.jpg`
+      : undefined,
     
     content: rec.post_content,
-    image: undefined,
+    // generate category-based image for ~60% of posts
+    image: getPostImageUrl(rec.postid, rec.post_content),
     dateRange: undefined,
     location: 'Location revealed after connection',
     timestamp,

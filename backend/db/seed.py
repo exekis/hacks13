@@ -8,7 +8,7 @@ load_dotenv()
 # Config
 # -----------------------
 DB_NAME = os.getenv("DB_NAME", "hacks13")
-DB_USER = os.getenv("DB_USER", "gabriel")
+DB_USER = os.getenv("DB_USER", "jennifer")
 DB_PASSWORD = os.getenv("DB_PASSWORD", "")  # can leave password blank
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_PORT = os.getenv("DB_PORT", "5432")
@@ -24,17 +24,13 @@ SCHEMA_FILE = os.getenv("SCHEMA_FILE", "backend/db/schema.sql")
 # Database Functions
 # -----------------------
 def recreate_tables(cur, conn, schema_file: str) -> None:
-    """Drop and recreate all tables in the database."""
+    """Execute schema.sql exactly as written."""
     with open(schema_file, "r", encoding="utf-8") as f:
         schema_sql = f.read()
-    
-    # Remove the Auth table creation from the schema
-    schema_sql = schema_sql.split("-- Create the Auth table")[0]
 
-    cur.execute("DROP TABLE IF EXISTS Messages, Posts, Conversations, Users, Auth CASCADE;")
     cur.execute(schema_sql)
     conn.commit()
-    print("Tables recreated successfully.")
+    print("Schema executed successfully.")
 
 # -----------------------
 # Loaders
@@ -126,7 +122,7 @@ def load_posts(cur, conn, posts_file: str) -> None:
                     """
                     INSERT INTO Posts (
                         PostID, user_id,
-                        time_posted, content, post_embedding
+                        time_posted, post_content, post_embedding
                     )
                     VALUES (%s, %s, %s, %s, %s)
                     """,
@@ -262,7 +258,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     try:
-        recreate_tables(cur, conn, SCHEMA_FILE)
+        #recreate_tables(cur, conn, SCHEMA_FILE)
         load_users(cur, conn, USERS_FILE)
         load_posts(cur, conn, POSTS_FILE)
         load_conversations(cur, conn, CONVERSATIONS_FILE)

@@ -33,6 +33,8 @@ export interface SendMessageResponse {
 
 export const fetchConversations = async (userId: number): Promise<ConversationPreview[]> => {
   const response = await fetch(`${API_URL}/conversations/all-conversations?user_id=${userId}`);
+  console.log(userId)
+  console.log(response)
   if (!response.ok) {
     throw new Error('Failed to fetch conversations');
   }

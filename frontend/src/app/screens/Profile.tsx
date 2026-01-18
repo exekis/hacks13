@@ -34,7 +34,7 @@ export const ProfileScreen: React.FC<ProfileScreenProps> = ({
         {/* Profile header */}
         <div className="px-4 -mt-12 pb-4">
           <div className="flex items-end justify-between mb-4">
-            <Avatar emoji={user.avatar} size="xl" className="border-4 border-white" />
+            <Avatar src={user.avatar} name={user.name} size="xl" className="border-4 border-white" />
             {isOwnProfile && (
               <div className="flex gap-2">
                 <button

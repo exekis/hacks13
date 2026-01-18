@@ -1,9 +1,9 @@
 -- Commented out the drops cuz we're prob not changing the data anymore
-DROP TABLE IF EXISTS Messages;
-DROP TABLE IF EXISTS Posts;
-DROP TABLE IF EXISTS Conversations;
-DROP TABLE IF EXISTS Users;
-DROP TABLE IF EXISTS Auth;
+DROP TABLE IF EXISTS messages CASCADE;
+DROP TABLE IF EXISTS posts CASCADE;
+DROP TABLE IF EXISTS conversations CASCADE;
+DROP TABLE IF EXISTS auth CASCADE;
+DROP TABLE IF EXISTS users CASCADE;
 
 CREATE EXTENSION IF NOT EXISTS vector;
 
@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS Users (
     BlockedUsers INT[],
     recs JSONB[],
     event_recs_emb JSONB[],
-    event_recs_dis JSONB[],
+    event_recs_dis JSONB,
     people_recs JSONB,
     user_embedding vector(384)
 );

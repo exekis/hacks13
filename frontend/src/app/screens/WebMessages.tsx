@@ -17,7 +17,7 @@ interface UiMessage {
   timestamp: string;
 }
 
-export function WebMessages({ selectedUserId, onBack, currentUserId = '482193' }: WebMessagesProps) {
+export function WebMessages({ selectedUserId, onBack, currentUserId = '100000' }: WebMessagesProps) {
   const [messageText, setMessageText] = useState('');
   const [selectedChat, setSelectedChat] = useState<string | undefined>(selectedUserId);
   const [searchQuery, setSearchQuery] = useState('');
@@ -41,6 +41,8 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '482193' }
     async function loadConversations() {
       setConversationsLoading(true);
       try {
+        console.log("user id in WebMessages.tsx")
+        console.log(userIdInt)
         const data = await fetchConversations(userIdInt);
         setConversations(data);
       } catch (err) {
@@ -242,14 +244,6 @@ export function WebMessages({ selectedUserId, onBack, currentUserId = '482193' }
                       {conversations.find(c => c.friend_user_id.toString() === selectedChat)?.friend_name || 
                        mockUsers.find(u => u.id === selectedChat)?.name || 'User'}
                     </h3>
-                    <div className="flex items-center gap-1.5">
-                      <motion.div 
-                        className="w-2 h-2 bg-green-500 rounded-full"
-                        animate={{ scale: [1, 1.2, 1] }}
-                        transition={{ duration: 2, repeat: Infinity }}
-                      />
-                      <p className="text-xs text-[#666666]">Active now</p>
-                    </div>
                   </div>
                 </div>
               </motion.div>
