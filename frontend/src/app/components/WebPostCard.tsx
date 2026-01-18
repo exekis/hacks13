@@ -84,10 +84,7 @@ export function WebPostCard({ post, onRSVP, onViewProfile }: WebPostCardProps) {
             animate={isLiked ? { scale: [1, 1.3, 1] } : {}}
             transition={{ duration: 0.3 }}
           >
-            <Heart 
-              size={20} 
-              className={isLiked ? 'text-[#f55c7a] fill-[#f55c7a]' : 'text-[#666666]'}
-            />
+  
           </motion.div>
         </motion.button>
       </div>

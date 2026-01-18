@@ -8,6 +8,7 @@ import { WebMessages } from '@/app/screens/WebMessages';
 import { WebCreatePost } from '@/app/screens/WebCreatePost';
 import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
+import { Schedule } from '@/app/screens/Schedule';
 import { Auth } from '@/app/screens/Auth';
 
 type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings' | 'schedule';
@@ -131,6 +132,20 @@ export default function App() {
             onMessage={handleMessage}
             friendRequests={friendRequests}
             onAddFriend={handleAddFriend}
+          />
+        )}
+
+        {(activeScreen === 'schedule') && (
+          <Schedule
+            userId={selectedProfileId}
+            userProfile={userProfile}
+            onBack={() => {
+              setSelectedProfileId(undefined);
+              setActiveScreen('feed');
+            }}
+            onMessage={handleMessage}
+            onCreatePost={() => setActiveScreen('create')}
+            onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
           />
         )}
 
