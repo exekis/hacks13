@@ -72,7 +72,7 @@ const features = [
   {
     icon: Coffee,
     title: 'Real Meetups',
-    description: 'From coffee chats to group adventures - make real connections.',
+    description: 'From cafe dates to group adventures - make real connections.',
     color: '#f6ac69',
   },
 ];
@@ -177,7 +177,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-black rounded-full mb-8"
           >
             <Sparkles className="w-4 h-4 text-[#f6ac69]" />
-            <span className="text-sm font-medium">Your adventure starts here</span>
+            <span className="text-sm font-medium">Community wherever you land</span>
           </motion.div>
 
           {/* main heading with gradient */}
@@ -197,7 +197,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
               style={{ backgroundSize: '200% auto' }}
             >
-              Travel Tribe
+              Travel Mates
             </motion.span>
           </motion.h1>
 
@@ -208,8 +208,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Connect with travelers and students who share your journey. 
-            Make friends, explore together, and turn strangers into lifelong companions.
+            When the world feels unfamiliar, we help you find the people who feel like home.
           </motion.p>
 
           {/* cta buttons */}
@@ -371,7 +370,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Why Travelmate?
             </h2>
             <p className="text-[#666666] text-lg max-w-2xl mx-auto">
-              We're not just another social app. We're building a community of curious souls who believe the best journeys are shared.
+              Being abroad can be isolating, but also an incredible way to discover yourself. We want to make the process easier by helping you find community wherever you go.
             </p>
           </motion.div>
 
@@ -473,7 +472,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             <h2 className="text-4xl md:text-5xl mb-4" style={{ fontFamily: 'Castoro, serif' }}>
               How It Works
             </h2>
-            <p className="text-[#666666] text-lg">Three simple steps to find your travel tribe</p>
+            <p className="text-[#666666] text-lg">Three simple steps to find your travel friends</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -536,7 +535,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </motion.div>
 
             <h2 className="text-3xl md:text-5xl text-white mb-4" style={{ fontFamily: 'Castoro, serif' }}>
-              Ready to Find Your Tribe?
+              Ready to Find Your Community Abroad?
             </h2>
             <p className="text-gray-300 text-lg mb-8 max-w-xl mx-auto">
               Join thousands of travelers and students making meaningful connections every day.
