@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
 class OnboardingIn(BaseModel):
     username: str
@@ -12,3 +12,6 @@ class ProfileOut(BaseModel):
     username: str
     display_name: str
     bio: Optional[str] = None
+
+class User(ProfileOut):
+    RSVP: List[int] = []

@@ -192,7 +192,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
               style={{ backgroundSize: '200% auto' }}
             >
-              Travel Mates
+              Community
             </motion.span>
           </motion.h1>
 

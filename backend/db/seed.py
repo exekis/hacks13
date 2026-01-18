@@ -51,12 +51,12 @@ def load_users(cur, conn, users_file: str) -> None:
                     culturalIdentity, ethnicity, religion, culturalSimilarityImportance,
                     culturalComfortLevel, languageMatchImportant, lookingFor,
                     socialVibe, whoCanSeePosts, hideLocationUntilFriends, meetupPreference,
-                    boundaries, bio, Friends
+                    boundaries, bio, Friends, RSVP
                 )
                 VALUES (
                     %s, %s, %s, %s, %s, %s, %s, %s,
                     %s, %s, %s, %s, %s, %s, %s, %s,
-                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
+                    %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s
                 )
                 """,
                 (
@@ -86,6 +86,7 @@ def load_users(cur, conn, users_file: str) -> None:
                     user["boundaries"],
                     user["bio"],
                     user["friends"],
+                    [],
                 ),
             )
         except psycopg2.Error as e:

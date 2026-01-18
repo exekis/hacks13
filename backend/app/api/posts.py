@@ -1,7 +1,8 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, status
 import psycopg2
 import os
 from app.schemas.post import PostCreate
+from pydantic import BaseModel
 
 router = APIRouter()
 
