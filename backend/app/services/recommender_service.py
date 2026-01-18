@@ -129,7 +129,7 @@ def recommend_posts(user_id: int, limit: int = 50) -> List[Dict[str, Any]]:
                     "time_posted": r[1].isoformat() if r[1] else None,
                     "post_content": r[2],
                     "author_id": r[3],
-                    "author_name": r[4] or (f"User {r[3]}" if r[3] is not None else "Unknown"),
+                    "author_name": r[4] or "Traveler",
                     "author_location": r[5],
                 }
                 for r in rows
@@ -283,7 +283,7 @@ def get_fallback_posts(conn, limit: int = 20) -> List[Dict[str, Any]]:
                 "time_posted": r[1].isoformat() if r[1] else None,
                 "post_content": r[2],
                 "author_id": r[3],
-                "author_name": r[4] or (f"User {r[3]}" if r[3] is not None else "Unknown"),
+                "author_name": r[4] or "Traveler",
                 "author_location": r[5],
             }
             for r in rows

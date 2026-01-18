@@ -589,31 +589,6 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
           <p className="text-[#666666] mb-8">Your safety is our priority</p>
 
           <div className="space-y-6">
-            {/* Who Can Message */}
-            <div>
-              <label className="block mb-2" style={{ fontFamily: 'Castoro, serif' }}>
-                Who can message you?
-              </label>
-              <div className="space-y-2">
-                {[
-                  { value: 'friends', label: 'Friends only' },
-                  { value: 'friends-of-friends', label: 'Friends-of-friends' },
-                  { value: 'anyone-verified', label: 'Anyone verified' },
-                ].map((option) => (
-                  <button
-                    key={option.value}
-                    onClick={() => updateProfile({ whoCanMessage: option.value as any })}
-                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
-                      profile.whoCanMessage === option.value
-                        ? 'bg-[#f55c7a] text-white'
-                        : 'bg-white hover:bg-[#f6bc66]/20'
-                    }`}
-                  >
-                    {option.label}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Who Can See Posts */}
             <div>
@@ -838,30 +813,74 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
 
             {/* Age Preference Toggle */}
             <div>
+              {profile.agePreference?.enabled && (() => {
+                const minLimit = 18;
+                const maxLimit = 50;
 
+                const [minAge, maxAge] = profile.matchFilters?.ageRange ?? [18, 30];
 
-              {profile.agePreference?.enabled && (
-                <div>
-                  <label className="block mb-2 text-sm text-[#666666]">Age Range: ±{profile.agePreference?.range || 5} years</label>
-                  <div className="flex gap-2">
-                    {[2, 3, 4, 5, 6, 7, 8].map((range) => (
-                      <button
-                        key={range}
-                        onClick={() => updateProfile({
-                          agePreference: { ...profile.agePreference!, range }
-                        })}
-                        className={`px-4 py-2 border border-black rounded-lg transition-colors ${profile.agePreference?.range === range
-                          ? 'bg-[#f6bc66] text-black'
-                          : 'bg-white hover:bg-[#f6ac69]/20'
-                          }`}
-                      >
-                        ±{range}
-                      </button>
-                    ))}
+                const clamp = (v: number) => Math.max(minLimit, Math.min(maxLimit, v));
+
+                const setAgeRange = (nextMin: number, nextMax: number) => {
+                  const clampedMin = clamp(nextMin);
+                  const clampedMax = clamp(nextMax);
+                  const orderedMin = Math.min(clampedMin, clampedMax);
+                  const orderedMax = Math.max(clampedMin, clampedMax);
+
+                  updateProfile({
+                    matchFilters: {
+                      ...(profile.matchFilters ?? {}),
+                      ageRange: [orderedMin, orderedMax],
+                    },
+                  });
+                };
+
+                return (
+                  <div>
+                    <label className="block mb-2 text-sm text-[#666666]">
+                      Age range (18–50)
+                    </label>
+
+                    <div className="flex gap-3">
+                      <div className="flex-1">
+                        <label className="block mb-1 text-xs text-[#666666]">Min</label>
+                        <input
+                          type="number"
+                          min={minLimit}
+                          max={maxLimit}
+                          value={minAge}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10);
+                            if (Number.isNaN(v)) return;
+                            setAgeRange(v, maxAge);
+                          }}
+                          className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                          placeholder="18"
+                        />
+                      </div>
+
+                      <div className="flex-1">
+                        <label className="block mb-1 text-xs text-[#666666]">Max</label>
+                        <input
+                          type="number"
+                          min={minLimit}
+                          max={maxLimit}
+                          value={maxAge}
+                          onChange={(e) => {
+                            const v = parseInt(e.target.value, 10);
+                            if (Number.isNaN(v)) return;
+                            setAgeRange(minAge, v);
+                          }}
+                          className="w-full px-4 py-3 border border-black rounded-lg bg-white"
+                          placeholder="50"
+                        />
+                      </div>
+                    </div>
                   </div>
-                </div>
-              )}
+                );
+              })()}
             </div>
+
 
             {/* Verified Only */}
             <div>

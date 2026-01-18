@@ -15,6 +15,7 @@ import {
   Camera,
   Music
 } from 'lucide-react';
+import FloatingPlane from '@/app/components/FloatingPlane';
 
 interface LandingPageProps {
   onGetStarted: () => void;
@@ -72,16 +73,9 @@ const features = [
   {
     icon: Coffee,
     title: 'Real Meetups',
-    description: 'From coffee chats to group adventures - make real connections.',
+    description: 'From cafe dates to group adventures - make real connections.',
     color: '#f6ac69',
   },
-];
-
-const stats = [
-  { number: '50K+', label: 'Active Users' },
-  { number: '120+', label: 'Countries' },
-  { number: '10K+', label: 'Connections Made' },
-  { number: '500+', label: 'Universities' },
 ];
 
 export function LandingPage({ onGetStarted }: LandingPageProps) {
@@ -108,6 +102,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
 
   return (
     <div className="min-h-screen bg-[#FFEBDA] overflow-x-hidden">
+      <FloatingPlane />
       {/* floating background icons */}
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
         {floatingIcons.map(({ Icon, delay, x, y }, index) => (
@@ -177,7 +172,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             className="inline-flex items-center gap-2 px-4 py-2 bg-white border-2 border-black rounded-full mb-8"
           >
             <Sparkles className="w-4 h-4 text-[#f6ac69]" />
-            <span className="text-sm font-medium">Your adventure starts here</span>
+            <span className="text-sm font-medium">Community wherever you land</span>
           </motion.div>
 
           {/* main heading with gradient */}
@@ -197,7 +192,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               transition={{ duration: 5, repeat: Infinity, ease: 'linear' }}
               style={{ backgroundSize: '200% auto' }}
             >
-              Travel Tribe
+              Community
             </motion.span>
           </motion.h1>
 
@@ -208,8 +203,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.4 }}
           >
-            Connect with travelers and students who share your journey. 
-            Make friends, explore together, and turn strangers into lifelong companions.
+            When the world feels unfamiliar, we help you find the people who feel like home.
           </motion.p>
 
           {/* cta buttons */}
@@ -332,31 +326,6 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
         </motion.div>
       </section>
 
-      {/* stats section */}
-      <section className="py-16 px-6 bg-black text-white">
-        <div className="max-w-6xl mx-auto">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-            {stats.map((stat, index) => (
-              <motion.div
-                key={stat.label}
-                className="text-center"
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: index * 0.1 }}
-              >
-                <motion.p
-                  className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-[#f55c7a] to-[#f6bc66] bg-clip-text text-transparent"
-                  style={{ fontFamily: 'Castoro, serif' }}
-                >
-                  {stat.number}
-                </motion.p>
-                <p className="text-gray-400 mt-2">{stat.label}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
 
       {/* features section */}
       <section className="py-20 px-6">
@@ -371,7 +340,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
               Why Travelmate?
             </h2>
             <p className="text-[#666666] text-lg max-w-2xl mx-auto">
-              We're not just another social app. We're building a community of curious souls who believe the best journeys are shared.
+              Being abroad can be isolating, but also a great way to discover yourself. We want to make the process easier by helping you find community wherever you go.
             </p>
           </motion.div>
 
@@ -473,7 +442,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             <h2 className="text-4xl md:text-5xl mb-4" style={{ fontFamily: 'Castoro, serif' }}>
               How It Works
             </h2>
-            <p className="text-[#666666] text-lg">Three simple steps to find your travel tribe</p>
+            <p className="text-[#666666] text-lg">Three simple steps to find your travel friends</p>
           </motion.div>
 
           <div className="grid md:grid-cols-3 gap-8">
@@ -536,7 +505,7 @@ export function LandingPage({ onGetStarted }: LandingPageProps) {
             </motion.div>
 
             <h2 className="text-3xl md:text-5xl text-white mb-4" style={{ fontFamily: 'Castoro, serif' }}>
-              Ready to Find Your Tribe?
+              Ready to Find Your Community Abroad?
             </h2>
             <p className="text-gray-300 text-lg mb-8 max-w-xl mx-auto">
               Join thousands of travelers and students making meaningful connections every day.

@@ -161,7 +161,7 @@ seed_database() {
     fi
     
     export DB_NAME DB_USER DB_HOST DB_PORT DB_PASSWORD
-    export USERS_FILE="backend/db/mock_data/fake_users.json"
+    export USERS_FILE="backend/db/mock_data/profiles.json"
     export POSTS_FILE="backend/db/mock_data/posts.json"
     export CONVERSATIONS_FILE="backend/db/mock_data/conversations.json"
     export MESSAGES_FILE="backend/db/mock_data/messages.json"

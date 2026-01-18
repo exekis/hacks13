@@ -14,14 +14,14 @@ import {
 
 interface WebFeedProps {
   onViewProfile: (userId: string) => void;
-  // onMessage: (userId: string) => void;
+  onMessage: (userId: string, userName?: string, userAvatar?: string) => void;
   onRSVP: (userId: string) => void;
   friendRequests: Set<string>;
   onAddFriend: (userId: string) => void;
   currentUserId?: string;
 }
 
-export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, currentUserId }: WebFeedProps) {
+export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAddFriend, currentUserId }: WebFeedProps) {
   // use provided userid or fallback to localstorage
   const effectiveUserId = currentUserId || localStorage.getItem('user_id') || '482193';
   
@@ -381,7 +381,7 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
                       <motion.div key={post.id} variants={itemVariants}>
                         <WebPostCard
                           post={post}
-                          onRSVP={onRSVP}
+                          onMessage={onMessage}
                           onViewProfile={onViewProfile}
                         />
                       </motion.div>
@@ -416,6 +416,7 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
                             <WebPostCard
                               post={item.data as Post}
                               onRSVP={onRSVP}
+                              onMessage={onMessage}
                               onViewProfile={onViewProfile}
                             />
                           </motion.div>
