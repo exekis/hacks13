@@ -159,57 +159,52 @@ export function WebFeed({ onViewProfile, onMessage, onRSVP, friendRequests, onAd
           </p>
         </motion.div>
 
-        {/* stats bar */}
+        {/* stats bar with refresh button */}
         <motion.div 
-          className="flex items-center gap-4 mb-6 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-black/10"
+          className="flex items-center justify-between gap-4 mb-6 p-4 bg-white/60 backdrop-blur-sm rounded-2xl border border-black/10"
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2 }}
         >
-          <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f55c7a]/10 rounded-full">
-            <TrendingUp className="w-4 h-4 text-[#f55c7a]" />
-            <span className="text-sm font-medium text-[#f55c7a]">
-              {hasLoadedOnce ? `${peopleItems.length} matches` : '6 new matches today'}
-            </span>
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-[#f55c7a]/10 rounded-full">
+              <TrendingUp className="w-4 h-4 text-[#f55c7a]" />
+              <span className="text-sm font-medium text-[#f55c7a]">
+                {hasLoadedOnce ? `${peopleItems.length} matches` : '6 new matches today'}
+              </span>
+            </div>
+            <div className="flex items-center gap-2 text-sm text-[#666666]">
+              <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+              <span>12 people online nearby</span>
+            </div>
+            {usingMockData && (
+              <span className="text-xs text-[#f55c7a] bg-[#f55c7a]/10 px-2 py-1 rounded-full">Demo data</span>
+            )}
+            {hasLoadedOnce && !usingMockData && lastRefreshTime.current && (
+              <span className="text-xs text-[#666666]">
+                Updated: {lastRefreshTime.current.toLocaleTimeString()}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-2 text-sm text-[#666666]">
-            <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-            <span>12 people online nearby</span>
-          </div>
-          {usingMockData && (
-            <span className="text-xs text-[#f55c7a] bg-[#f55c7a]/10 px-2 py-1 rounded-full">Demo data</span>
-          )}
-          {hasLoadedOnce && !usingMockData && lastRefreshTime.current && (
-            <span className="text-xs text-[#666666]">
-              Updated: {lastRefreshTime.current.toLocaleTimeString()}
-            </span>
-          )}
-        </motion.div>
-
-        {/* refresh feed button */}
-        <motion.div 
-          className="mb-6"
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25 }}
-        >
+          
+          {/* refresh feed button - right aligned */}
           <motion.button
             onClick={handleRefreshFeed}
             disabled={isRefreshing}
-            className={`w-full flex items-center justify-center gap-3 px-6 py-4 rounded-2xl font-semibold transition-all border-2 ${
+            className={`flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-all border-2 ${
               isRefreshing
                 ? 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                 : 'bg-white text-[#f55c7a] border-[#f55c7a] hover:bg-[#f55c7a] hover:text-white'
             }`}
-            whileHover={!isRefreshing ? { scale: 1.01 } : {}}
-            whileTap={!isRefreshing ? { scale: 0.99 } : {}}
+            whileHover={!isRefreshing ? { scale: 1.02 } : {}}
+            whileTap={!isRefreshing ? { scale: 0.98 } : {}}
           >
             <RefreshCw 
-              size={20} 
+              size={18} 
               className={isRefreshing ? 'animate-spin' : ''} 
             />
-            <span style={{ fontFamily: 'Castoro, serif' }}>
-              {isRefreshing ? 'Refreshing Recommendations...' : 'Refresh Feed'}
+            <span className="text-sm" style={{ fontFamily: 'Castoro, serif' }}>
+              {isRefreshing ? 'Refreshing...' : 'Refresh Feed'}
             </span>
           </motion.button>
         </motion.div>
