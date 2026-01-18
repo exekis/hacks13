@@ -5,6 +5,14 @@ import { Send, ArrowLeft, MessageCircle, Search, Loader2 } from 'lucide-react';
 import { fetchConversations, fetchConversation, sendMessage, ConversationPreview, Message as ApiMessage } from '@/api/conversations';
 import { Avatar } from '@/app/components/DesignSystem';
 
+// generate avatar url from user id for consistent avatars
+function generateAvatarUrl(userId: string | number): string {
+  const id = typeof userId === 'string' ? parseInt(userId, 10) : userId;
+  const gender = id % 2 === 0 ? 'women' : 'men';
+  const index = (id % 99) + 1;
+  return `https://randomuser.me/api/portraits/${gender}/${index}.jpg`;
+}
+
 interface WebMessagesProps {
   selectedUserId?: string;
   selectedUserName?: string;  // optional name of the selected user
@@ -194,8 +202,9 @@ export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvat
                 const isSelected = selectedChat === conv.friend_user_id.toString();
                 // get display name with fallback
                 const displayName = conv.friend_name || 'Traveler';
-                // try to find mock user for avatar if possible
+                // try to find mock user for avatar, otherwise generate from user id
                 const mockUser = mockUsers.find(u => u.id === conv.friend_user_id.toString());
+                const avatarUrl = mockUser?.avatar || generateAvatarUrl(conv.friend_user_id);
                 
                 return (
                   <motion.button
@@ -214,7 +223,7 @@ export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvat
                         whileHover={{ scale: 1.05 }}
                       >
                         <Avatar 
-                          src={mockUser?.avatar}
+                          src={avatarUrl}
                           name={displayName}
                           size="md"
                           className="border border-black"
@@ -260,7 +269,8 @@ export function WebMessages({ selectedUserId, selectedUserName, selectedUserAvat
                 currentFriend?.name || 
                 mockUser?.name || 
                 'Traveler';
-              const chatAvatar = currentFriend?.avatar || mockUser?.avatar;
+              // generate avatar from user id, or use provided avatar
+              const chatAvatar = currentFriend?.avatar || mockUser?.avatar || generateAvatarUrl(selectedChat);
               
               return (
             <>

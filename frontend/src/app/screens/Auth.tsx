@@ -31,7 +31,7 @@ export const Auth: React.FC<AuthProps> = ({ onSignIn, onSignUp }) => {
       const profile = await getMyProfile();
       onSignIn(profile, access_token, String(user_id));
     } catch (err: unknown) {
-      setError('Failed to sign in. Please check your credentials.');
+      setError('Account not found. Try signing up first, or check your email and password.');
     } finally {
       setLoading(false);
     }
