@@ -108,6 +108,12 @@ const getInitials = (name: string): string => {
   return parts[0].substring(0, 2).toUpperCase();
 };
 
+// helper to check if string is a valid image url
+const isValidImageUrl = (url?: string): boolean => {
+  if (!url) return false;
+  return url.startsWith('http://') || url.startsWith('https://') || url.startsWith('/');
+};
+
 export const Avatar: React.FC<AvatarProps> = ({ 
   src, 
   emoji,
@@ -122,9 +128,11 @@ export const Avatar: React.FC<AvatarProps> = ({
     xl: 'w-24 h-24 text-2xl'
   };
   
+  const hasValidImage = isValidImageUrl(src);
+  
   // determine what to render: image, initials, emoji, or default
   const renderContent = () => {
-    if (src) {
+    if (hasValidImage) {
       return (
         <img src={src} alt="avatar" className="w-full h-full rounded-full object-cover" />
       );
