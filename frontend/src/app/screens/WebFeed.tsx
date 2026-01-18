@@ -15,7 +15,7 @@ import {
 interface WebFeedProps {
   onViewProfile: (userId: string) => void;
   onMessage: (userId: string, userName?: string, userAvatar?: string) => void;
-  onRSVP: (userId: string) => void;
+  onRSVP: (postId: string, userId: string, userName?: string, userAvatar?: string) => void;
   friendRequests: Set<string>;
   onAddFriend: (userId: string) => void;
   currentUserId?: string;

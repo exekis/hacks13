@@ -1,19 +1,74 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { mockUsers, mockPosts } from '@/app/data/mockData';
-import { Plus, MessageCircle } from 'lucide-react';
+import { Plus, MessageCircle, CalendarDays, MapPin } from 'lucide-react';
 import { WebPostCard } from '@/app/components/WebPostCard';
-import { UserProfile } from '@/app/types/profile';
+import { fetchHostedPosts, fetchAttendingPosts, PostEvent } from '@/api/posts';
+import { Post } from '@/app/data/mockData';
 
 interface ScheduleProps {
   userId?: string;
   onBack: () => void;
-  onRSVP?: (userId: string) => void;
+  onRSVP?: (postId: string, userId: string, userName?: string, userAvatar?: string) => void;
+  onMessage?: (userId: string, userName?: string, userAvatar?: string) => void;
 }
 
-export function Schedule({ userId, onRSVP }: ScheduleProps) {  
-  // get user's posts
-  const userPosts = mockPosts.filter(p => p.userId === (userId || '1'));
+// helper to convert api post to Post type for WebPostCard
+function convertToPost(apiPost: PostEvent): Post & { authorName?: string; authorLocation?: string } {
+  return {
+    id: String(apiPost.postid),
+    userId: String(apiPost.user_id),
+    content: apiPost.post_content,
+    location: apiPost.location_str || '',
+    dateRange: {
+      from: apiPost.start_time ? new Date(apiPost.start_time).toLocaleDateString() : '',
+      to: apiPost.end_time ? new Date(apiPost.end_time).toLocaleDateString() : ''
+    },
+    timeRange: {
+      from: apiPost.start_time ? new Date(apiPost.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : '',
+      to: apiPost.end_time ? new Date(apiPost.end_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : ''
+    },
+    timestamp: apiPost.time_posted || '',
+    capacity: apiPost.capacity || 0,
+    authorName: apiPost.author_name,
+    authorLocation: apiPost.author_location || undefined
+  };
+}
+
+export function Schedule({ userId, onRSVP, onMessage }: ScheduleProps) {  
+  const [attendingPosts, setAttendingPosts] = useState<PostEvent[]>([]);
+  const [hostedPosts, setHostedPosts] = useState<PostEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadPosts() {
+      if (!userId) {
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        const numericUserId = parseInt(userId, 10);
+        
+        const [attending, hosted] = await Promise.all([
+          fetchAttendingPosts(numericUserId),
+          fetchHostedPosts(numericUserId)
+        ]);
+        
+        setAttendingPosts(attending);
+        setHostedPosts(hosted);
+        setError(null);
+      } catch (err) {
+        console.error('Error loading schedule posts:', err);
+        setError('Failed to load your schedule');
+      } finally {
+        setLoading(false);
+      }
+    }
+
+    loadPosts();
+  }, [userId]);
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -28,12 +83,6 @@ export function Schedule({ userId, onRSVP }: ScheduleProps) {
     visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
   };
 
-  const tagVariants = {
-    hidden: { opacity: 0, scale: 0.8 },
-    visible: { opacity: 1, scale: 1 },
-  };
-
-  // for own profile, use userProfile data
 return (
     <div className="min-h-screen bg-gradient-to-br from-[#FFEBDA] via-[#fff5ef] to-[#FFEBDA] py-8 relative overflow-hidden">
     {/* animated background elements */}
@@ -60,19 +109,36 @@ return (
     {/* attending events section */}
         <motion.div className="space-y-4" variants={containerVariants}>
         <h3 className="text-2xl flex items-center gap-2" style={{ fontFamily: 'Castoro, serif' }}>
-            <MessageCircle size={24} className="text-[#f55c7a]" />
+            <CalendarDays size={24} className="text-[#f55c7a]" />
             Events I'm Attending
         </h3>
-        {userPosts.length > 0 ? (
-            userPosts.map((post, index) => (
-            <motion.div key={post.id} variants={itemVariants}>
-                <WebPostCard
-                post={post}
-                onRSVP={onRSVP}
-                onViewProfile={() => {}}
-                />
+        {loading ? (
+            <motion.div 
+            className="bg-white border border-black rounded-2xl p-8 text-center"
+            variants={itemVariants}
+            >
+            <p className="text-[#666666]">Loading your schedule...</p>
             </motion.div>
-            ))
+        ) : attendingPosts.length > 0 ? (
+            attendingPosts.map((apiPost) => {
+            const post = convertToPost(apiPost);
+            return (
+                <motion.div key={post.id} variants={itemVariants}>
+                <WebPostCard
+                    post={post}
+                    onRSVP={onRSVP}
+                    onMessage={onMessage}
+                    onViewProfile={() => {}}
+                />
+                {apiPost.location_str && (
+                    <div className="mt-2 ml-4 flex items-center gap-2 text-sm text-[#666666]">
+                    <MapPin size={14} className="text-[#f55c7a]" />
+                    <span>{apiPost.location_str}</span>
+                    </div>
+                )}
+                </motion.div>
+            );
+            })
         ) : (
             <motion.div 
             className="bg-white border border-black rounded-2xl p-8 text-center"
@@ -85,8 +151,8 @@ return (
             >
                 <Plus className="w-8 h-8 text-[#f55c7a]" />
             </motion.div>
-            <p className="text-[#666666]">You haven't RSVP-ed for any events yet</p>
-            <p className="text-sm text-[#999] mt-1">Share your travel plans with the community!</p>
+            <p className="text-[#666666]">You haven't RSVP'd to any events yet</p>
+            <p className="text-sm text-[#999] mt-1">Browse the feed and RSVP to events that interest you!</p>
             </motion.div>
         )}
         </motion.div>
@@ -99,16 +165,31 @@ return (
             Events I'm Hosting
         </h3>
 
-        {userPosts.length > 0 ? (
-            userPosts.map((post, index) => (
-            <motion.div key={post.id} variants={itemVariants}>
-                <WebPostCard
-                post={post}
-                onRSVP={onRSVP}
-                onViewProfile={() => {}}
-                />
+        {loading ? (
+            <motion.div 
+            className="bg-white border border-black rounded-2xl p-8 text-center"
+            variants={itemVariants}
+            >
+            <p className="text-[#666666]">Loading your events...</p>
             </motion.div>
-            ))
+        ) : hostedPosts.length > 0 ? (
+            hostedPosts.map((apiPost) => {
+            const post = convertToPost(apiPost);
+            return (
+                <motion.div key={post.id} variants={itemVariants}>
+                <WebPostCard
+                    post={post}
+                    onViewProfile={() => {}}
+                />
+                {apiPost.location_str && (
+                    <div className="mt-2 ml-4 flex items-center gap-2 text-sm text-[#666666]">
+                    <MapPin size={14} className="text-[#f55c7a]" />
+                    <span>{apiPost.location_str}</span>
+                    </div>
+                )}
+                </motion.div>
+            );
+            })
         ) : (
             <motion.div 
             className="bg-white border border-black rounded-2xl p-8 text-center"
@@ -121,8 +202,8 @@ return (
             >
                 <Plus className="w-8 h-8 text-[#f55c7a]" />
             </motion.div>
-            <p className="text-[#666666]">You haven't created any future events yet</p>
-            <p className="text-sm text-[#999] mt-1">Share your travel plans with the community!</p>
+            <p className="text-[#666666]">You haven't created any events yet</p>
+            <p className="text-sm text-[#999] mt-1">Create an event to share your travel plans!</p>
             </motion.div>
         )}
         </motion.div>

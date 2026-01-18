@@ -10,6 +10,7 @@ import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
 import { Schedule } from '@/app/screens/Schedule';
 import { Auth } from '@/app/screens/Auth';
+import { rsvpToPost } from '@/api/posts';
 
 type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings' | 'schedule';
 type AppScreen = 'landing' | 'onboarding' | 'main' | 'auth';
@@ -46,10 +47,24 @@ export default function App() {
     setActiveScreen('messages');
   };
 
-  const handleRSVP = (userId: string) => {
-    setSelectedProfileId(userId);
-    setActiveScreen('schedule');
+  const handleRSVP = async (postId: string, userId: string, userName?: string, userAvatar?: string) => {
+    // call the rsvp api to add user to the post's rsvp list
+    if (currentUserId) {
+      try {
+        await rsvpToPost(parseInt(postId, 10), parseInt(currentUserId, 10));
+        console.log('RSVP successful for post:', postId);
+      } catch (err) {
+        console.error('Failed to RSVP:', err);
+      }
+    }
+    
+    // also open dms with the event host
+    setSelectedMessageUserId(userId);
+    setSelectedMessageUserName(userName);
+    setSelectedMessageUserAvatar(userAvatar);
+    setActiveScreen('messages');
   };
+
 
   // Render the landing page for new visitors
   if (appScreen === 'landing') {
@@ -165,13 +180,12 @@ export default function App() {
 
         {(activeScreen === 'schedule') && (
           <Schedule
-            userId={selectedProfileId}
-            // userProfile={userProfile}
+            userId={currentUserId || undefined}
             onBack={() => {
               setActiveScreen('feed');
             }}
             onRSVP={handleRSVP}
-            // onUpdateProfile={(updates: Partial<UserProfile>) => setUserProfile({ ...userProfile!, ...updates })}
+            onMessage={handleMessage}
           />
         )}
 
