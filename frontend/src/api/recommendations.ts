@@ -156,10 +156,17 @@ export function backendPersonToMockUser(rec: BackendPersonRecommendation) {
   if (rec.isStudent) badges.push('Verified Student');
   if (rec.university) badges.push(rec.university);
   
+  // generate avatar url based on userid - use randomuser.me with a consistent portrait
+  // use modulo to get a portrait number between 1-99
+  const portraitNum = (rec.userid % 99) + 1;
+  // alternate between men and women based on userid
+  const gender = rec.userid % 2 === 0 ? 'women' : 'men';
+  const avatarUrl = `https://randomuser.me/api/portraits/${gender}/${portraitNum}.jpg`;
+  
   return {
     id: rec.userid.toString(),
     name: displayName,
-    avatar: 'user',
+    avatar: avatarUrl,
     bio: rec.bio || 'No bio available',
     culturalBackground: rec.culturalIdentity || [],
     languages: rec.languages || [],
