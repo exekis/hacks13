@@ -171,7 +171,7 @@ if __name__ == "__main__":
     print("Stored event recommendations")
     
     test_user_id = 482193
-    recs = get_event_recs_emb(test_user_id, limit=10)
+    recs = get_event_recs_emb(conn, test_user_id, limit=10)
     print("Top 10 recommended post IDs:", recs)
 
     conn.close()

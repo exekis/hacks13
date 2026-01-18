@@ -17,7 +17,9 @@ load_dotenv()
 from app.api.conversations import router as conversations_router
 from app.api.settings import router as settings_router
 from app.api.profile import router as profile_router
+from app.api.profile_router import router as profile_posts_router
 from app.api.recommendations import router as recommendations_router
+from app.api.posts import router as posts_router
 from app.api import auth, profile_setup
 
 
@@ -28,7 +30,11 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
+        "http://localhost:5174",
+        "http://localhost:5175",
         "http://127.0.0.1:5173",
+        "http://127.0.0.1:5174",
+        "http://127.0.0.1:5175",
         "http://localhost:3000",
     ],
     allow_credentials=True,
@@ -70,5 +76,7 @@ app.include_router(auth.router)
 app.include_router(profile_setup.router)
 app.include_router(conversations_router)
 app.include_router(settings_router)
+app.include_router(posts_router)
 app.include_router(recommendations_router, prefix="/api")
 app.include_router(profile_router)
+app.include_router(profile_posts_router)

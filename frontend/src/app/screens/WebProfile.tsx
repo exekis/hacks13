@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { mockUsers, mockPosts } from '@/app/data/mockData';
+import { mockUsers, mockPosts, Post } from '@/app/data/mockData';
 import { User, MapPin, Edit, Plus, Globe, ArrowLeft, CheckCircle, Sparkles, Heart, MessageCircle } from 'lucide-react';
 import { WebPostCard } from '@/app/components/WebPostCard';
 import { UserProfile } from '@/app/types/profile';
+import { fetchUserPosts, PostResponse } from '@/api/posts';
 
 interface WebProfileProps {
   userId?: string;
@@ -16,13 +17,39 @@ interface WebProfileProps {
 
 export function WebProfile({ userId, userProfile, onBack, onMessage, onCreatePost, onUpdateProfile }: WebProfileProps) {
   const [isEditingAge, setIsEditingAge] = useState(false);
+  const [ownPosts, setOwnPosts] = useState<Post[]>([]);
   
-  // if viewing someone else's profile, show their mock data
-  const isOwnProfile = !userId || userId === '1';
+  // get current user id from localstorage
+  const currentUserId = localStorage.getItem('user_id');
+  
+  // if viewing someone else's profile, show their data
+  const isOwnProfile = !userId || userId === currentUserId;
   const displayUser = isOwnProfile ? null : mockUsers.find(u => u.id === userId);
   
-  // get user's posts
-  const userPosts = mockPosts.filter(p => p.userId === (userId || '1'));
+  // fetch own posts from api
+  useEffect(() => {
+    if (isOwnProfile && currentUserId) {
+      fetchUserPosts(currentUserId).then((posts: PostResponse[]) => {
+        // transform to mock post format for webpostcard
+        const transformed: Post[] = posts.map(p => ({
+          id: p.id,
+          userId: p.author_id,
+          userName: userProfile?.fullName || 'You',
+          content: p.content,
+          timestamp: 'Just now',
+          likes: 0,
+          comments: 0,
+          isEvent: p.is_event,
+        }));
+        setOwnPosts(transformed);
+      }).catch(() => {
+        setOwnPosts([]);
+      });
+    }
+  }, [isOwnProfile, currentUserId, userProfile?.fullName]);
+  
+  // for own profile use fetched posts, for others use mock
+  const userPosts = isOwnProfile ? ownPosts : mockPosts.filter(p => p.userId === userId);
 
   const containerVariants = {
     hidden: { opacity: 0 },

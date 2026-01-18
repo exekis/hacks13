@@ -1,6 +1,8 @@
+/// <reference types="vite/client" />
+
 import { UserProfile } from "@/app/types/profile";
 
-const API_URL = import.meta.env.VITE_API_URL || 
+export const API_URL = import.meta.env.VITE_API_URL || 
   (import.meta.env.DEV ? "http://localhost:8000" : "/api");
 
 /**
@@ -9,7 +11,7 @@ const API_URL = import.meta.env.VITE_API_URL ||
  * @param password The user's password.
  * @returns A promise that resolves to an object containing the access token and token type.
  */
-export const signup = async (email: string, password: string): Promise<{ access_token: string; token_type: string; }> => {
+export const signup = async (email: string, password: string): Promise<{ access_token: string; token_type: string; user_id: number }> => {
   const response = await fetch(`${API_URL}/signup`, {
     method: 'POST',
     headers: {
@@ -19,7 +21,8 @@ export const signup = async (email: string, password: string): Promise<{ access_
   });
 
   if (!response.ok) {
-    throw new Error('Signup failed');
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.detail || 'Signup failed');
   }
 
   return response.json();
@@ -31,7 +34,7 @@ export const signup = async (email: string, password: string): Promise<{ access_
  * @param password The user's password.
  * @returns A promise that resolves to an object containing the access token and token type.
  */
-export const login = async (email: string, password: string): Promise<{ access_token: string; token_type: string; }> => {
+export const login = async (email: string, password: string): Promise<{ access_token: string; token_type: string; user_id: number }> => {
   const formData = new URLSearchParams();
   formData.append('username', email);
   formData.append('password', password);
@@ -65,6 +68,14 @@ export const storeToken = (token: string) => {
  */
 export const getToken = (): string | null => {
   return localStorage.getItem('access_token');
+};
+
+/**
+ * Retrieves the user ID from local storage.
+ * @returns The user ID, or null if it's not found.
+ */
+export const getUserId = (): string | null => {
+    return localStorage.getItem('user_id');
 };
 
 /**

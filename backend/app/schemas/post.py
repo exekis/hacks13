@@ -1,8 +1,16 @@
 from pydantic import BaseModel
-from typing import Optional
+from datetime import datetime
+
+class PostCreate(BaseModel):
+    user_id: int
+    post_content: str
+    capacity: int
+    start_time: datetime
+    end_time: datetime
+    location_str: str
 
 class CreatePostIn(BaseModel):
-    author_id: str # str to match recs
+    author_id: int  # int to match database
     content: str
     is_event: bool = False
 

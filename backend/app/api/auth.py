@@ -69,11 +69,20 @@ async def signup(user: User):
     conn = get_db_connection()
     cur = conn.cursor()
     try:
-        # Get new userID (simple; not concurrency-safe but fine for your "easy" requirement)
+        # check if email already exists
+        cur.execute("SELECT userID FROM Users WHERE Email = %s", (user.email,))
+        existing_user = cur.fetchone()
+        if existing_user:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Email already registered"
+            )
+
+        # get new userid (simple; not concurrency-safe but fine for demo)
         cur.execute("SELECT COALESCE(MAX(userID), 0) FROM Users")
         new_user_id = cur.fetchone()[0] + 1
 
-        # Create new user
+        # create new user
         cur.execute("INSERT INTO Users (userID, Email) VALUES (%s, %s)", (new_user_id, user.email))
 
         # Hash the password

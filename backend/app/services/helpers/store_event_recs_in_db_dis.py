@@ -375,6 +375,7 @@ def rerank_posts(
 # ---------------------------------------------------------------------------
 
 def recommend_posts(
+    conn: psycopg2.extensions.connection,
     user_id: str,
     limit: int = 30,
 ) -> List[int]:
@@ -385,123 +386,118 @@ def recommend_posts(
     3) rerank for diversity
     4) return top limit
     """
-    conn = get_conn()
-    try:
-        # ---- load viewer ----
+    # ---- load viewer ----
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(SQL_GET_VIEWER, (int(user_id),))
+        viewer = cur.fetchone()
+
+    if not viewer:
+        return []
+
+    user_friends: Set[str] = {str(x) for x in (viewer.get("friends") or [])}
+    user_blocked: Set[str] = {str(x) for x in (viewer.get("blockedusers") or [])}
+
+    # blocked_by: users who blocked viewer
+    blocked_by: Set[str] = set()
+    with conn.cursor() as cur:
+        cur.execute(SQL_BLOCKED_BY, (int(user_id),))
+        blocked_by = {str(r[0]) for r in cur.fetchall()}
+
+    excluded_authors: Set[str] = user_blocked | blocked_by
+
+    # ---- 1) candidate generation ----
+    candidate_ids = generate_post_candidates(
+        conn=conn,
+        user_id=str(user_id),
+        viewer=viewer,
+        user_friends=user_friends,
+        excluded_authors=excluded_authors,
+    )
+    if not candidate_ids:
+        return []
+
+    candidate_ints = [int(pid) for pid in candidate_ids]
+
+    # ---- fetch post rows in bulk ----
+    sql_get_posts_bulk = """
+    SELECT
+      p.postid,
+      p.user_id AS author_id,
+      COALESCE(p.location_str, '') AS coarse_location,
+      p.time_posted,
+      COALESCE(p.post_content, '') AS post_content
+    FROM posts p
+    WHERE p.postid = ANY(%s);
+    """
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(sql_get_posts_bulk, (candidate_ints,))
+        post_rows = cur.fetchall()
+
+    if not post_rows:
+        return []
+
+    # map posts by id for determinism and quick lookup
+    posts_by_id: Dict[str, Dict[str, Any]] = {str(r["postid"]): r for r in post_rows}
+
+    # ---- author rows in bulk ----
+    author_ids = sorted({int(r["author_id"]) for r in post_rows})
+    with conn.cursor(cursor_factory=RealDictCursor) as cur:
+        cur.execute(SQL_GET_AUTHORS, (author_ids,))
+        author_rows = cur.fetchall()
+
+    authors_by_id: Dict[str, Dict[str, Any]] = {str(r["userid"]): r for r in author_rows}
+
+    # ---- RSVP friend counts (optional) ----
+    friend_rsvp_count_by_post: Dict[str, int] = {}
+    if user_friends and _table_exists(conn, "postrsvps"):
+        friends_int = [int(x) for x in user_friends]
         with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(SQL_GET_VIEWER, (int(user_id),))
-            viewer = cur.fetchone()
+            cur.execute(SQL_RSVP_FRIEND_COUNT_FOR_POSTS, (friends_int, candidate_ints))
+            for r in cur.fetchall():
+                friend_rsvp_count_by_post[str(r["post_id"])] = int(r["friend_rsvp_count"])
 
-        if not viewer:
-            return []
+    # ---- 2) score ----
+    scored: List[ScoredCandidate] = []
+    for pid_str in candidate_ids:
+        post = posts_by_id.get(pid_str)
+        if not post:
+            continue
+        author = authors_by_id.get(str(post["author_id"]))
+        if not author:
+            continue
 
-        user_friends: Set[str] = {str(x) for x in (viewer.get("friends") or [])}
-        user_blocked: Set[str] = {str(x) for x in (viewer.get("blockedusers") or [])}
-
-        # blocked_by: users who blocked viewer
-        blocked_by: Set[str] = set()
-        with conn.cursor() as cur:
-            cur.execute(SQL_BLOCKED_BY, (int(user_id),))
-            blocked_by = {str(r[0]) for r in cur.fetchall()}
-
-        excluded_authors: Set[str] = user_blocked | blocked_by
-
-        # ---- 1) candidate generation ----
-        candidate_ids = generate_post_candidates(
-            conn=conn,
-            user_id=str(user_id),
+        score = score_post(
             viewer=viewer,
+            post_row=post,
+            author_row=author,
             user_friends=user_friends,
-            excluded_authors=excluded_authors,
+            friend_rsvp_count=friend_rsvp_count_by_post.get(pid_str, 0),
         )
-        if not candidate_ids:
-            return []
+        scored.append(ScoredCandidate(
+            id=pid_str,
+            score=score,
+            author_id=str(post["author_id"]),
+        ))
 
-        candidate_ints = [int(pid) for pid in candidate_ids]
+    # sort for determinism before reranking
+    scored.sort(key=lambda x: (-x.score, x.id))
 
-        # ---- fetch post rows in bulk ----
-        sql_get_posts_bulk = """
-        SELECT
-          p.postid,
-          p.user_id AS author_id,
-          COALESCE(p.location_str, '') AS coarse_location,
-          p.time_posted,
-          COALESCE(p.post_content, '') AS post_content
-        FROM posts p
-        WHERE p.postid = ANY(%s);
-        """
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(sql_get_posts_bulk, (candidate_ints,))
-            post_rows = cur.fetchall()
+    # ---- 3) rerank ----
+    reranked = rerank_posts(str(user_id), scored, limit)
 
-        if not post_rows:
-            return []
+    # ---- 4) build response ----
+    results: List[int] = []
+    for sc in reranked:
+        post = posts_by_id.get(sc.id)
+        if not post:
+            continue
+        author = authors_by_id.get(str(post["author_id"]))
+        if not author:
+            continue
 
-        # map posts by id for determinism and quick lookup
-        posts_by_id: Dict[str, Dict[str, Any]] = {str(r["postid"]): r for r in post_rows}
+        results.append(post["postid"])
 
-        # ---- author rows in bulk ----
-        author_ids = sorted({int(r["author_id"]) for r in post_rows})
-        with conn.cursor(cursor_factory=RealDictCursor) as cur:
-            cur.execute(SQL_GET_AUTHORS, (author_ids,))
-            author_rows = cur.fetchall()
-
-        authors_by_id: Dict[str, Dict[str, Any]] = {str(r["userid"]): r for r in author_rows}
-
-        # ---- RSVP friend counts (optional) ----
-        friend_rsvp_count_by_post: Dict[str, int] = {}
-        if user_friends and _table_exists(conn, "postrsvps"):
-            friends_int = [int(x) for x in user_friends]
-            with conn.cursor(cursor_factory=RealDictCursor) as cur:
-                cur.execute(SQL_RSVP_FRIEND_COUNT_FOR_POSTS, (friends_int, candidate_ints))
-                for r in cur.fetchall():
-                    friend_rsvp_count_by_post[str(r["post_id"])] = int(r["friend_rsvp_count"])
-
-        # ---- 2) score ----
-        scored: List[ScoredCandidate] = []
-        for pid_str in candidate_ids:
-            post = posts_by_id.get(pid_str)
-            if not post:
-                continue
-            author = authors_by_id.get(str(post["author_id"]))
-            if not author:
-                continue
-
-            score = score_post(
-                viewer=viewer,
-                post_row=post,
-                author_row=author,
-                user_friends=user_friends,
-                friend_rsvp_count=friend_rsvp_count_by_post.get(pid_str, 0),
-            )
-            scored.append(ScoredCandidate(
-                id=pid_str,
-                score=score,
-                author_id=str(post["author_id"]),
-            ))
-
-        # sort for determinism before reranking
-        scored.sort(key=lambda x: (-x.score, x.id))
-
-        # ---- 3) rerank ----
-        reranked = rerank_posts(str(user_id), scored, limit)
-
-        # ---- 4) build response ----
-        results: List[int] = []
-        for sc in reranked:
-            post = posts_by_id.get(sc.id)
-            if not post:
-                continue
-            author = authors_by_id.get(str(post["author_id"]))
-            if not author:
-                continue
-
-            results.append(post["postid"])
-
-        return results
-
-    finally:
-        conn.close()
+    return results
 
 
 
@@ -527,7 +523,7 @@ def store_post_recs_dis(conn: psycopg2.extensions.connection, limit: int = 30, r
 
     # compute + store for each user
     for uid in all_user_ids:
-        post_ids = recommend_posts(uid, limit)  # List[int]
+        post_ids = recommend_posts(conn, uid, limit)  # List[int]
 
         if refresh:
             random.shuffle(post_ids)
@@ -554,7 +550,9 @@ if __name__ == "__main__":
         limit = int(limit_env)
     except ValueError:
         limit = 30
-
-    test_user_id = 482193
-    print(store_post_recs_dis(limit=20))
-    print("Stored event recommendations into users.event_recs_dis")
+    conn = get_conn()
+    try:
+        print(store_post_recs_dis(conn, limit=20))
+        print("Stored event recommendations into users.event_recs_dis")
+    finally:
+        conn.close()

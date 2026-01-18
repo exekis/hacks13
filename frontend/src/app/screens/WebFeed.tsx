@@ -21,7 +21,10 @@ interface WebFeedProps {
   currentUserId?: string;
 }
 
-export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, currentUserId = '482193' }: WebFeedProps) {
+export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, currentUserId }: WebFeedProps) {
+  // use provided userid or fallback to localstorage
+  const effectiveUserId = currentUserId || localStorage.getItem('user_id') || '482193';
+  
   const [activeTab, setActiveTab] = useState<'people' | 'posts' | 'all'>('people');
   
   // state for api-powered recommendations
@@ -60,8 +63,8 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
 
       // fetch real recommendations from the backend
       const [peopleRecs, postRecs] = await Promise.all([
-        fetchPeopleRecommendations(currentUserId, 20),
-        fetchPostRecommendations(currentUserId, 20)
+        fetchPeopleRecommendations(effectiveUserId, 20),
+        fetchPostRecommendations(effectiveUserId, 20)
       ]);
 
       console.log('[WebFeed] received peopleRecs:', peopleRecs.length);
@@ -91,7 +94,7 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
       setLoading(false);
       setIsRefreshing(false);
     }
-  }, [currentUserId, isRefreshing, peopleItems.length, postItems.length]);
+  }, [effectiveUserId, isRefreshing, peopleItems.length, postItems.length]);
 
   // combine people and posts for all tab
   const allItems = hasLoadedOnce 
@@ -348,7 +351,8 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
                 <>
                   {peopleItems.length === 0 ? (
                     <div className="text-center py-8 text-[#666666]">
-                      <p>No recommendations found. Try refreshing!</p>
+                      <p className="mb-2">No recommendations yet!</p>
+                      <p className="text-sm">Complete your profile to get personalized matches.</p>
                     </div>
                   ) : (
                     peopleItems.map((user) => (
@@ -369,7 +373,8 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
                 <>
                   {postItems.length === 0 ? (
                     <div className="text-center py-8 text-[#666666]">
-                      <p>No events found. Try refreshing!</p>
+                      <p className="mb-2">No events yet!</p>
+                      <p className="text-sm">Complete your profile to see events near you.</p>
                     </div>
                   ) : (
                     postItems.map((post) => (
@@ -389,7 +394,8 @@ export function WebFeed({ onViewProfile, onRSVP, friendRequests, onAddFriend, cu
                 <>
                   {allItems.length === 0 ? (
                     <div className="text-center py-8 text-[#666666]">
-                      <p>No content found. Try refreshing!</p>
+                      <p className="mb-2">No content yet!</p>
+                      <p className="text-sm">Complete your profile to get personalized recommendations.</p>
                     </div>
                   ) : (
                     allItems.map((item) => {

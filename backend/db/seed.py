@@ -122,9 +122,10 @@ def load_posts(cur, conn, posts_file: str) -> None:
                     """
                     INSERT INTO Posts (
                         PostID, user_id,
-                        time_posted, post_content, post_embedding
+                        time_posted, post_content, post_embedding,
+                        capacity, start_time, end_time
                     )
-                    VALUES (%s, %s, %s, %s, %s)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, %s)
                     """,
                     (
                         int(post_key),
@@ -132,6 +133,9 @@ def load_posts(cur, conn, posts_file: str) -> None:
                         post.get("time_posted"),
                         post.get("post_content"),
                         post.get("embedding"),
+                        post.get("capacity", 0),
+                        post.get("start_time"),
+                        post.get("end_time"),
                     ),
                 )
             else:
@@ -142,15 +146,19 @@ def load_posts(cur, conn, posts_file: str) -> None:
                             PostID,
                             user_id,
                             time_posted,
-                            post_content
+                            post_content,
+                            capacity, start_time, end_time
                         )
-                        VALUES (%s, %s, %s, %s)
+                        VALUES (%s, %s, %s, %s, %s, %s, %s)
                         """,
                         (
                             int(post_key),
                             post["user_id"],
                             post.get("time_posted"),
                             post.get("post_content"),
+                            post.get("capacity", 0),
+                            post.get("start_time"),
+                            post.get("end_time"),
                         ),
                     )
         except psycopg2.Error as e:
@@ -258,7 +266,7 @@ if __name__ == "__main__":
         raise SystemExit(1)
 
     try:
-        #recreate_tables(cur, conn, SCHEMA_FILE)
+        recreate_tables(cur, conn, SCHEMA_FILE)
         load_users(cur, conn, USERS_FILE)
         load_posts(cur, conn, POSTS_FILE)
         load_conversations(cur, conn, CONVERSATIONS_FILE)

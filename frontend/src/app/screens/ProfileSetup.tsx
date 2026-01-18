@@ -602,11 +602,12 @@ export function ProfileSetup({ onComplete, token }: ProfileSetupProps) {
                 ].map((option) => (
                   <button
                     key={option.value}
-
-                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors 
+                    onClick={() => updateProfile({ whoCanMessage: option.value as any })}
+                    className={`w-full px-4 py-3 border border-black rounded-lg text-left transition-colors ${
+                      profile.whoCanMessage === option.value
                         ? 'bg-[#f55c7a] text-white'
                         : 'bg-white hover:bg-[#f6bc66]/20'
-                      }`}
+                    }`}
                   >
                     {option.label}
                   </button>

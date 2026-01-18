@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { X, Image as ImageIcon, Calendar, Send, Sparkles, MapPin } from 'lucide-react';
+import { X, Image as ImageIcon, Calendar, Send, Sparkles, MapPin, Loader2 } from 'lucide-react';
+import { getUserId, API_URL } from '@/api/auth';
 
 interface WebCreatePostProps {
   onBack: () => void;
@@ -8,16 +9,59 @@ interface WebCreatePostProps {
 
 export function WebCreatePost({ onBack }: WebCreatePostProps) {
   const [content, setContent] = useState('');
-  const [hasDateRange, setHasDateRange] = useState(false);
   const [dateFrom, setDateFrom] = useState('');
   const [dateTo, setDateTo] = useState('');
   const [timeFrom, setTimeFrom] = useState('');
   const [timeTo, setTimeTo] = useState('');
   const [capacity, setCapacity] = useState<number | ''>('');
+  const [location, setLocation] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-  const handleSubmit = () => {
-    // in a real app, this would create the post
-    onBack();
+  const handleSubmit = async () => {
+    const userId = getUserId();
+    if (!userId) {
+      setError("You must be logged in to create a post");
+      return;
+    }
+
+    if (!content.trim()) {
+      setError('Please enter some content for your post');
+      return;
+    }
+
+    setIsSubmitting(true);
+    setError(null);
+
+    const postData = {
+      user_id: parseInt(userId, 10),
+      post_content: content,
+      capacity: capacity || 0,
+      start_time: `${dateFrom}T${timeFrom}`,
+      end_time: `${dateTo}T${timeTo}`,
+      location_str: location,
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/posts`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(postData),
+      });
+
+      if (response.ok) {
+        onBack();
+      } else {
+        const errorData = await response.json().catch(() => ({}));
+        setError(errorData.detail || 'Failed to create post');
+      }
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'Failed to create post');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const containerVariants = {
@@ -167,6 +211,25 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
               
             </div>
           </motion.div>
+
+          <motion.div
+            className="mb-6 p-4 bg-gradient-to-r from-[#f68c70]/20 to-[#f6ac69]/10 border border-black rounded-xl"
+            >
+            <div className="flex items-center gap-2 mb-3">
+                <MapPin size={16} className="text-[#f68c70]" />
+                <label className="font-medium">Location</label>
+            </div>
+            <div className="flex gap-4">
+                <div className="flex-1">
+                <input
+                    type="text"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-black rounded-xl focus:ring-2 focus:ring-[#f55c7a]/30 outline-none"
+                />
+                </div>
+            </div>
+            </motion.div>
           
           {/* add image button */}
           <motion.button 
@@ -177,21 +240,6 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
             <ImageIcon size={20} className="text-[#f68c70]" />
             <span>Add Image (optional)</span>
           </motion.button>
-
-          {/* info box
-          <motion.div 
-            className="p-4 bg-gradient-to-r from-[#f6bc66]/20 to-[#f6ac69]/10 border border-black rounded-xl mb-6"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-          >
-            {/* <div className="flex items-start gap-2">
-              <MapPin size={16} className="text-[#f55c7a] mt-0.5 flex-shrink-0" />
-              <p className="text-sm text-[#666666]">
-                <strong className="text-[#3d3430]">Privacy Note:</strong> Your exact location will only be shared with people you connect with.
-              </p>
-            </div> 
-          </motion.div> */}
 
           {/* action buttons */}
           <div className="flex gap-3">
@@ -205,17 +253,22 @@ export function WebCreatePost({ onBack }: WebCreatePostProps) {
             </motion.button>
             <motion.button
               onClick={handleSubmit}
-              disabled={!content.trim()}
-              className={`flex-1 px-6 py-3 border border-black rounded-xl transition-all flex items-center justify-center gap-2 ${
-                content.trim()
+              disabled={isSubmitting || !content.trim()}
+              className={`flex-1 px-6 py-3 border border-black rounded-xl transition-all flex items-center justify-center gap-2 ${                content.trim()
                   ? 'bg-gradient-to-r from-[#f55c7a] to-[#f68c70] text-white shadow-lg'
                   : 'bg-[#666666] text-white cursor-not-allowed'
               }`}
               whileHover={content.trim() ? { scale: 1.02, boxShadow: '0 8px 20px rgba(245, 92, 122, 0.4)' } : {}}
               whileTap={content.trim() ? { scale: 0.98 } : {}}
             >
-              <Send size={18} />
-              Post
+              {isSubmitting ? (
+                <Loader2 className="w-5 h-5 animate-spin" />
+              ) : (
+                <>
+                  <Send size={18} />
+                  Post
+                </>
+              )}
             </motion.button>
           </div>
         </motion.div>
