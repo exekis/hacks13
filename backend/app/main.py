@@ -1,3 +1,4 @@
+
 """
 Travelmate backend API
 
@@ -20,6 +21,7 @@ from app.api.profile import router as profile_router
 from app.api.profile_router import router as profile_posts_router
 from app.api.recommendations import router as recommendations_router
 from app.api.posts import router as posts_router
+from app.api.rsvps import router as rsvps_router
 from app.api import auth, profile_setup
 
 
@@ -77,6 +79,7 @@ app.include_router(profile_setup.router)
 app.include_router(conversations_router)
 app.include_router(settings_router)
 app.include_router(posts_router)
+app.include_router(rsvps_router)
 app.include_router(recommendations_router, prefix="/api")
 app.include_router(profile_router)
 app.include_router(profile_posts_router)

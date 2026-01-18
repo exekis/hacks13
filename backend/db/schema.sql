@@ -43,7 +43,8 @@ CREATE TABLE IF NOT EXISTS Users (
     event_recs_emb JSONB[],
     event_recs_dis JSONB,
     people_recs JSONB,
-    user_embedding vector(384)
+    user_embedding vector(384),
+    RSVP INT[]
 );
 
 -- Create the Posts table

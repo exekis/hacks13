@@ -1,21 +1,62 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion } from 'motion/react';
-import { mockUsers, mockPosts } from '@/app/data/mockData';
+import { mockUsers, mockPosts, Post } from '@/app/data/mockData';
 import { Plus, MessageCircle } from 'lucide-react';
 import { WebPostCard } from '@/app/components/WebPostCard';
 import { UserProfile } from '@/app/types/profile';
+import { fetchRsvpdPosts, PostResponse, rsvpToPost } from '@/api/posts';
 
 interface ScheduleProps {
   userId?: string;
   onBack: () => void;
-  onRSVP?: (userId: string) => void;
+  onRSVP?: (postId: string) => void;
 }
 
 export function Schedule({ userId, onRSVP }: ScheduleProps) {  
+  const [rsvpdPosts, setRsvpdPosts] = useState<Post[]>([]);
+  const [refreshKey, setRefreshKey] = useState(0);
   // get user's posts
   const userPosts = mockPosts.filter(p => p.userId === (userId || '1'));
 
-  const containerVariants = {
+  useEffect(() => {
+    if (userId) {
+      fetchRsvpdPosts(userId).then(posts => {
+        const formattedPosts: Post[] = posts.map(p => {
+          const fromDate = new Date(p.start_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const toDate = new Date(p.end_time).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+          const fromTime = new Date(p.start_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+          const toTime = new Date(p.end_time).toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+          return {
+            id: p.id,
+            userId: p.user_id,
+            content: p.post_content,
+            dateRange: { from: fromDate, to: toDate },
+            timeRange: { from: fromTime, to: toTime },
+            location: p.location_str,
+            timestamp: new Date(p.time_posted).toLocaleString(),
+            capacity: p.capacity,
+            authorName: p.author_name,
+            authorLocation: p.author_location
+          }
+        });
+        setRsvpdPosts(formattedPosts);
+      });
+    }
+  }, [userId, refreshKey]);
+
+  const handleRsvp = async (postId: string) => {
+    if (userId) {
+      // we dont have the token here, so we cant call rsvpToPost directly
+      // we will call the onRSVP prop and let the parent handle it
+      if(onRSVP) {
+        onRSVP(postId)
+      }
+      setRefreshKey(prev => prev + 1);
+    }
+  };
+
+  const containerVariants: any = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
@@ -23,12 +64,12 @@ export function Schedule({ userId, onRSVP }: ScheduleProps) {
     },
   };
 
-  const itemVariants = {
+  const itemVariants: any = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0, transition: { type: 'spring', stiffness: 300, damping: 24 } },
   };
 
-  const tagVariants = {
+  const tagVariants: any = {
     hidden: { opacity: 0, scale: 0.8 },
     visible: { opacity: 1, scale: 1 },
   };
@@ -63,12 +104,12 @@ return (
             <MessageCircle size={24} className="text-[#f55c7a]" />
             Events I'm Attending
         </h3>
-        {userPosts.length > 0 ? (
-            userPosts.map((post, index) => (
+        {rsvpdPosts.length > 0 ? (
+            rsvpdPosts.map((post, index) => (
             <motion.div key={post.id} variants={itemVariants}>
                 <WebPostCard
                 post={post}
-                onRSVP={onRSVP}
+                onRSVP={handleRsvp}
                 onViewProfile={() => {}}
                 />
             </motion.div>
@@ -104,7 +145,7 @@ return (
             <motion.div key={post.id} variants={itemVariants}>
                 <WebPostCard
                 post={post}
-                onRSVP={onRSVP}
+                onRSVP={handleRsvp}
                 onViewProfile={() => {}}
                 />
             </motion.div>

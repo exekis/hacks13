@@ -10,6 +10,7 @@ import { WebSettings } from '@/app/screens/WebSettings';
 import { UserProfile } from '@/app/types/profile';
 import { Schedule } from '@/app/screens/Schedule';
 import { Auth } from '@/app/screens/Auth';
+import { rsvpToPost } from '@/api/posts';
 
 type MainScreen = 'feed' | 'discover' | 'create' | 'messages' | 'profile' | 'settings' | 'schedule';
 type AppScreen = 'landing' | 'onboarding' | 'main' | 'auth';
@@ -43,9 +44,18 @@ export default function App() {
     setActiveScreen('messages');
   };
 
-  const handleRSVP = (userId: string) => {
-    setSelectedProfileId(userId);
-    setActiveScreen('schedule');
+  const handleRSVP = async (postId: string) => {
+    if (!token || !currentUserId) {
+      console.error("No token or user ID found, cannot RSVP");
+      return;
+    }
+    try {
+      await rsvpToPost(postId, currentUserId, token);
+      alert("RSVP successful!");
+    } catch (error) {
+      console.error("Failed to RSVP", error);
+      alert("Failed to RSVP. Please try again.");
+    }
   };
 
   // Render the landing page for new visitors
@@ -162,7 +172,7 @@ export default function App() {
 
         {(activeScreen === 'schedule') && (
           <Schedule
-            userId={selectedProfileId}
+            userId={currentUserId || undefined}
             // userProfile={userProfile}
             onBack={() => {
               setActiveScreen('feed');
