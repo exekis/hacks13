@@ -1,3 +1,6 @@
+
+<img width="937" height="238" alt="travelmate_banner" src="https://github.com/user-attachments/assets/2b007551-45bd-4b90-bab3-6c02eb55b7f7" />
+
 # Travelmate
 
 A social platform for connecting travelers and students.
