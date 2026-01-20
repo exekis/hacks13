@@ -2,9 +2,9 @@
 <img width="937" height="238" alt="travelmate_banner" src="https://github.com/user-attachments/assets/2b007551-45bd-4b90-bab3-6c02eb55b7f7" />
 
 <p align="left">
-  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-  <img src="https://img.shields.io/badge/Python-3475aa?logo=python&logoColor=FFFFFF" alt="Python" />
-  <img src="https://img.shields.io/badge/PostgreSQL-f55d7a?logo=postgresql&logoColor=FFFFFF" alt="PostgreSQL" />
+  &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+  <img src="https://img.shields.io/badge/Python-428af7?logo=python&logoColor=FFFFFF" alt="Python" />
+  <img src="https://img.shields.io/badge/PostgreSQL-f65d7b?logo=postgresql&logoColor=FFFFFF" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/React-428af7.svg?logo=react&logoColor=ffffff" alt="React" />
   <img src="https://img.shields.io/badge/FastAPI-0a9a8c?logo=fastapi&logoColor=FFFFFF" alt="FastAPI" />
   <img src="https://img.shields.io/github/repo-size/exekis/hacks13?color=f78875" alt="Repo size" />
