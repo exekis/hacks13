@@ -6,8 +6,7 @@
   <img src="https://img.shields.io/badge/PostgreSQL-f55d7a?logo=postgresql&logoColor=FFFFFF" alt="PostgreSQL" />
   <img src="https://img.shields.io/badge/React-428af7.svg?logo=react&logoColor=ffffff" alt="React" />
   <img src="https://img.shields.io/badge/FastAPI-0a9a8c?logo=fastapi&logoColor=FFFFFF" alt="FastAPI" />
-    <img src="https://img.shields.io/github/repo-size/exekis/hacks13?color=f78875" alt="Repo size" />
-  <img src="https://img.shields.io/github/last-commit/exekis/hacks13?color=eba265" alt="GitHub last commit" />
+  <img src="https://img.shields.io/github/repo-size/exekis/hacks13?color=f78875" alt="Repo size" />
 
 </p>
 
