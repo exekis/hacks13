@@ -15,6 +15,12 @@
 
 Travelmate helps people connect with their cultural identities and build real-life communities, no matter where they are. It’s a platform for finding and hosting events, sharing traditions, and making meaningful connections with others who have similar backgrounds and interests.
 
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/016b27aa-c630-447e-81de-b6eded463a73" width="756" height="407" alt="homepage" />
+</p>
+
+
+
 ## About The Project
 
 Being away from home can feel isolating. Travelmate was built to bridge that gap by connecting people with shared cultural backgrounds. Through self-hosted events and a smart recommendation system, our platform helps users build genuine communities. Whether it’s sharing a meal, celebrating a tradition, or just having a conversation, Travelmate makes it easier to find a piece of home, wherever you are.
@@ -25,6 +31,11 @@ Being away from home can feel isolating. Travelmate was built to bridge that gap
 *   **Personalized Recommendations:** A recommendation engine suggests people and events based on location, interests, cultural background, and more.
 *   **Direct Messaging:** Connect and chat with new friends and acquaintances.
 *   **User Profiles:** Create a profile that showcases your background, interests, and what you're looking for in a community.
+
+<p align="center">
+  <img src="https://github.com/user-attachments/assets/e73f7ac7-673e-4e91-8941-bad938a35259" width="45%" />
+  <img src="https://github.com/user-attachments/assets/fb9fe70a-2c4e-4088-ad8d-3021247905cf" width="45%" />
+</p>
 
 ## How It Works
 
