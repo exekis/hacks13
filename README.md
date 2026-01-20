@@ -7,7 +7,7 @@
   <img src="https://img.shields.io/badge/React-428af7.svg?logo=react&logoColor=ffffff" alt="React" />
   <img src="https://img.shields.io/badge/FastAPI-0a9a8c?logo=fastapi&logoColor=FFFFFF" alt="FastAPI" />
   <img src="https://img.shields.io/github/repo-size/exekis/hacks13?color=f78875" alt="Repo size" />
-
+  <img src="https://img.shields.io/badge/-%20-ffffff?style=for-the-badge" alt="" />
 </p>
 
 
